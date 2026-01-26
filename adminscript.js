@@ -1,13 +1,27 @@
 /**
- * RTPS MASTER DASHBOARD LOGIC
- * Features: Tab Switching, Dynamic Form Loading, Cascading Dropdowns,
- * Multi-Endpoint Data Fetching, and Cashfree Integration.
+ * RTPS MASTER DASHBOARD - CORE LOGIC
+ * Includes: Tab Navigation, Bihar Locality DB, Form Validation,
+ * Multi-Table Data Fetching, and Cashfree v3 Integration.
  */
 
 // ==========================================
-// 1. TAB & NAVIGATION LOGIC
+// 1. GLOBAL INITIALIZATION
 // ==========================================
+document.addEventListener("DOMContentLoaded", () => {
+  const emailDisp = document.getElementById("user-email-display");
+  if (emailDisp) emailDisp.innerText = localStorage.getItem("email") || "Admin";
 
+  // Initialize DB Dropdowns
+  loadDistricts();
+  loadCategories();
+
+  // Default Tab
+  showTab("apply");
+});
+
+// ==========================================
+// 2. TAB & NAVIGATION LOGIC
+// ==========================================
 function showTab(tabName) {
   const applyTab = document.getElementById("tab-apply");
   const recordsTab = document.getElementById("tab-records");
@@ -17,114 +31,39 @@ function showTab(tabName) {
   const subtitle = document.getElementById("page-subtitle");
 
   if (tabName === "records") {
-    // Toggle Visibility
-    applyTab.classList.add("hidden");
-    recordsTab.classList.remove("hidden");
-
-    // Highlight Sidebar
-    navApply.classList.remove("active");
-    navRecords.classList.add("active");
-
-    // Update Header
-    title.innerText = "Application Records";
-    subtitle.innerText = "Manage and download your digital documents.";
-
-    // Trigger Data Fetch
+    applyTab?.classList.add("hidden");
+    recordsTab?.classList.remove("hidden");
+    navApply?.classList.remove("active");
+    navRecords?.classList.add("active");
+    if (title) title.innerText = "Application Records";
+    if (subtitle)
+      subtitle.innerText = "Manage and download your digital documents.";
     fetchRecords();
   } else {
-    // Toggle Visibility
-    applyTab.classList.remove("hidden");
-    recordsTab.classList.add("hidden");
-
-    // Highlight Sidebar
-    navApply.classList.add("active");
-    navRecords.classList.remove("active");
-
-    // Update Header
-    title.innerText = "RTPS Registration";
-    subtitle.innerText = '"Connecting citizens to digital governance."';
+    applyTab?.classList.remove("hidden");
+    recordsTab?.classList.add("hidden");
+    navApply?.classList.add("active");
+    navRecords?.classList.remove("active");
+    if (title) title.innerText = "RTPS Registration";
+    if (subtitle)
+      subtitle.innerText = '"Connecting citizens to digital governance."';
   }
 }
 
-// ==========================================
-// 2. DATA FETCHING (RECORDS TABLE)
-// ==========================================
+function toggleSidebar() {
+  document.getElementById("sidebar").classList.toggle("sidebar-open");
+  document
+    .getElementById("sidebar-overlay")
+    .classList.toggle("sidebar-overlay-active");
+}
 
-async function fetchRecords() {
-  const tableBody = document.getElementById("records-table-body");
-
-  // Show Loading State
-  tableBody.innerHTML = `<tr><td colspan="4" class="p-20 text-center font-bold text-slate-400">Syncing Database Records...</td></tr>`;
-
-  try {
-    const endpoints = ["domicile", "income", "castes"];
-    const token =
-      localStorage.getItem("token") || localStorage.getItem("access_token");
-
-    const fetchPromises = endpoints.map((slug) =>
-      fetch(
-        `https://backend-5gc912wx6-wasimsonu76-gmailcoms-projects.vercel.app/api/${slug}/all`,
-        {
-          headers: { Authorization: `Bearer ${token}` },
-        },
-      ).then((res) => res.json()),
-    );
-
-    const results = await Promise.all(fetchPromises);
-    const allData = results.flatMap((res) => res.data || []);
-
-    if (allData.length === 0) {
-      tableBody.innerHTML = `<tr><td colspan="4" class="p-20 text-center text-slate-400">No applications found in your history.</td></tr>`;
-      return;
-    }
-
-    tableBody.innerHTML = ""; // Clear loader
-
-    allData.forEach((item) => {
-      const isSuccess = item.payment_status === "SUCCESS";
-      const statusBadge = isSuccess
-        ? "bg-emerald-100 text-emerald-600"
-        : "bg-amber-100 text-amber-600";
-
-      // Certificate Download Logic
-      const certAction =
-        isSuccess && item.certificate_url
-          ? `<a href="${item.certificate_url}" target="_blank" class="text-indigo-600 font-bold hover:underline flex items-center"><span class="mr-2">📥</span> DOWNLOAD</a>`
-          : `<span class="text-slate-300 italic flex items-center"><span class="mr-2">🔒</span> PENDING</span>`;
-
-      const row = `
-        <tr class="border-b border-slate-50 hover:bg-slate-50/80 transition-all">
-            <td class="p-6">
-                <p class="font-bold text-slate-800">${item.name}</p>
-                <p class="text-[10px] font-black text-slate-400 uppercase tracking-tighter">${item.document_type || "Certificate"}</p>
-            </td>
-            <td class="p-6">
-                <span class="px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest ${statusBadge}">
-                    ${item.payment_status || "PENDING"}
-                </span>
-            </td>
-            <td class="p-6 text-xs font-bold">${certAction}</td>
-            <td class="p-6 text-center">
-                <button class="p-2 bg-slate-50 text-slate-400 hover:bg-indigo-600 hover:text-white rounded-xl transition-all shadow-sm">
-                    <svg class="w-5 h-5 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
-                    </svg>
-                </button>
-            </td>
-        </tr>
-      `;
-      tableBody.insertAdjacentHTML("beforeend", row);
-    });
-  } catch (err) {
-    showToast("Database Connection Error");
-    tableBody.innerHTML = `<tr><td colspan="4" class="p-20 text-center text-rose-500 font-bold">Failed to load data from server.</td></tr>`;
-  }
+function closeSidebarOnMobile() {
+  if (window.innerWidth < 1024) toggleSidebar();
 }
 
 // ==========================================
-// 3. BIHAR LOCALITY & CASTE DATABASE
+// 3. BIHAR LOCALITY & CASTE DATABASE (300+ Lines)
 // ==========================================
-
 const BiharDB = {
   Araria: ["Araria", "Forbesganj", "Jokihat", "Kursakanta"],
   Arwal: ["Arwal", "Kaler", "Kurtha", "Sonbhadra"],
@@ -181,13 +120,10 @@ const CasteDB = {
   General: ["Brahmin", "Rajput", "Kayastha", "Bhumihar"],
 };
 
-// ==========================================
-// 4. FORM FIELD POPULATION & CALCULATION
-// ==========================================
-
 function loadDistricts() {
   const distSelect = document.getElementById("district");
   if (!distSelect) return;
+  distSelect.innerHTML = '<option value="">Select District</option>';
   Object.keys(BiharDB)
     .sort()
     .forEach((d) => {
@@ -198,18 +134,19 @@ function loadDistricts() {
 function loadCategories() {
   const catSelect = document.getElementById("category");
   if (!catSelect) return;
+  catSelect.innerHTML = '<option value="">Select Category</option>';
   Object.keys(CasteDB).forEach((c) => {
     catSelect.innerHTML += `<option value="${c}">${c}</option>`;
   });
 }
 
 function loadBlocks() {
-  const distSelect = document.getElementById("district");
+  const distVal = document.getElementById("district")?.value;
   const block = document.getElementById("block");
-  const ps = document.getElementById("police_station");
-  block.innerHTML = ps.innerHTML = '<option value="">Select Block</option>';
-  if (distSelect.value) {
-    BiharDB[distSelect.value].forEach((b) => {
+  if (!block) return;
+  block.innerHTML = '<option value="">Select Block</option>';
+  if (distVal && BiharDB[distVal]) {
+    BiharDB[distVal].forEach((b) => {
       block.innerHTML += `<option value="${b}">${b}</option>`;
     });
   }
@@ -217,21 +154,23 @@ function loadBlocks() {
 
 function loadPoliceStations() {
   const ps = document.getElementById("police_station");
-  const b = document.getElementById("block").value;
-  ps.innerHTML = '<option value="">Select Police Station</option>';
+  const b = document.getElementById("block")?.value;
+  if (!ps) return;
+  ps.innerHTML = '<option value="">Select PS</option>';
   if (b) {
-    [`${b} Thana`, `${b} Rural OP`, `${b} Mahila Thana`].forEach((p) => {
+    [`${b} Thana`, `${b} Rural OP`, `${b} Town PS`].forEach((p) => {
       ps.innerHTML += `<option value="${p}">${p}</option>`;
     });
   }
 }
 
 function loadCastes() {
-  const catSelect = document.getElementById("category");
+  const cat = document.getElementById("category")?.value;
   const caste = document.getElementById("caste");
+  if (!caste) return;
   caste.innerHTML = '<option value="">Select Caste</option>';
-  if (catSelect.value) {
-    CasteDB[catSelect.value].forEach((c) => {
+  if (cat && CasteDB[cat]) {
+    CasteDB[cat].forEach((c) => {
       caste.innerHTML += `<option value="${c}">${c}</option>`;
     });
   }
@@ -239,7 +178,8 @@ function loadCastes() {
 
 function loadSubCastes() {
   const sc = document.getElementById("sub_caste");
-  const c = document.getElementById("caste").value;
+  const c = document.getElementById("caste")?.value;
+  if (!sc) return;
   sc.innerHTML = '<option value="">-- No Subcaste --</option>';
   if (c === "Yadav")
     sc.innerHTML =
@@ -249,52 +189,49 @@ function loadSubCastes() {
       '<option value="Jha">Jha</option><option value="Mishra">Mishra</option>';
 }
 
+// ==========================================
+// 4. CALCULATION & UI TOGGLES
+// ==========================================
 function handleTypeChange() {
-  const val = document.getElementById("document_type").value;
-  document
-    .getElementById("incomeSection")
-    .classList.toggle("hidden", val !== "income");
-  document
-    .getElementById("casteSection")
-    .classList.toggle("hidden", val !== "caste");
+  const val = document.getElementById("document_type")?.value;
+  const incSec = document.getElementById("incomeSection");
+  const casSec = document.getElementById("casteSection");
+  if (incSec) incSec.classList.toggle("hidden", val !== "income");
+  if (casSec) casSec.classList.toggle("hidden", val !== "caste");
 }
 
 function calcIncome() {
-  const g = +document.getElementById("inc_govt").value || 0;
-  const b = +document.getElementById("inc_biz").value || 0;
-  const a = +document.getElementById("inc_agri").value || 0;
-  const o = +document.getElementById("inc_other").value || 0;
-  document.getElementById("total_annual_income").value = g + b + a + o;
+  const g = +document.getElementById("inc_govt")?.value || 0;
+  const b = +document.getElementById("inc_biz")?.value || 0;
+  const a = +document.getElementById("inc_agri")?.value || 0;
+  const o = +document.getElementById("inc_other")?.value || 0;
+  const totalEl = document.getElementById("total_annual_income");
+  if (totalEl) totalEl.value = g + b + a + o;
 }
 
 // ==========================================
-// 5. SUBMISSION & CASHFREE INTEGRATION
+// 5. SUBMISSION & CASHFREE FIX
 // ==========================================
-
 async function submitForm() {
   const btn = document.getElementById("submitBtn");
   const loader = document.getElementById("btnLoader");
   const btnText = document.getElementById("btnText");
 
-  // 1. SELECT RAW ELEMENTS & VALUES
-  const docTypeRaw = document.getElementById("document_type").value;
-  const nameVal = document.getElementById("name").value.trim();
-  const mobileVal = document.getElementById("mobile_number").value.trim();
-  const emailVal = document.getElementById("email_id").value.trim();
-  const districtVal = document.getElementById("district").value;
-  const blockVal = document.getElementById("block").value;
-  const photoFile = document.getElementById("applicant_photo").files[0];
-  const docFile = document.getElementById("document_file").files[0];
+  const docTypeRaw = document.getElementById("document_type")?.value;
+  const nameVal = document.getElementById("name")?.value.trim();
+  const mobileVal = document.getElementById("mobile_number")?.value.trim();
+  const districtVal = document.getElementById("district")?.value;
+  const blockVal = document.getElementById("block")?.value;
+  const photoFile = document.getElementById("applicant_photo")?.files[0];
+  const docFile = document.getElementById("document_file")?.files[0];
 
-  // 2. VALIDATION
   if (!docTypeRaw) return showToast("Please select Certificate Type");
-  if (!nameVal) return showToast("Name is required");
-  if (mobileVal.length !== 10) return showToast("Mobile must be 10 digits");
-  if (!districtVal || !blockVal)
-    return showToast("Locality details are mandatory");
-  if (!photoFile || !docFile) return showToast("Required files are missing");
+  if (!nameVal || mobileVal?.length !== 10)
+    return showToast("Invalid Name or 10-digit Mobile");
+  if (!districtVal || !blockVal) return showToast("Locality missing");
+  if (!photoFile || !docFile)
+    return showToast("Both Photo and ID Proof required");
 
-  // 3. CONSTRUCT DATA OBJECT
   const finalJson = {
     document_type:
       docTypeRaw === "domicile"
@@ -302,93 +239,89 @@ async function submitForm() {
         : docTypeRaw === "income"
           ? "Income Certificate"
           : "Caste Certificate",
-    level: document.getElementById("level").value,
-    gender: document.getElementById("gender").value,
+    level: document.getElementById("level")?.value,
+    gender: document.getElementById("gender")?.value,
     name: nameVal,
-    father_name: document.getElementById("father_name").value.trim(),
-    mother_name: document.getElementById("mother_name").value.trim(),
-    husband_name: document.getElementById("husband_name").value.trim() || null,
+    father_name: document.getElementById("father_name")?.value.trim(),
+    mother_name: document.getElementById("mother_name")?.value.trim(),
+    husband_name: document.getElementById("husband_name")?.value.trim() || null,
     mobile_number: mobileVal,
-    email_id: emailVal,
+    email_id: document.getElementById("email_id")?.value.trim(),
     state: "Bihar",
     district: districtVal,
-    sub_division: districtVal, // Satisfies the not-null constraint
+    sub_division: districtVal,
     block: blockVal,
-    local_body: document.getElementById("local_body").value, // 👈 Added this
-    ward_no: document.getElementById("ward_no").value.trim() || "N/A",
-    town: document.getElementById("town").value.trim(),
-    post_office: document.getElementById("post_office").value.trim(),
-    police_station: document.getElementById("police_station").value,
-    pincode: document.getElementById("pincode").value.trim(),
-    residence_type: document.getElementById("residence_type").value,
+    local_body:
+      document.getElementById("local_body")?.value || "Gram Panchayat",
+    ward_no: document.getElementById("ward_no")?.value.trim() || "N/A",
+    town: document.getElementById("town")?.value.trim(),
+    post_office: document.getElementById("post_office")?.value.trim(),
+    police_station: document.getElementById("police_station")?.value,
+    pincode: document.getElementById("pincode")?.value.trim(),
+    residence_type: document.getElementById("residence_type")?.value,
     aadhar_number:
-      document.getElementById("aadhar_number").value.trim() || null,
-    purpose_of_application: document.getElementById("purpose").value.trim(),
+      document.getElementById("aadhar_number")?.value.trim() || null,
+    purpose_of_application: document.getElementById("purpose")?.value.trim(),
+    caste_serial_number: document.getElementById("caste_serial")?.value || "",
   };
 
-  // 4. CONDITIONAL FIELDS
   if (docTypeRaw === "income") {
-    finalJson.profession = document.getElementById("profession_income").value;
+    finalJson.profession =
+      document.getElementById("profession_income")?.value || "Farmer";
     finalJson.total_annual_income =
-      +document.getElementById("total_annual_income").value || 0;
+      +document.getElementById("total_annual_income")?.value || 0;
     finalJson.income_govt_service =
-      +document.getElementById("inc_govt").value || 0;
-    finalJson.income_business = +document.getElementById("inc_biz").value || 0;
+      +document.getElementById("inc_govt")?.value || 0;
+    finalJson.income_business = +document.getElementById("inc_biz")?.value || 0;
     finalJson.income_agriculture =
-      +document.getElementById("inc_agri").value || 0;
+      +document.getElementById("inc_agri")?.value || 0;
     finalJson.income_other_sources =
-      +document.getElementById("inc_other").value || 0;
-  }
-
-  if (docTypeRaw === "caste") {
-    finalJson.profession = document.getElementById("profession_caste").value;
-    finalJson.category = document.getElementById("category").value;
-    finalJson.caste = document.getElementById("caste").value;
+      +document.getElementById("inc_other")?.value || 0;
+  } else if (docTypeRaw === "caste") {
+    finalJson.profession =
+      document.getElementById("profession_caste")?.value || "Student";
+    finalJson.category = document.getElementById("category")?.value;
+    finalJson.caste = document.getElementById("caste")?.value;
     finalJson.sub_caste =
-      document.getElementById("sub_caste").value || "General";
+      document.getElementById("sub_caste")?.value || "General";
   }
 
-  // 5. API CONFIGURATION
-  const apiSlug = { domicile: "domicile", castes: "castes", income: "income" };
+  // Ensure 'caste' maps to 'castes' if that's your backend route
+  const apiSlug = { domicile: "domicile", caste: "castes", income: "income" };
   const apiUrl = `https://backend-5gc912wx6-wasimsonu76-gmailcoms-projects.vercel.app/api/${apiSlug[docTypeRaw] || docTypeRaw}/create`;
 
-  // 6. UI LOADING STATE
   btn.disabled = true;
-  loader.classList.remove("hidden");
-  btnText.innerText = "Transmitting...";
+  loader?.classList.remove("hidden");
+  if (btnText) btnText.innerText = "Transmitting...";
 
   try {
     const formData = new FormData();
     Object.keys(finalJson).forEach((key) => {
-      if (finalJson[key] !== null && finalJson[key] !== undefined) {
+      if (finalJson[key] !== null && finalJson[key] !== undefined)
         formData.append(key, finalJson[key]);
-      }
     });
     formData.append("profilePhoto", photoFile);
     formData.append("documentId", docFile);
 
-    const authToken =
-      localStorage.getItem("token") || localStorage.getItem("access_token");
-
     const response = await fetch(apiUrl, {
       method: "POST",
       body: formData,
-      headers: { Authorization: `Bearer ${authToken}` },
+      headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
     });
 
     const result = await response.json();
 
     if (result.success) {
+      // ROBUST CHECK FOR SESSION ID
       const sessionId =
-        result.payment_session_id || result.payment?.payment_session_id;
-      if (sessionId) {
-        showToast("Opening Secure Payment...", "success");
+        result.payment_session_id ||
+        result.data?.payment_session_id ||
+        result.payment?.payment_session_id;
 
-        // Mode logic: Production for Vercel, Sandbox for local
+      if (sessionId) {
         const isProduction =
           !window.location.hostname.includes("localhost") &&
           !window.location.hostname.includes("127.0.0.1");
-
         const cashfree = new window.Cashfree({
           mode: isProduction ? "production" : "sandbox",
         });
@@ -398,36 +331,133 @@ async function submitForm() {
             paymentSessionId: sessionId,
             redirectTarget: "_self",
           })
-          .then((result) => {
-            if (result.error) {
-              // This handles cases where the SDK couldn't even start the checkout
-              console.error("SDK Error:", result.error);
-              showToast(result.error.message, "error");
-            }
+          .then((cfResult) => {
+            if (cfResult.error) showToast(cfResult.error.message, "error");
           });
       } else {
-        showToast("Registration Successful!", "success");
-        setTimeout(() => location.reload(), 2000);
+        showToast("Payment session ID not found in server response.", "error");
+        console.error("Result missing session ID:", result);
       }
     } else {
       showToast(result.message || "Submission failed", "error");
     }
   } catch (error) {
-    console.error("Submit Error:", error);
     showToast("Network Error: Could not connect to server.");
   } finally {
     btn.disabled = false;
-    loader.classList.add("hidden");
-    btnText.innerText = "TRANSMIT APPLICATION";
+    loader?.classList.add("hidden");
+    if (btnText) btnText.innerText = "TRANSMIT APPLICATION";
   }
 }
 
 // ==========================================
-// 6. UTILITIES
+// 6. RECORDS DATA FETCHING
 // ==========================================
+// Helper Function to force download from URL
+async function triggerDownload(url, fileName) {
+  if (!url) return;
+  try {
+    const response = await fetch(url);
+    const blob = await response.blob();
+    const blobUrl = window.URL.createObjectURL(blob);
 
+    const link = document.createElement("a");
+    link.href = blobUrl;
+    link.download = fileName;
+    document.body.appendChild(link);
+    link.click();
+
+    document.body.removeChild(link);
+    window.URL.revokeObjectURL(blobUrl);
+  } catch (error) {
+    console.error("Download failed:", error);
+    // Fallback to opening in new tab if fetch fails
+    window.open(url, "_blank");
+  }
+}
+
+async function fetchRecords() {
+  const tableBody = document.getElementById("records-table-body");
+  if (!tableBody) return;
+
+  tableBody.innerHTML = `<tr><td colspan="4" class="p-20 text-center font-bold text-slate-400">Syncing Records...</td></tr>`;
+
+  try {
+    const token = localStorage.getItem("token");
+    const response = await fetch(
+      "http://localhost:5000/api/records/my-records",
+      {
+        headers: { Authorization: `Bearer ${token}` },
+      },
+    );
+
+    const result = await response.json();
+    if (!result.success || !result.data) return;
+
+    tableBody.innerHTML = "";
+
+    result.data.forEach((item) => {
+      const isSuccess = item.payment_status === "SUCCESS";
+      const statusBadge = isSuccess
+        ? "bg-emerald-100 text-emerald-600"
+        : "bg-amber-100 text-amber-600";
+
+      // Clean filenames for download
+      const safeName = item.name.replace(/\s+/g, "_");
+      const certFileName = `Certificate_${safeName}.pdf`;
+      const receiptFileName = `Receiving_${safeName}.pdf`;
+
+      // Certificate Column with Automatic Download
+      const certAction =
+        isSuccess && item.certificate_document
+          ? `<button onclick="triggerDownload('${item.certificate_document}', '${certFileName}')" 
+                    class="text-indigo-600 font-bold hover:text-indigo-800 flex items-center gap-2 transition-transform active:scale-95">
+                    <span class="text-lg">📥</span> DOWNLOAD
+                   </button>`
+          : `<span class="text-slate-300 italic flex items-center gap-2">
+                    <span class="text-lg">🔒</span> ${isSuccess ? "PROCESSING" : "LOCKED"}
+                   </span>`;
+
+      // Receiving Column with Automatic Download
+      const receivingAction = item.receiving_url
+        ? `<button onclick="triggerDownload('${item.receiving_url}', '${receiptFileName}')" 
+                    class="mx-auto flex items-center justify-center w-10 h-10 rounded-xl bg-slate-50 text-indigo-600 hover:bg-indigo-600 hover:text-white transition-all shadow-sm active:scale-90">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                    </svg>
+                   </button>`
+        : `<div class="mx-auto w-10 h-10 rounded-xl bg-slate-50 flex items-center justify-center text-slate-200">
+                    <span class="text-xs font-bold">N/A</span>
+                   </div>`;
+
+      const row = `
+                <tr class="border-b border-slate-50 hover:bg-slate-50/80 transition-all group">
+                    <td class="p-6">
+                        <p class="font-bold text-slate-800">${item.name}</p>
+                        <p class="text-[10px] font-black text-slate-400 uppercase tracking-tighter">${item.document_type}</p>
+                    </td>
+                    <td class="p-6">
+                        <span class="px-3 py-1 rounded-full text-[10px] font-black uppercase ${statusBadge}">
+                            ${item.payment_status}
+                        </span>
+                    </td>
+                    <td class="p-6 text-xs font-bold">${certAction}</td>
+                    <td class="p-6 text-center">${receivingAction}</td>
+                </tr>
+            `;
+      tableBody.insertAdjacentHTML("beforeend", row);
+    });
+  } catch (err) {
+    tableBody.innerHTML = `<tr><td colspan="4" class="p-20 text-center text-rose-500 font-bold">Connection Error.</td></tr>`;
+  }
+}
+
+// ==========================================
+// 7. UTILITIES
+// ==========================================
 function showToast(msg, type = "error") {
   const container = document.getElementById("toast-container");
+  if (!container) return;
   const toast = document.createElement("div");
   toast.className = `toast ${type === "error" ? "bg-rose-500" : "bg-emerald-500"}`;
   toast.innerHTML = `<span>${type === "error" ? "⚠️" : "✅"}</span> ${msg}`;
@@ -439,10 +469,3 @@ function logoutUser() {
   localStorage.clear();
   window.location.href = "login.html";
 }
-
-document.addEventListener("DOMContentLoaded", () => {
-  document.getElementById("user-email-display").innerText =
-    localStorage.getItem("email") || "Admin";
-  loadDistricts();
-  loadCategories();
-});
