@@ -14,7 +14,6 @@
         font-family: "Plus Jakarta Sans", sans-serif;
         background-color: #f8fafc;
       }
-
       .ps-card {
         background: white;
         border-radius: 2rem;
@@ -25,8 +24,6 @@
         text-align: center;
         border: 1px solid #e2e8f0;
       }
-
-      /* Loader Animation */
       .ps-loader {
         border: 4px solid #f3f3f3;
         border-top: 4px solid #6366f1;
@@ -36,7 +33,6 @@
         animation: spin 1s linear infinite;
         margin: 0 auto;
       }
-
       @keyframes spin {
         0% {
           transform: rotate(0deg);
@@ -45,8 +41,6 @@
           transform: rotate(360deg);
         }
       }
-
-      /* Progress Bar Animation */
       .progress-container {
         width: 100%;
         background-color: #e2e8f0;
@@ -55,14 +49,12 @@
         margin: 1.5rem 0;
         overflow: hidden;
       }
-
       .progress-fill {
         height: 100%;
         background-color: #6366f1;
         width: 0%;
         transition: width 6s linear;
       }
-
       .status-icon {
         width: 80px;
         height: 80px;
@@ -115,25 +107,29 @@
 
     <script>
       const API_BASE =
-        "https://backend-5gc912wx6-wasimsonu76-gmailcoms-projects.vercel.app/api"; // Ensure this matches your backend URL
+        "https://backend-5gc912wx6-wasimsonu76-gmailcoms-projects.vercel.app/api";
+      let redirectTimer = null;
+      let hasCalledApi = false;
 
       function goToDashboard() {
+        if (redirectTimer) clearTimeout(redirectTimer);
         window.location.href = "admin.html";
       }
 
       async function verifyPayment() {
+        if (hasCalledApi) return;
+
         const urlParams = new URLSearchParams(window.location.search);
-        const orderId = urlParams.get("order_id");
-        const docType = urlParams.get("document_type");
-        const userId = urlParams.get("user_id");
+        const orderId = urlParams.get("order_id")?.trim();
+        const docType = decodeURIComponent(
+          urlParams.get("document_type") || "",
+        )?.trim();
+        const userId = urlParams.get("user_id")?.trim();
 
-        const titleEl = document.getElementById("ps-title");
-        const msgEl = document.getElementById("ps-message");
-        const iconContainer = document.getElementById("icon-container");
-        const actionArea = document.getElementById("action-area");
         const progressFill = document.getElementById("fill");
+        const actionArea = document.getElementById("action-area");
 
-        // Start progress bar animation
+        // Start progress bar visual
         setTimeout(() => {
           progressFill.style.width = "100%";
         }, 100);
@@ -146,6 +142,8 @@
           );
           return;
         }
+
+        hasCalledApi = true;
 
         try {
           const response = await fetch(
@@ -180,8 +178,7 @@
           );
         } finally {
           actionArea.classList.remove("hidden");
-          // Auto-redirect after 6 seconds
-          setTimeout(goToDashboard, 6000);
+          redirectTimer = setTimeout(goToDashboard, 6000);
         }
       }
 
@@ -208,7 +205,6 @@
         }
       }
 
-      // Initialize verification on load
       window.onload = verifyPayment;
     </script>
   </body>
