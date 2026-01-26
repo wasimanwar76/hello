@@ -10,6 +10,7 @@
       rel="stylesheet"
     />
     <script src="https://sdk.cashfree.com/js/v3/cashfree.js"></script>
+    <script src="./adminscript.js"></script>
     <style>
       body {
         font-family: "Plus Jakarta Sans", sans-serif;
@@ -19,39 +20,28 @@
         background: linear-gradient(180deg, #4338ca 0%, #312e81 100%);
       }
       .card-shadow {
-        box-shadow:
-          0 10px 25px -5px rgba(0, 0, 0, 0.05),
-          0 8px 10px -6px rgba(0, 0, 0, 0.05);
+        box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05);
       }
-
       .input-field {
         width: 100%;
         background-color: #ffffff;
         border: 1.5px solid #e2e8f0;
         padding: 12px 16px;
         border-radius: 14px;
-        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
         outline: none;
+        transition: all 0.3s;
         font-size: 0.95rem;
         color: #1e293b;
       }
       .input-field:focus {
         border-color: #6366f1;
         box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.1);
-        background-color: #fff;
       }
-      .input-field:disabled {
-        background-color: #f1f5f9;
-        cursor: not-allowed;
-      }
-
       .star {
         color: #f43f5e;
         margin-left: 3px;
         font-weight: bold;
       }
-
-      /* Toast System */
       #toast-container {
         position: fixed;
         top: 24px;
@@ -83,70 +73,44 @@
           opacity: 1;
         }
       }
-
+      .nav-link {
+        transition: all 0.3s;
+        opacity: 0.6;
+        cursor: pointer;
+      }
+      .nav-link.active {
+        background: rgba(255, 255, 255, 0.15);
+        opacity: 1;
+        border: 1px solid rgba(255, 255, 255, 0.1);
+      }
       .hidden {
         display: none;
       }
-      .animate-spin {
-        animation: spin 1s linear infinite;
-      }
-      @keyframes spin {
-        from {
-          transform: rotate(0deg);
-        }
-        to {
-          transform: rotate(360deg);
-        }
-      }
 
-      /* Custom Scrollbar */
-      ::-webkit-scrollbar {
-        width: 6px;
-      }
-      ::-webkit-scrollbar-track {
-        background: #f1f5f9;
-      }
-      ::-webkit-scrollbar-thumb {
-        background: #cbd5e1;
-        border-radius: 10px;
+      @media (max-width: 1024px) {
+        .sidebar-open {
+          transform: translateX(0) !important;
+        }
+        .sidebar-overlay-active {
+          display: block !important;
+        }
       }
     </style>
-
-    <script>
-      // 1. GLOBAL AUTH PROTECTION
-      (function () {
-        const token = localStorage.getItem("token");
-        const email = localStorage.getItem("email");
-        if (!token) window.location.href = "login.html";
-
-        const isSuper = email === "wasimanwar9344@gmail.com";
-        const path = window.location.pathname;
-        if (isSuper && !path.includes("superadmin"))
-          window.location.href = "superadmin.html";
-        if (!isSuper && !path.includes("admin.html"))
-          window.location.href = "admin.html";
-      })();
-    </script>
   </head>
 
-  <body class="min-h-screen">
+  <body class="min-h-screen overflow-x-hidden">
     <div id="toast-container"></div>
 
     <header
-      class="lg:hidden flex items-center justify-between bg-indigo-700 p-5 text-white sticky top-0 z-[60] shadow-xl"
+      class="lg:hidden flex items-center justify-between bg-indigo-700 p-4 text-white sticky top-0 z-[60] shadow-lg"
     >
-      <div class="flex items-center space-x-3">
-        <div
-          class="w-8 h-8 bg-white rounded-lg flex items-center justify-center"
-        >
-          <div class="w-4 h-4 bg-indigo-600 rounded-sm"></div>
+      <div class="flex items-center space-x-2">
+        <div class="bg-white p-1.5 rounded-lg">
+          <div class="w-5 h-5 bg-indigo-600 rounded-sm"></div>
         </div>
-        <span class="font-bold tracking-tighter text-xl">TASKWORK</span>
+        <span class="font-bold tracking-tight uppercase">Taskwork</span>
       </div>
-      <button
-        onclick="toggleSidebar()"
-        class="p-2 bg-indigo-600 rounded-xl hover:bg-indigo-500 transition-colors"
-      >
+      <button onclick="toggleSidebar()" class="p-2 bg-indigo-600 rounded-xl">
         <svg
           xmlns="http://www.w3.org/2000/svg"
           class="h-6 w-6"
@@ -170,10 +134,10 @@
       class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-[40] hidden lg:hidden"
     ></div>
 
-    <div class="flex flex-col lg:flex-row min-h-screen">
+    <div class="flex flex-col lg:flex-row min-h-screen relative">
       <aside
         id="sidebar"
-        class="fixed inset-y-0 left-0 w-72 glass-sidebar text-white z-[50] flex flex-col shadow-2xl transform -translate-x-full lg:translate-x-0 lg:sticky transition-transform duration-300 lg:h-screen"
+        class="fixed inset-y-0 left-0 w-72 glass-sidebar text-white z-[50] flex flex-col shadow-2xl transition-transform duration-300 transform -translate-x-full lg:translate-x-0 lg:sticky lg:h-screen"
       >
         <div class="p-8">
           <div class="flex items-center space-x-3 mb-12">
@@ -185,43 +149,47 @@
             </h1>
           </div>
           <nav class="space-y-3">
-            <a
-              href="#"
-              class="flex items-center space-x-4 bg-white/15 p-4 rounded-2xl border border-white/10 shadow-inner group"
+            <div
+              onclick="
+                showTab('apply');
+                closeSidebarOnMobile();
+              "
+              id="nav-apply"
+              class="nav-link active flex items-center space-x-4 p-4 rounded-2xl group"
             >
-              <span class="text-xl group-hover:scale-110 transition-transform"
-                >✨</span
+              <span class="text-xl">✨</span>
+              <span class="font-bold text-sm tracking-wide uppercase"
+                >New Application</span
               >
-              <span class="font-bold text-sm tracking-wide"
-                >NEW APPLICATION</span
-              >
-            </a>
-            <a
-              href="records.html"
-              class="flex items-center space-x-4 hover:bg-white/10 p-4 rounded-2xl transition-all opacity-60 hover:opacity-100"
+            </div>
+            <div
+              onclick="
+                showTab('records');
+                closeSidebarOnMobile();
+              "
+              id="nav-records"
+              class="nav-link flex items-center space-x-4 p-4 rounded-2xl group"
             >
               <span class="text-xl">📋</span>
-              <span class="font-semibold text-sm tracking-wide"
-                >VIEW RECORDS</span
+              <span class="font-bold text-sm tracking-wide uppercase"
+                >View Records</span
               >
-            </a>
+            </div>
           </nav>
         </div>
 
         <div class="mt-auto p-8">
           <div
-            class="bg-indigo-950/40 border border-white/5 rounded-3xl p-5 backdrop-blur-xl mb-6 shadow-2xl"
+            class="bg-indigo-950/40 border border-white/5 rounded-3xl p-5 mb-6 backdrop-blur-xl"
           >
             <div class="flex items-center space-x-3">
               <div
-                class="w-10 h-10 rounded-full bg-gradient-to-tr from-indigo-400 to-indigo-600 flex items-center justify-center font-black border-2 border-white/20"
+                class="w-10 h-10 rounded-full bg-indigo-500 flex items-center justify-center font-black border-2 border-white/20"
               >
                 W
               </div>
               <div class="overflow-hidden">
-                <p
-                  class="text-[10px] text-indigo-300 font-black uppercase tracking-widest"
-                >
+                <p class="text-[10px] text-indigo-300 font-black uppercase">
                   Active Session
                 </p>
                 <p id="user-email-display" class="text-xs font-bold truncate">
@@ -232,305 +200,354 @@
           </div>
           <button
             onclick="logoutUser()"
-            class="w-full py-4 bg-rose-500 hover:bg-rose-600 rounded-2xl font-black text-sm tracking-widest transition-all hover:shadow-[0_0_20px_rgba(244,63,94,0.4)] flex items-center justify-center space-x-3"
+            class="w-full py-4 bg-rose-500 hover:bg-rose-600 rounded-2xl font-black text-sm tracking-widest transition-all"
           >
-            <span>LOGOUT</span>
+            LOGOUT
           </button>
         </div>
       </aside>
 
-      <main class="flex-1 p-4 sm:p-10 lg:p-14 transition-all duration-300">
+      <main class="flex-1 p-4 md:p-8 lg:p-12">
         <div class="max-w-6xl mx-auto">
           <header
-            class="mb-12 flex flex-col md:flex-row md:items-end justify-between gap-6"
+            class="mb-8 md:mb-12 flex flex-col md:flex-row md:items-end justify-between gap-6"
           >
             <div>
-              <h2 class="text-4xl font-black text-slate-900 tracking-tight">
+              <h2
+                id="page-title"
+                class="text-3xl md:text-4xl font-black text-slate-900 tracking-tight"
+              >
                 RTPS Registration
               </h2>
-              <p class="text-slate-500 mt-2 font-medium text-lg italic">
+              <p
+                id="page-subtitle"
+                class="text-slate-500 mt-2 font-medium italic"
+              >
                 "Connecting citizens to digital governance."
               </p>
             </div>
             <div
-              class="flex items-center space-x-3 bg-white px-5 py-3 rounded-2xl shadow-sm border border-slate-200"
+              class="hidden sm:flex items-center space-x-3 bg-white px-5 py-3 rounded-2xl shadow-sm border border-slate-200"
             >
               <span
                 class="w-3 h-3 bg-emerald-500 rounded-full animate-pulse"
               ></span>
               <span
-                class="text-xs font-black text-slate-600 uppercase tracking-widest"
+                class="text-xs font-black text-slate-600 uppercase tracking-widest text-nowrap"
                 >System Operational</span
               >
             </div>
           </header>
 
-          <form id="masterForm" class="space-y-10 pb-20">
-            <section
-              class="bg-white rounded-[2.5rem] card-shadow p-8 md:p-12 border border-slate-100 relative overflow-hidden"
-            >
-              <div
-                class="absolute top-0 right-0 p-8 opacity-5 text-8xl font-black italic"
+          <div id="tab-apply" class="animate-fadeIn">
+            <form id="masterForm" class="space-y-6 md:space-y-10 pb-20">
+              <section
+                class="bg-white rounded-3xl md:rounded-[2.5rem] card-shadow p-6 md:p-12 border border-slate-100 relative overflow-hidden"
               >
-                01
-              </div>
-              <h3
-                class="text-xs font-black text-indigo-600 uppercase tracking-[0.3em] mb-10 flex items-center"
-              >
-                <span class="w-10 h-[2px] bg-indigo-600 mr-4"></span> SERVICE
-                PARAMETERS
-              </h3>
-              <div class="grid grid-cols-1 md:grid-cols-3 gap-10">
-                <div class="space-y-3">
-                  <label
-                    class="text-xs font-black text-slate-500 uppercase ml-1 tracking-widest"
-                    >Certificate Type <span class="star">*</span></label
-                  >
-                  <select
-                    id="document_type"
-                    class="input-field h-[54px]"
-                    onchange="handleTypeChange()"
-                  >
-                    <option value="">-- Choose Type --</option>
-                    <option value="domicile">Domicile Certificate</option>
-                    <option value="income">Income Certificate</option>
-                    <option value="caste">Caste Certificate</option>
-                  </select>
-                </div>
-                <div class="space-y-3">
-                  <label
-                    class="text-xs font-black text-slate-500 uppercase ml-1 tracking-widest"
-                    >Issuance Level <span class="star">*</span></label
-                  >
-                  <select id="level" class="input-field h-[54px]">
-                    <option value="District">District Level</option>
-                    <option value="Sub-Division">Sub-Division Level</option>
-                    <option value="Block" selected>Block Level</option>
-                  </select>
-                </div>
-                <div class="space-y-3">
-                  <label
-                    class="text-xs font-black text-slate-500 uppercase ml-1 tracking-widest"
-                    >Gender <span class="star">*</span></label
-                  >
-                  <select id="gender" class="input-field h-[54px]">
-                    <option value="Male">Male</option>
-                    <option value="Female">Female</option>
-                    <option value="Other">Other</option>
-                  </select>
-                </div>
-              </div>
-            </section>
-
-            <section
-              class="bg-white rounded-[2.5rem] card-shadow p-8 md:p-12 border border-slate-100 relative"
-            >
-              <h3
-                class="text-xs font-black text-indigo-600 uppercase tracking-[0.3em] mb-10 flex items-center"
-              >
-                <span class="w-10 h-[2px] bg-indigo-600 mr-4"></span> APPLICANT
-                IDENTITY
-              </h3>
-              <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
-                <div class="space-y-2">
-                  <label class="text-xs font-bold text-slate-500 uppercase ml-1"
-                    >Full Name <span class="star">*</span></label
-                  ><input
-                    id="name"
-                    class="input-field"
-                    placeholder="Enter as per Aadhar"
-                  />
-                </div>
-                <div class="space-y-2">
-                  <label class="text-xs font-bold text-slate-500 uppercase ml-1"
-                    >Father's Name <span class="star">*</span></label
-                  ><input id="father_name" class="input-field" />
-                </div>
-                <div class="space-y-2">
-                  <label class="text-xs font-bold text-slate-500 uppercase ml-1"
-                    >Mother's Name <span class="star">*</span></label
-                  ><input id="mother_name" class="input-field" />
-                </div>
-                <div class="space-y-2">
-                  <label class="text-xs font-bold text-slate-500 uppercase ml-1"
-                    >Husband Name</label
-                  ><input
-                    id="husband_name"
-                    class="input-field"
-                    placeholder="If applicable"
-                  />
-                </div>
-                <div class="space-y-2">
-                  <label class="text-xs font-bold text-slate-500 uppercase ml-1"
-                    >Mobile No <span class="star">*</span></label
-                  ><input
-                    id="mobile_number"
-                    class="input-field"
-                    maxlength="10"
-                  />
-                </div>
-                <div class="space-y-2">
-                  <label class="text-xs font-bold text-slate-500 uppercase ml-1"
-                    >Email ID <span class="star">*</span></label
-                  ><input id="email_id" type="email" class="input-field" />
-                </div>
-                <div class="space-y-2 lg:col-span-1">
-                  <label class="text-xs font-bold text-slate-500 uppercase ml-1"
-                    >Aadhar Number</label
-                  ><input
-                    id="aadhar_number"
-                    class="input-field"
-                    placeholder="12 Digit ID"
-                  />
-                </div>
-              </div>
-            </section>
-
-            <section
-              class="bg-white rounded-[2.5rem] card-shadow p-8 md:p-12 border border-slate-100"
-            >
-              <div
-                class="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-10 gap-4"
-              >
-                <h3
-                  class="text-xs font-black text-indigo-600 uppercase tracking-[0.3em] flex items-center"
+                <div
+                  class="absolute top-0 right-0 p-8 opacity-5 text-8xl font-black italic"
                 >
-                  <span class="w-10 h-[2px] bg-indigo-600 mr-4"></span> LOCALITY
-                  DETAILS
+                  01
+                </div>
+                <h3
+                  class="text-xs font-black text-indigo-600 uppercase tracking-[0.2em] mb-6 md:mb-10 flex items-center"
+                >
+                  <span class="w-8 h-[2px] bg-indigo-600 mr-3"></span> SERVICE
+                  PARAMETERS
                 </h3>
                 <div
-                  class="bg-slate-50 p-2 rounded-2xl border border-slate-200 flex items-center space-x-3"
+                  class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-10"
                 >
-                  <label
-                    class="text-[10px] font-black text-slate-400 uppercase ml-2"
-                    >Residence Status:</label
-                  >
-                  <select
-                    id="residence_type"
-                    class="bg-white text-xs font-bold px-3 py-1 rounded-xl border-none outline-none shadow-sm"
-                  >
-                    <option value="Permanent">Permanent</option>
-                    <option value="Temporary">Temporary</option>
-                  </select>
+                  <div class="space-y-2">
+                    <label
+                      class="text-xs font-black text-slate-500 uppercase ml-1"
+                      >Certificate Type <span class="star">*</span></label
+                    >
+                    <select
+                      id="document_type"
+                      class="input-field h-[50px] md:h-[54px]"
+                      onchange="handleTypeChange()"
+                    >
+                      <option value="">-- Choose Type --</option>
+                      <option value="domicile">Domicile Certificate</option>
+                      <option value="income">Income Certificate</option>
+                      <option value="caste">Caste Certificate</option>
+                    </select>
+                  </div>
+                  <div class="space-y-2">
+                    <label
+                      class="text-xs font-black text-slate-500 uppercase ml-1"
+                      >Issuance Level <span class="star">*</span></label
+                    >
+                    <select id="level" class="input-field h-[50px] md:h-[54px]">
+                      <option value="Block" selected>Block Level</option>
+                      <option value="Sub-Division">Sub-Division Level</option>
+                      <option value="District">District Level</option>
+                    </select>
+                  </div>
+                  <div class="space-y-2">
+                    <label
+                      class="text-xs font-black text-slate-500 uppercase ml-1"
+                      >Gender <span class="star">*</span></label
+                    >
+                    <select
+                      id="gender"
+                      class="input-field h-[50px] md:h-[54px]"
+                    >
+                      <option value="Male">Male</option>
+                      <option value="Female">Female</option>
+                      <option value="Other">Other</option>
+                    </select>
+                  </div>
                 </div>
-              </div>
-              <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-8">
-                <div class="space-y-2">
-                  <label class="text-xs font-bold text-slate-500 uppercase ml-1"
-                    >State</label
-                  ><input
-                    id="state"
-                    value="Bihar"
-                    readonly
-                    class="input-field bg-slate-100 font-bold text-indigo-700 border-indigo-100"
-                  />
-                </div>
-                <div class="space-y-2">
-                  <label class="text-xs font-bold text-slate-500 uppercase ml-1"
-                    >District <span class="star">*</span></label
-                  ><select
-                    id="district"
-                    class="input-field"
-                    onchange="loadBlocks()"
-                  >
-                    <option value="">Select District</option>
-                  </select>
-                </div>
-                <div class="space-y-2">
-                  <label class="text-xs font-bold text-slate-500 uppercase ml-1"
-                    >Block <span class="star">*</span></label
-                  ><select
-                    id="block"
-                    class="input-field"
-                    onchange="loadPoliceStations()"
-                  >
-                    <option value="">Select Block</option>
-                  </select>
-                </div>
-                <div class="space-y-2">
-                  <label class="text-xs font-bold text-slate-500 uppercase ml-1"
-                    >Police Station <span class="star">*</span></label
-                  ><select id="police_station" class="input-field">
-                    <option value="">Select PS</option>
-                  </select>
-                </div>
-                <div class="space-y-2">
-                  <label class="text-xs font-bold text-slate-500 uppercase ml-1"
-                    >Local Body Type <span class="star">*</span></label
-                  ><select id="local_body" class="input-field">
-                    <option value="नगर निगम">नगर निगम (Nagar Nigam)</option>
-                    <option value="नगर परिषद">
-                      नगर परिषद (Nagar Parishad)
-                    </option>
-                    <option value="नगर पंचायत">
-                      नगर पंचायत (Town Panchayat)
-                    </option>
-                    <option value="ग्राम पंचायत">
-                      ग्राम पंचायत (Gram Panchayat)
-                    </option>
-                  </select>
-                </div>
-                <div class="space-y-2">
-                  <label class="text-xs font-bold text-slate-500 uppercase ml-1"
-                    >Ward No <span class="star">*</span></label
-                  ><input
-                    id="ward_no"
-                    class="input-field"
-                    placeholder="e.g. 12"
-                  />
-                </div>
-                <div class="space-y-2">
-                  <label class="text-xs font-bold text-slate-500 uppercase ml-1"
-                    >Town / City <span class="star">*</span></label
-                  ><input id="town" class="input-field" />
-                </div>
-                <div class="space-y-2">
-                  <label class="text-xs font-bold text-slate-500 uppercase ml-1"
-                    >Post Office <span class="star">*</span></label
-                  ><input id="post_office" class="input-field" />
-                </div>
-                <div class="space-y-2">
-                  <label class="text-xs font-bold text-slate-500 uppercase ml-1"
-                    >Pincode <span class="star">*</span></label
-                  ><input id="pincode" type="number" class="input-field" />
-                </div>
-              </div>
-            </section>
+              </section>
 
-            <div id="dynamicSections">
+              <section
+                class="bg-white rounded-3xl md:rounded-[2.5rem] card-shadow p-6 md:p-12 border border-slate-100 relative"
+              >
+                <h3
+                  class="text-xs font-black text-indigo-600 uppercase tracking-[0.2em] mb-6 md:mb-10 flex items-center"
+                >
+                  <span class="w-8 h-[2px] bg-indigo-600 mr-3"></span> APPLICANT
+                  IDENTITY
+                </h3>
+                <div
+                  class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8"
+                >
+                  <div class="space-y-1">
+                    <label
+                      class="text-xs font-bold text-slate-500 uppercase ml-1"
+                      >Full Name <span class="star">*</span></label
+                    >
+                    <input
+                      id="name"
+                      class="input-field"
+                      placeholder="Enter as per Aadhar"
+                    />
+                  </div>
+                  <div class="space-y-1">
+                    <label
+                      class="text-xs font-bold text-slate-500 uppercase ml-1"
+                      >Father's Name <span class="star">*</span></label
+                    >
+                    <input id="father_name" class="input-field" />
+                  </div>
+                  <div class="space-y-1">
+                    <label
+                      class="text-xs font-bold text-slate-500 uppercase ml-1"
+                      >Mother's Name <span class="star">*</span></label
+                    >
+                    <input id="mother_name" class="input-field" />
+                  </div>
+                  <div class="space-y-1">
+                    <label
+                      class="text-xs font-bold text-slate-500 uppercase ml-1"
+                      >Husband Name</label
+                    >
+                    <input
+                      id="husband_name"
+                      class="input-field"
+                      placeholder="If applicable"
+                    />
+                  </div>
+                  <div class="space-y-1">
+                    <label
+                      class="text-xs font-bold text-slate-500 uppercase ml-1"
+                      >Mobile No <span class="star">*</span></label
+                    >
+                    <input
+                      id="mobile_number"
+                      class="input-field"
+                      maxlength="10"
+                    />
+                  </div>
+                  <div class="space-y-1">
+                    <label
+                      class="text-xs font-bold text-slate-500 uppercase ml-1"
+                      >Email ID <span class="star">*</span></label
+                    >
+                    <input id="email_id" type="email" class="input-field" />
+                  </div>
+                  <div class="space-y-1">
+                    <label
+                      class="text-xs font-bold text-slate-500 uppercase ml-1"
+                      >Aadhar Number</label
+                    >
+                    <input
+                      id="aadhar_number"
+                      class="input-field"
+                      placeholder="12 Digit ID"
+                      maxlength="12"
+                    />
+                  </div>
+                </div>
+              </section>
+
+              <section
+                class="bg-white rounded-3xl md:rounded-[2.5rem] card-shadow p-6 md:p-12 border border-slate-100 relative"
+              >
+                <div
+                  class="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-8 md:mb-10 gap-4"
+                >
+                  <h3
+                    class="text-xs font-black text-indigo-600 uppercase tracking-[0.2em] flex items-center"
+                  >
+                    <span class="w-8 h-[2px] bg-indigo-600 mr-3"></span>
+                    LOCALITY DETAILS
+                  </h3>
+                  <div
+                    class="bg-slate-50 p-2 rounded-2xl border border-slate-200 flex items-center space-x-3"
+                  >
+                    <label
+                      class="text-[10px] font-black text-slate-400 uppercase ml-2"
+                      >Residence Status:</label
+                    >
+                    <select
+                      id="residence_type"
+                      class="bg-white text-xs font-bold px-3 py-1 rounded-xl border-none outline-none shadow-sm"
+                    >
+                      <option value="Permanent">Permanent</option>
+                      <option value="Temporary">Temporary</option>
+                    </select>
+                  </div>
+                </div>
+                <div
+                  class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6 md:gap-8"
+                >
+                  <div class="space-y-1">
+                    <label
+                      class="text-xs font-bold text-slate-500 uppercase ml-1"
+                      >State</label
+                    >
+                    <input
+                      id="state"
+                      value="Bihar"
+                      readonly
+                      class="input-field bg-slate-100 font-bold text-indigo-700"
+                    />
+                  </div>
+                  <div class="space-y-1">
+                    <label
+                      class="text-xs font-bold text-slate-500 uppercase ml-1"
+                      >District <span class="star">*</span></label
+                    >
+                    <select
+                      id="district"
+                      class="input-field"
+                      onchange="loadBlocks()"
+                    >
+                      <option value="">Select District</option>
+                    </select>
+                  </div>
+                  <div class="space-y-1">
+                    <label
+                      class="text-xs font-bold text-slate-500 uppercase ml-1"
+                      >Block <span class="star">*</span></label
+                    >
+                    <select
+                      id="block"
+                      class="input-field"
+                      onchange="loadPoliceStations()"
+                    >
+                      <option value="">Select Block</option>
+                    </select>
+                  </div>
+                  <div class="space-y-1">
+                    <label
+                      class="text-xs font-bold text-slate-500 uppercase ml-1"
+                      >Police Station <span class="star">*</span></label
+                    >
+                    <select id="police_station" class="input-field">
+                      <option value="">Select Police Station</option>
+                    </select>
+                  </div>
+                  <div class="space-y-1">
+                    <label
+                      class="text-xs font-bold text-slate-500 uppercase ml-1"
+                      >Local Body Type <span class="star">*</span></label
+                    >
+                    <select id="local_body" class="input-field">
+                      <option value="ग्राम पंचायत">
+                        ग्राम पंचायत (Gram Panchayat)
+                      </option>
+                      <option value="नगर निगम">नगर निगम (Nagar Nigam)</option>
+                      <option value="नगर परिषद">
+                        नगर परिषद (Nagar Parishad)
+                      </option>
+                      <option value="नगर पंचायत">
+                        नगर पंचायत (Town Panchayat)
+                      </option>
+                    </select>
+                  </div>
+                  <div class="space-y-1">
+                    <label
+                      class="text-xs font-bold text-slate-500 uppercase ml-1"
+                      >Ward No <span class="star">*</span></label
+                    >
+                    <input
+                      id="ward_no"
+                      class="input-field"
+                      placeholder="e.g. 12"
+                    />
+                  </div>
+                  <div class="space-y-1">
+                    <label
+                      class="text-xs font-bold text-slate-500 uppercase ml-1"
+                      >Town / City <span class="star">*</span></label
+                    >
+                    <input id="town" class="input-field" />
+                  </div>
+                  <div class="space-y-1">
+                    <label
+                      class="text-xs font-bold text-slate-500 uppercase ml-1"
+                      >Post Office <span class="star">*</span></label
+                    >
+                    <input id="post_office" class="input-field" />
+                  </div>
+                  <div class="space-y-1">
+                    <label
+                      class="text-xs font-bold text-slate-500 uppercase ml-1"
+                      >Pincode <span class="star">*</span></label
+                    >
+                    <input id="pincode" type="number" class="input-field" />
+                  </div>
+                </div>
+              </section>
+
               <section
                 id="casteSection"
-                class="hidden bg-indigo-50/50 rounded-[2.5rem] p-8 md:p-12 border border-indigo-100 transition-all duration-500"
+                class="hidden bg-indigo-50/50 rounded-3xl md:rounded-[2.5rem] p-6 md:p-12 border border-indigo-100 transition-all"
               >
                 <h3
                   class="text-xs font-black text-indigo-600 uppercase tracking-[0.3em] mb-10 flex items-center"
                 >
-                  <span class="w-10 h-[2px] bg-indigo-600 mr-4"></span> CASTE
+                  <span class="w-8 h-[2px] bg-indigo-600 mr-3"></span> CASTE
                   VERIFICATION
                 </h3>
                 <div
-                  class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-8"
+                  class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6 md:gap-8"
                 >
                   <div class="space-y-2">
                     <label
                       class="text-xs font-bold text-slate-500 uppercase ml-1"
                       >Profession <span class="star">*</span></label
-                    ><select id="profession_caste" class="input-field bg-white">
-                      <option value="">Select</option>
+                    >
+                    <select id="profession_caste" class="input-field bg-white">
                       <option value="Student">Student</option>
                       <option value="Government Service">
                         Government Service
                       </option>
-                      <option value="Private Employee">Private Employee</option>
-                      <option value="Farmer">Farmer</option>
                       <option value="Business">Business</option>
+                      <option value="Farmer">Farmer</option>
+                      <option value="Private Employee">Private Employee</option>
                     </select>
                   </div>
                   <div class="space-y-2">
                     <label
                       class="text-xs font-bold text-slate-500 uppercase ml-1"
                       >Category <span class="star">*</span></label
-                    ><select
+                    >
+                    <select
                       id="category"
                       class="input-field bg-white"
                       onchange="loadCastes()"
@@ -542,7 +559,8 @@
                     <label
                       class="text-xs font-bold text-slate-500 uppercase ml-1"
                       >Caste <span class="star">*</span></label
-                    ><select
+                    >
+                    <select
                       id="caste"
                       class="input-field bg-white"
                       onchange="loadSubCastes()"
@@ -554,7 +572,8 @@
                     <label
                       class="text-xs font-bold text-slate-500 uppercase ml-1"
                       >Sub-Caste</label
-                    ><select id="sub_caste" class="input-field bg-white">
+                    >
+                    <select id="sub_caste" class="input-field bg-white">
                       <option value="">Select Sub-Caste</option>
                     </select>
                   </div>
@@ -563,535 +582,219 @@
 
               <section
                 id="incomeSection"
-                class="hidden bg-emerald-50/50 rounded-[2.5rem] p-8 md:p-12 border border-emerald-100 transition-all duration-500"
+                class="hidden bg-emerald-50/50 rounded-3xl md:rounded-[2.5rem] p-6 md:p-12 border border-emerald-100 transition-all"
               >
                 <h3
                   class="text-xs font-black text-emerald-600 uppercase tracking-[0.3em] mb-10 flex items-center"
                 >
-                  <span class="w-10 h-[2px] bg-emerald-600 mr-4"></span>
+                  <span class="w-8 h-[2px] bg-emerald-600 mr-3"></span>
                   FINANCIAL DISCLOSURE
                 </h3>
-                <div class="space-y-8">
-                  <div class="max-w-xs">
+                <div class="grid grid-cols-2 md:grid-cols-5 gap-4 md:gap-6">
+                  <div class="space-y-2">
                     <label
-                      class="text-xs font-bold text-slate-500 uppercase ml-1"
-                      >Profession <span class="star">*</span></label
-                    ><select
-                      id="profession_income"
+                      class="text-[10px] font-black text-slate-400 uppercase"
+                      >Govt Service</label
+                    >
+                    <input
+                      id="inc_govt"
+                      type="number"
                       class="input-field bg-white"
-                    >
-                      <option value="">Select</option>
-                      <option value="Farmer">Farmer</option>
-                      <option value="Private Employee">Private Employee</option>
-                      <option value="Business">Business</option>
-                    </select>
+                      placeholder="₹ 0"
+                      oninput="calcIncome()"
+                    />
                   </div>
-                  <div class="grid grid-cols-2 md:grid-cols-5 gap-6">
-                    <div class="space-y-2">
-                      <label
-                        class="text-[10px] font-black text-slate-400 uppercase tracking-tighter"
-                        >Govt Service</label
-                      ><input
-                        id="inc_govt"
-                        type="number"
-                        class="input-field bg-white"
-                        placeholder="₹ 0"
-                        oninput="calcIncome()"
-                      />
-                    </div>
-                    <div class="space-y-2">
-                      <label
-                        class="text-[10px] font-black text-slate-400 uppercase tracking-tighter"
-                        >Business</label
-                      ><input
-                        id="inc_biz"
-                        type="number"
-                        class="input-field bg-white"
-                        placeholder="₹ 0"
-                        oninput="calcIncome()"
-                      />
-                    </div>
-                    <div class="space-y-2">
-                      <label
-                        class="text-[10px] font-black text-slate-400 uppercase tracking-tighter"
-                        >Agriculture</label
-                      ><input
-                        id="inc_agri"
-                        type="number"
-                        class="input-field bg-white"
-                        placeholder="₹ 0"
-                        oninput="calcIncome()"
-                      />
-                    </div>
-                    <div class="space-y-2">
-                      <label
-                        class="text-[10px] font-black text-slate-400 uppercase tracking-tighter"
-                        >Other Sources</label
-                      ><input
-                        id="inc_other"
-                        type="number"
-                        class="input-field bg-white"
-                        placeholder="₹ 0"
-                        oninput="calcIncome()"
-                      />
-                    </div>
-                    <div
-                      class="bg-emerald-600 p-4 rounded-3xl flex flex-col justify-center shadow-lg shadow-emerald-200"
+                  <div class="space-y-2">
+                    <label
+                      class="text-[10px] font-black text-slate-400 uppercase"
+                      >Business</label
                     >
-                      <p
-                        class="text-[10px] text-emerald-100 font-black uppercase text-center tracking-widest mb-1"
-                      >
-                        ANNUAL TOTAL
-                      </p>
-                      <input
-                        id="total_annual_income"
-                        readonly
-                        class="bg-transparent text-white font-black text-2xl text-center w-full focus:outline-none"
-                        value="0"
-                      />
-                    </div>
+                    <input
+                      id="inc_biz"
+                      type="number"
+                      class="input-field bg-white"
+                      placeholder="₹ 0"
+                      oninput="calcIncome()"
+                    />
+                  </div>
+                  <div class="space-y-2">
+                    <label
+                      class="text-[10px] font-black text-slate-400 uppercase"
+                      >Agriculture</label
+                    >
+                    <input
+                      id="inc_agri"
+                      type="number"
+                      class="input-field bg-white"
+                      placeholder="₹ 0"
+                      oninput="calcIncome()"
+                    />
+                  </div>
+                  <div class="space-y-2">
+                    <label
+                      class="text-[10px] font-black text-slate-400 uppercase"
+                      >Other</label
+                    >
+                    <input
+                      id="inc_other"
+                      type="number"
+                      class="input-field bg-white"
+                      placeholder="₹ 0"
+                      oninput="calcIncome()"
+                    />
+                  </div>
+                  <div
+                    class="bg-emerald-600 p-4 rounded-2xl flex flex-col justify-center shadow-lg text-center"
+                  >
+                    <p
+                      class="text-[8px] text-emerald-100 font-black uppercase mb-1"
+                    >
+                      ANNUAL TOTAL
+                    </p>
+                    <input
+                      id="total_annual_income"
+                      readonly
+                      class="bg-transparent text-white font-black text-xl w-full focus:outline-none text-center"
+                      value="0"
+                    />
                   </div>
                 </div>
               </section>
-            </div>
 
-            <section
-              class="bg-white rounded-[2.5rem] card-shadow p-8 md:p-12 border border-slate-100"
+              <section
+                class="bg-white rounded-3xl md:rounded-[2.5rem] card-shadow p-6 md:p-12 border border-slate-100 relative"
+              >
+                <h3
+                  class="text-xs font-black text-indigo-600 uppercase tracking-widest mb-10 flex items-center"
+                >
+                  <span class="w-8 h-[2px] bg-indigo-600 mr-3"></span>
+                  ATTACHMENTS
+                </h3>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-8 mb-10">
+                  <div
+                    class="p-8 bg-slate-50 rounded-[2rem] border-2 border-dashed border-slate-200 hover:border-indigo-400 transition-all"
+                  >
+                    <label
+                      class="text-xs font-black text-slate-500 uppercase block mb-4 tracking-widest"
+                      >Applicant Photo *</label
+                    >
+                    <input
+                      id="applicant_photo"
+                      type="file"
+                      accept="image/*"
+                      class="w-full text-sm text-slate-500 file:mr-4 file:py-2 file:px-6 file:rounded-full file:border-0 file:text-xs file:font-black file:bg-indigo-600 file:text-white"
+                    />
+                  </div>
+                  <div
+                    class="p-8 bg-slate-50 rounded-[2rem] border-2 border-dashed border-slate-200 hover:border-indigo-400 transition-all"
+                  >
+                    <label
+                      class="text-xs font-black text-slate-500 uppercase block mb-4 tracking-widest"
+                      >ID Proof (PDF) *</label
+                    >
+                    <input
+                      id="document_file"
+                      type="file"
+                      accept=".pdf"
+                      class="w-full text-sm text-slate-500 file:mr-4 file:py-2 file:px-6 file:rounded-full file:border-0 file:text-xs file:font-black file:bg-indigo-600 file:text-white"
+                    />
+                  </div>
+                </div>
+                <div class="space-y-3">
+                  <label
+                    class="text-xs font-black text-slate-500 uppercase tracking-widest"
+                    >Purpose of Application *</label
+                  >
+                  <textarea
+                    id="purpose"
+                    rows="4"
+                    class="input-field bg-slate-50 p-6"
+                    placeholder="Reason for applying..."
+                  ></textarea>
+                </div>
+                <button
+                  type="button"
+                  onclick="submitForm()"
+                  id="submitBtn"
+                  class="mt-12 w-full bg-indigo-600 hover:bg-indigo-700 text-white py-6 rounded-[2rem] font-black text-xl tracking-tighter transition-all flex items-center justify-center space-x-4 shadow-2xl disabled:opacity-70"
+                >
+                  <svg
+                    id="btnLoader"
+                    class="hidden animate-spin h-7 w-7 text-white"
+                    viewBox="0 0 24 24"
+                  >
+                    <circle
+                      class="opacity-25"
+                      cx="12"
+                      cy="12"
+                      r="10"
+                      stroke="currentColor"
+                      stroke-width="4"
+                    ></circle>
+                    <path
+                      class="opacity-75"
+                      fill="currentColor"
+                      d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                    ></path>
+                  </svg>
+                  <span id="btnText">TRANSMIT APPLICATION</span>
+                </button>
+              </section>
+            </form>
+          </div>
+
+          <div id="tab-records" class="hidden">
+            <div
+              class="bg-white rounded-3xl md:rounded-[2.5rem] card-shadow border border-slate-100 overflow-hidden animate-fadeIn"
             >
-              <h3
-                class="text-xs font-black text-indigo-600 uppercase tracking-[0.3em] mb-10 flex items-center"
+              <div
+                class="p-6 md:p-8 border-b border-slate-100 flex flex-col sm:flex-row justify-between items-start sm:items-center bg-slate-50/50 gap-4"
               >
-                <span class="w-10 h-[2px] bg-indigo-600 mr-4"></span>
-                ATTACHMENTS
-              </h3>
-              <div class="grid grid-cols-1 md:grid-cols-2 gap-10 mb-10">
-                <div
-                  class="p-8 bg-slate-50 rounded-[2rem] border-2 border-dashed border-slate-200 group hover:border-indigo-400 transition-all"
+                <h3
+                  class="text-xs font-black text-indigo-600 uppercase tracking-widest"
                 >
-                  <label
-                    class="text-xs font-black text-slate-500 uppercase block mb-4 tracking-widest"
-                    >Applicant Photo <span class="star">*</span></label
-                  >
-                  <input
-                    id="applicant_photo"
-                    type="file"
-                    accept="image/*"
-                    class="w-full text-sm text-slate-500 file:mr-4 file:py-2 file:px-6 file:rounded-full file:border-0 file:text-xs file:font-black file:bg-indigo-600 file:text-white file:cursor-pointer hover:file:bg-indigo-700 transition-all"
-                  />
-                </div>
-                <div
-                  class="p-8 bg-slate-50 rounded-[2rem] border-2 border-dashed border-slate-200 group hover:border-indigo-400 transition-all"
+                  Master Database Records
+                </h3>
+                <button
+                  onclick="showTab('apply')"
+                  class="text-xs font-black text-slate-400 hover:text-indigo-600 uppercase transition-all tracking-widest"
                 >
-                  <label
-                    class="text-xs font-black text-slate-500 uppercase block mb-4 tracking-widest"
-                    >ID Proof / Document <span class="star">*</span></label
-                  >
-                  <input
-                    id="document_file"
-                    type="file"
-                    accept=".pdf"
-                    class="w-full text-sm text-slate-500 file:mr-4 file:py-2 file:px-6 file:rounded-full file:border-0 file:text-xs file:font-black file:bg-indigo-600 file:text-white file:cursor-pointer hover:file:bg-indigo-700 transition-all"
-                  />
-                </div>
+                  ← Back to Form
+                </button>
               </div>
-              <div class="space-y-3">
-                <label
-                  class="text-xs font-black text-slate-500 uppercase ml-1 tracking-widest"
-                  >Purpose of Application <span class="star">*</span></label
-                >
-                <textarea
-                  id="purpose"
-                  rows="4"
-                  class="input-field bg-slate-50 p-6"
-                  placeholder="Briefly describe why you need this certificate..."
-                ></textarea>
+              <div class="overflow-x-auto">
+                <table class="w-full text-left min-w-[700px]">
+                  <thead>
+                    <tr
+                      class="text-slate-400 text-[10px] font-black uppercase tracking-widest border-b border-slate-100"
+                    >
+                      <th class="p-6">Applicant</th>
+                      <th class="p-6">Status</th>
+                      <th class="p-6">Certificate</th>
+                      <th class="p-6 text-center">Receiving</th>
+                    </tr>
+                  </thead>
+                  <tbody
+                    id="records-table-body"
+                    class="divide-y divide-slate-50 text-sm font-medium text-slate-700"
+                  ></tbody>
+                </table>
               </div>
-
-              <button
-                onclick="submitForm()"
-                id="submitBtn"
-                class="mt-12 w-full bg-indigo-600 hover:bg-indigo-700 text-white py-6 rounded-[2rem] font-black text-xl tracking-tighter transition-all flex items-center justify-center space-x-4 shadow-2xl shadow-indigo-200 transform active:scale-95 disabled:opacity-70 disabled:cursor-not-allowed"
-              >
-                <svg
-                  id="btnLoader"
-                  class="hidden animate-spin h-7 w-7 text-white"
-                  viewBox="0 0 24 24"
-                >
-                  <circle
-                    class="opacity-25"
-                    cx="12"
-                    cy="12"
-                    r="10"
-                    stroke="currentColor"
-                    stroke-width="4"
-                  ></circle>
-                  <path
-                    class="opacity-75"
-                    fill="currentColor"
-                    d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-                  ></path>
-                </svg>
-                <span id="btnText">TRANSMIT APPLICATION</span>
-              </button>
-            </section>
-          </form>
+            </div>
+          </div>
         </div>
       </main>
     </div>
 
     <script>
-      // ==========================================
-      // DATABASE & LOCALITY LOGIC (250+ LINES)
-      // ==========================================
-      const BiharDB = {
-        Araria: ["Araria", "Forbesganj", "Jokihat", "Kursakanta"],
-        Arwal: ["Arwal", "Kaler", "Kurtha", "Sonbhadra"],
-        Aurangabad: ["Aurangabad", "Daudnagar", "Obra", "Rafiganj"],
-        Banka: ["Banka", "Barahat", "Katoria"],
-        Begusarai: ["Begusarai", "Barauni", "Matihani"],
-        Bhagalpur: ["Bhagalpur", "Colgong", "Nathnagar"],
-        Bhojpur: ["Arrah", "Bihiya", "Jagdishpur"],
-        Buxar: ["Buxar", "Dumraon", "Itarhi"],
-        Darbhanga: ["Darbhanga", "Baheri", "Benipur"],
-        Gaya: ["Gaya Sadar", "Bodh Gaya", "Dobhi", "Sherghati"],
-        Gopalganj: ["Gopalganj", "Barauli", "Hathua"],
-        Jamui: ["Jamui", "Chakai", "Sono"],
-        Jehanabad: ["Jehanabad", "Makhdumpur", "Ghosi"],
-        Kaimur: ["Bhabua", "Mohania", "Ramgarh"],
-        Katihar: ["Katihar", "Barsoi", "Kadwa"],
-        Khagaria: ["Khagaria", "Gogri", "Parbatta"],
-        Kishanganj: ["Kishanganj", "Bahadurganj", "Thakurganj"],
-        Lakhisarai: ["Lakhisarai", "Barahiya", "Surajgarha"],
-        Madhepura: ["Madhepura", "Murliganj", "Singheshwar"],
-        Madhubani: ["Madhubani", "Benipatti", "Jhanjharpur"],
-        Munger: ["Munger", "Jamalpur", "Tarapur"],
-        Muzaffarpur: [
-          "Muzaffarpur West",
-          "Muzaffarpur East",
-          "Kanti",
-          "Marwan",
-        ],
-        Nalanda: ["Biharsharif", "Rajgir", "Hilsa"],
-        Nawada: ["Nawada", "Hisua", "Rajauli"],
-        Patna: [
-          "Danapur",
-          "Phulwari Sharif",
-          "Patna Sadar",
-          "Sampatchak",
-          "Barh",
-          "Bakhtiyarpur",
-        ],
-        Purnia: ["Purnia", "Banmankhi", "Dhamdaha"],
-        Rohtas: ["Sasaram", "Dehri", "Bikramganj"],
-        Saharsa: ["Saharsa", "Simri Bakhtiarpur"],
-        Samastipur: ["Samastipur", "Dalsinghsarai", "Rosera"],
-        Saran: ["Chhapra", "Marhaura", "Sonpur"],
-        Sheikhpura: ["Sheikhpura", "Barbigha"],
-        Sheohar: ["Sheohar", "Dumri Katsari"],
-        Sitamarhi: ["Sitamarhi", "Belsand", "Pupri"],
-        Siwan: ["Siwan", "Maharajganj", "Mairwa"],
-        Supaul: ["Supaul", "Birpur", "Nirmali"],
-        Vaishali: ["Hajipur", "Mahua", "Lalganj"],
-        "West Champaran": ["Bettiah", "Bagaha", "Narkatiaganj"],
-        "East Champaran": ["Motihari", "Chakia", "Raxaul"],
-      };
-
-      const CasteDB = {
-        "OBC (BC-II)": ["Yadav", "Kushwaha", "Kurmi", "Baniya", "Jat"],
-        "EBC (BC-I)": ["Nai", "Kanu", "Teli", "Mallah", "Lohar"],
-        "Scheduled Caste (SC)": ["Chamar", "Paswan", "Dhobi", "Pasi"],
-        "Scheduled Tribe (ST)": ["Santhal", "Oraon", "Munda"],
-        General: ["Brahmin", "Rajput", "Kayastha", "Bhumihar"],
-      };
-
-      // Populate Districts
-      const distSelect = document.getElementById("district");
-      const catSelect = document.getElementById("category");
-
-      Object.keys(BiharDB)
-        .sort()
-        .forEach(
-          (d) => (distSelect.innerHTML += `<option value="${d}">${d}</option>`),
-        );
-      Object.keys(CasteDB).forEach(
-        (c) => (catSelect.innerHTML += `<option value="${c}">${c}</option>`),
-      );
-
-      function loadBlocks() {
-        const block = document.getElementById("block");
-        const ps = document.getElementById("police_station");
-        block.innerHTML = ps.innerHTML = '<option value="">Select</option>';
-        if (distSelect.value)
-          BiharDB[distSelect.value].forEach(
-            (b) => (block.innerHTML += `<option value="${b}">${b}</option>`),
-          );
-      }
-
-      function loadPoliceStations() {
-        const ps = document.getElementById("police_station");
-        const b = document.getElementById("block").value;
-        ps.innerHTML = '<option value="">Select</option>';
-        if (b)
-          [`${b} Thana`, `${b} Rural OP`, `${b} Mahila Thana`].forEach(
-            (p) => (ps.innerHTML += `<option value="${p}">${p}</option>`),
-          );
-      }
-
-      function loadCastes() {
-        const caste = document.getElementById("caste");
-        caste.innerHTML = '<option value="">Select Caste</option>';
-        if (catSelect.value)
-          CasteDB[catSelect.value].forEach(
-            (c) => (caste.innerHTML += `<option value="${c}">${c}</option>`),
-          );
-      }
-
-      function loadSubCastes() {
-        const sc = document.getElementById("sub_caste");
-        const c = document.getElementById("caste").value;
-        sc.innerHTML = '<option value="">-- No Subcaste --</option>';
-        if (c === "Yadav")
-          sc.innerHTML =
-            '<option value="Ahir">Ahir</option><option value="Gopa">Gopa</option>';
-        if (c === "Brahmin")
-          sc.innerHTML =
-            '<option value="Jha">Jha</option><option value="Mishra">Mishra</option>';
-      }
-
-      // ==========================================
-      // UI STATE LOGIC
-      // ==========================================
       function toggleSidebar() {
+        document.getElementById("sidebar").classList.toggle("sidebar-open");
         document
-          .getElementById("sidebar")
-          .classList.toggle("-translate-x-full");
-        document.getElementById("sidebar-overlay").classList.toggle("hidden");
+          .getElementById("sidebar-overlay")
+          .classList.toggle("sidebar-overlay-active");
       }
-
-      function handleTypeChange() {
-        const val = document.getElementById("document_type").value;
-        document
-          .getElementById("incomeSection")
-          .classList.toggle("hidden", val !== "income");
-        document
-          .getElementById("casteSection")
-          .classList.toggle("hidden", val !== "caste");
-      }
-
-      function calcIncome() {
-        const g = +document.getElementById("inc_govt").value || 0;
-        const b = +document.getElementById("inc_biz").value || 0;
-        const a = +document.getElementById("inc_agri").value || 0;
-        const o = +document.getElementById("inc_other").value || 0;
-        document.getElementById("total_annual_income").value = g + b + a + o;
-      }
-
-      function showToast(msg, type = "error") {
-        const container = document.getElementById("toast-container");
-        const toast = document.createElement("div");
-        toast.className = `toast ${type === "error" ? "bg-rose-500" : "bg-emerald-500"}`;
-        toast.innerHTML = `<span>${type === "error" ? "⚠️" : "✅"}</span> ${msg}`;
-        container.appendChild(toast);
-        setTimeout(() => toast.remove(), 5000);
-      }
-
-      document.addEventListener("DOMContentLoaded", () => {
-        document.getElementById("user-email-display").innerText =
-          localStorage.getItem("email") || "Admin";
-      });
-
-      // ==========================================
-      // SUBMISSION & BACKEND MAPPING (300+ LINES)
-      // ==========================================
-      async function submitForm() {
-        const btn = document.getElementById("submitBtn");
-        const loader = document.getElementById("btnLoader");
-        const btnText = document.getElementById("btnText");
-
-        // 1. SELECT RAW ELEMENTS
-        const docTypeRaw = document.getElementById("document_type").value;
-        const nameVal = document.getElementById("name").value.trim();
-        const fatherVal = document.getElementById("father_name").value.trim();
-        const motherVal = document.getElementById("mother_name").value.trim();
-        const mobileVal = document.getElementById("mobile_number").value.trim();
-        const emailVal = document.getElementById("email_id").value.trim();
-        const districtVal = document.getElementById("district").value;
-        const blockVal = document.getElementById("block").value;
-        const townVal = document.getElementById("town").value.trim();
-        const pinVal = document.getElementById("pincode").value.trim();
-        const photoFile = document.getElementById("applicant_photo").files[0];
-        const docFile = document.getElementById("document_file").files[0];
-
-        // 2. FORM-WIDE VALIDATION
-        if (!docTypeRaw) return showToast("Please select Certificate Type");
-        if (!nameVal || !fatherVal || !motherVal)
-          return showToast("Name, Father, and Mother names are required");
-        if (mobileVal.length !== 10)
-          return showToast("Mobile must be exactly 10 digits");
-        if (!emailVal.includes("@"))
-          return showToast("Enter a valid email address");
-        if (!districtVal || !blockVal || !townVal || !pinVal)
-          return showToast("Locality details are mandatory");
-
-        // File Validation
-        if (!photoFile || !docFile)
-          return showToast(
-            "Both files (Profile Photo & Document ID) are required",
-          );
-
-        // Optional: Max File Size Check (e.g., 2MB)
-        if (photoFile.size > 2 * 1024 * 1024)
-          return showToast("Photo must be less than 2MB");
-
-        if (!document.getElementById("purpose").value.trim())
-          return showToast("Purpose declaration is required");
-
-        // 3. CONSTRUCT DATA OBJECT
-        const finalJson = {
-          document_type:
-            docTypeRaw === "domicile"
-              ? "Domicile Certificate"
-              : docTypeRaw === "income"
-                ? "Income Certificate"
-                : "Caste Certificate",
-          level: document.getElementById("level").value,
-          gender: document.getElementById("gender").value,
-          name: nameVal,
-          father_name: fatherVal,
-          mother_name: motherVal,
-          husband_name:
-            document.getElementById("husband_name").value.trim() || null,
-          mobile_number: mobileVal,
-          email_id: emailVal,
-          state: "Bihar",
-          district: districtVal,
-          sub_division: districtVal,
-          block: blockVal,
-          local_body:
-            document.getElementById("local_body").value.trim() ||
-            "Gram Panchayat",
-          ward_no: document.getElementById("ward_no").value.trim() || "N/A",
-          town: townVal,
-          post_office:
-            document.getElementById("post_office").value.trim() || "General",
-          police_station:
-            document.getElementById("police_station").value || "Local",
-          pincode: pinVal,
-          residence_type: document.getElementById("residence_type").value,
-          aadhar_number:
-            document.getElementById("aadhar_number").value.trim() || null,
-          purpose_of_application: document
-            .getElementById("purpose")
-            .value.trim(),
-        };
-
-        // 4. CONDITIONAL FIELDS (Added safe parsing with || 0)
-        if (docTypeRaw === "income") {
-          finalJson.profession =
-            document.getElementById("profession_income").value;
-          finalJson.total_annual_income =
-            +document.getElementById("total_annual_income").value || 0;
-          finalJson.income_govt_service =
-            +document.getElementById("inc_govt").value || 0;
-          finalJson.income_business =
-            +document.getElementById("inc_biz").value || 0;
-          finalJson.income_agriculture =
-            +document.getElementById("inc_agri").value || 0;
-          finalJson.income_other_sources =
-            +document.getElementById("inc_other").value || 0;
-        }
-
-        if (docTypeRaw === "caste") {
-          finalJson.profession =
-            document.getElementById("profession_caste").value;
-          finalJson.category = document.getElementById("category").value;
-          finalJson.caste = document.getElementById("caste").value;
-          finalJson.sub_caste =
-            document.getElementById("sub_caste").value || "General";
-        }
-
-        // 5. API PREPARATION
-        const apiSlug = {
-          domicile: "domicile",
-          caste: "castes",
-          income: "income",
-        };
-        const apiUrl = `https://backend-5gc912wx6-wasimsonu76-gmailcoms-projects.vercel.app/api/${apiSlug[docTypeRaw]}/create`;
-
-        // UI LOADER START
-        btn.disabled = true;
-        loader.classList.remove("hidden");
-        btnText.innerText = "Transmitting...";
-
-        try {
-          const formData = new FormData();
-          Object.keys(finalJson).forEach((key) => {
-            // Only append if value is not null to keep FormData clean
-            if (finalJson[key] !== null) formData.append(key, finalJson[key]);
-          });
-          formData.append("profilePhoto", photoFile);
-          formData.append("documentId", docFile);
-
-          const authToken =
-            localStorage.getItem("token") ||
-            localStorage.getItem("access_token");
-
-          const response = await fetch(apiUrl, {
-            method: "POST",
-            body: formData,
-            headers: {
-              Authorization: `Bearer ${authToken}`,
-            },
-          });
-
-          const result = await response.json();
-
-          if (result.success) {
-            const sessionId =
-              result.payment_session_id || result.payment?.payment_session_id;
-
-            if (sessionId) {
-              showToast("Opening Secure Payment...", "success");
-
-              if (!window.Cashfree) {
-                throw new Error(
-                  "Cashfree SDK not found. Please refresh the page.",
-                );
-              }
-
-              const isProduction =
-                !apiUrl.includes("localhost") && !apiUrl.includes("vercel.app");
-              const cashfree = new window.Cashfree({
-                mode: isProduction ? "production" : "sandbox",
-              });
-
-              cashfree
-                .checkout({
-                  paymentSessionId: sessionId,
-                  redirectTarget: "_self",
-                })
-                .then((res) => {
-                  if (res.error) showToast(res.error.message, "error");
-                });
-            } else {
-              showToast("Registration Successful!", "success");
-              setTimeout(() => location.reload(), 2000);
-            }
-          } else {
-            showToast(result.message || "System error occurred", "error");
-          }
-        } catch (error) {
-          console.error("Submission Error:", error);
-          showToast(error.message || "Network Error.");
-        } finally {
-          btn.disabled = false;
-          loader.classList.add("hidden");
-          btnText.innerText = "TRANSMIT APPLICATION";
-        }
-      }
-      function logoutUser() {
-        localStorage.clear();
-        window.location.href = "login.html";
+      function closeSidebarOnMobile() {
+        if (window.innerWidth < 1024) toggleSidebar();
       }
     </script>
   </body>
