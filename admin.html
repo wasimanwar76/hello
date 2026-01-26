@@ -1024,32 +1024,52 @@
           formData.append("profilePhoto", photoFile);
           formData.append("documentId", docFile);
 
+          // GET TOKEN (Verify if your app uses 'token' or 'access_token')
+          const authToken =
+            localStorage.getItem("token") ||
+            localStorage.getItem("access_token");
+
           const response = await fetch(apiUrl, {
             method: "POST",
             body: formData,
             headers: {
-              Authorization: `Bearer ${localStorage.getItem("token")}`,
+              Authorization: `Bearer ${authToken}`,
             },
           });
 
           const result = await response.json();
+          console.log("Server Response:", result);
 
           if (result.success) {
-            if (result.payment_session_id) {
+            // Check for payment session in either root or result.payment object
+            const sessionId =
+              result.payment_session_id || result.payment?.payment_session_id;
+
+            if (sessionId) {
               showToast(
-                "Application saved! Redirecting to payment...",
+                "Application saved! Opening Secure Payment...",
                 "success",
               );
 
-              // Construct Cashfree URL
-              const checkoutUrl = `https://sandbox.cashfree.com/pg/view/checkout/#/${result.payment_session_id}`;
+              if (!window.Cashfree) {
+                throw new Error(
+                  "Cashfree SDK not found. Please refresh the page.",
+                );
+              }
 
-              // Short delay to let user read the toast
-              setTimeout(() => {
-                window.location.href = checkoutUrl;
-              }, 1500);
+              // Initialize Cashfree
+              const isProduction =
+                !apiUrl.includes("localhost") && !apiUrl.includes("vercel.app");
+              const cashfree = new window.Cashfree({
+                mode: "sandbox", // Toggle to "production" when live
+              });
+
+              // Trigger Checkout Overlay
+              cashfree.checkout({
+                paymentSessionId: sessionId,
+                redirectTarget: "_self",
+              });
             } else {
-              // Fallback if payment is not required or session ID is missing
               showToast("Registration Successful!", "success");
               setTimeout(() => location.reload(), 2000);
             }
@@ -1060,8 +1080,10 @@
             );
           }
         } catch (error) {
-          console.error("Fetch Error:", error);
-          showToast("Network Error: Could not reach backend server.");
+          console.error("Submission Error:", error);
+          showToast(
+            error.message || "Network Error: Could not reach backend server.",
+          );
         } finally {
           btn.disabled = false;
           loader.classList.add("hidden");
