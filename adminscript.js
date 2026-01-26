@@ -385,7 +385,7 @@ async function fetchRecords() {
   try {
     const token = localStorage.getItem("token");
     const response = await fetch(
-      "http://localhost:5000/api/records/my-records",
+      "https://backend-pi-mocha-44.vercel.app/api/records/my-records",
       {
         headers: { Authorization: `Bearer ${token}` },
       },
