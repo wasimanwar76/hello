@@ -932,10 +932,17 @@
           return showToast("Enter a valid email address");
         if (!districtVal || !blockVal || !townVal || !pinVal)
           return showToast("Locality details are mandatory");
+
+        // File Validation
         if (!photoFile || !docFile)
           return showToast(
             "Both files (Profile Photo & Document ID) are required",
           );
+
+        // Optional: Max File Size Check (e.g., 2MB)
+        if (photoFile.size > 2 * 1024 * 1024)
+          return showToast("Photo must be less than 2MB");
+
         if (!document.getElementById("purpose").value.trim())
           return showToast("Purpose declaration is required");
 
@@ -978,13 +985,12 @@
             .value.trim(),
         };
 
-        // 4. CONDITIONAL FIELDS
+        // 4. CONDITIONAL FIELDS (Added safe parsing with || 0)
         if (docTypeRaw === "income") {
           finalJson.profession =
             document.getElementById("profession_income").value;
-          finalJson.total_annual_income = +document.getElementById(
-            "total_annual_income",
-          ).value;
+          finalJson.total_annual_income =
+            +document.getElementById("total_annual_income").value || 0;
           finalJson.income_govt_service =
             +document.getElementById("inc_govt").value || 0;
           finalJson.income_business =
@@ -1020,7 +1026,8 @@
         try {
           const formData = new FormData();
           Object.keys(finalJson).forEach((key) => {
-            formData.append(key, finalJson[key]);
+            // Only append if value is not null to keep FormData clean
+            if (finalJson[key] !== null) formData.append(key, finalJson[key]);
           });
           formData.append("profilePhoto", photoFile);
           formData.append("documentId", docFile);
@@ -1047,27 +1054,24 @@
               showToast("Opening Secure Payment...", "success");
 
               if (!window.Cashfree) {
-                throw new Error("Cashfree SDK not loaded. Please refresh.");
+                throw new Error(
+                  "Cashfree SDK not found. Please refresh the page.",
+                );
               }
 
-              // Auto-detect environment
               const isProduction =
                 !apiUrl.includes("localhost") && !apiUrl.includes("vercel.app");
-
               const cashfree = new window.Cashfree({
                 mode: isProduction ? "production" : "sandbox",
               });
 
-              // Trigger Checkout
               cashfree
                 .checkout({
                   paymentSessionId: sessionId,
                   redirectTarget: "_self",
                 })
                 .then((res) => {
-                  if (res.error) {
-                    showToast(res.error.message, "error");
-                  }
+                  if (res.error) showToast(res.error.message, "error");
                 });
             } else {
               showToast("Registration Successful!", "success");
