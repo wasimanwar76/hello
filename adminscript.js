@@ -232,6 +232,7 @@ async function submitForm() {
   if (!photoFile || !docFile)
     return showToast("Both Photo and ID Proof required");
 
+  // 1. CONSTRUCT MAIN DATA OBJECT (Common fields for all certificates)
   const finalJson = {
     document_type:
       docTypeRaw === "domicile"
@@ -262,9 +263,10 @@ async function submitForm() {
     aadhar_number:
       document.getElementById("aadhar_number")?.value.trim() || null,
     purpose_of_application: document.getElementById("purpose")?.value.trim(),
-    caste_serial_number: document.getElementById("caste_serial")?.value || "",
+    // REMOVED: caste_serial_number from here to prevent Domicile table errors
   };
 
+  // 2. CONDITIONAL FIELDS (Specific to each certificate type)
   if (docTypeRaw === "income") {
     finalJson.profession =
       document.getElementById("profession_income")?.value || "Farmer";
@@ -284,6 +286,10 @@ async function submitForm() {
     finalJson.caste = document.getElementById("caste")?.value;
     finalJson.sub_caste =
       document.getElementById("sub_caste")?.value || "General";
+
+    // MOVED HERE: Only sent when the document type is actually "caste"
+    finalJson.caste_serial_number =
+      document.getElementById("caste_serial")?.value || "";
   }
 
   // Ensure 'caste' maps to 'castes' if that's your backend route
