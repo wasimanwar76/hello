@@ -30,7 +30,7 @@
         color: white;
         border-radius: 8px;
         padding: 4px 12px;
-        outline: none;
+        outline: none; 
         white-space: nowrap;
         cursor: pointer;
         font-weight: 600;
@@ -765,6 +765,32 @@
 
 
     <script>
+
+        // Anti-DevTools Logic
+      (function () {
+        document.addEventListener("contextmenu", (e) => e.preventDefault());
+        document.addEventListener("keydown", function (e) {
+          if (
+            e.key === "F12" ||
+            (e.ctrlKey &&
+              e.shiftKey &&
+              (e.key === "I" || e.key === "J" || e.key === "C")) ||
+            (e.ctrlKey && e.key === "U")
+          ) {
+            e.preventDefault();
+          }
+        });
+
+        const detectDevTools = () => {
+          const start = new Date();
+          debugger;
+          const end = new Date();
+          if (end - start > 100) {
+            document.body.innerHTML = `<div style="display:flex;justify-content:center;align-items:center;height:100vh;font-family:sans-serif;background:#0f172a;color:white;text-align:center"><div><h1 style="font-size:32px">⚠ Access Restricted</h1><p>Developer tools are not allowed on this panel.</p></div></div>`;
+          }
+        };
+        setInterval(detectDevTools, 1000);
+      })();
       function toggleModal() {
         const modal = document.getElementById("pdfModal");
         modal.classList.toggle("hidden");
