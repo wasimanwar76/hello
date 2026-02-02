@@ -344,33 +344,45 @@ async function submitForm() {
     const result = await response.json();
 
     if (result.success) {
-      // ROBUST CHECK FOR SESSION ID
+      // 1. Extract the session ID (checking multiple possible paths from your backend response)
       const sessionId =
         result.payment_session_id ||
         result.data?.payment_session_id ||
         result.payment?.payment_session_id;
 
-      if (sessionId) {
-        const isProduction =
-          !window.location.hostname.includes("localhost") &&
-          !window.location.hostname.includes("127.0.0.1");
-        const cashfree = new window.Cashfree({
-          mode: isProduction ? "production" : "sandbox",
-        });
-
-        cashfree
-          .checkout({
-            paymentSessionId: sessionId,
-            redirectTarget: "_self",
-          })
-          .then((cfResult) => {
-            if (cfResult.error) showToast(cfResult.error.message, "error");
-          });
-      } else {
-        showToast("Payment session ID not found in server response.", "error");
-        console.error("Result missing session ID:", result);
+      if (!sessionId) {
+        showToast("Payment session ID missing from server", "error");
+        console.error("Cashfree response structure issue:", result);
+        return;
       }
+
+      const isProduction =
+        !window.location.hostname.includes("localhost") &&
+        !window.location.hostname.includes("127.0.0.1");
+
+      // 2. Proper SDK initialization
+      // Changed variable name to 'cfInstance' to avoid conflict with the 'Cashfree' function
+      const cfInstance = Cashfree({
+        mode: isProduction ? "production" : "sandbox",
+      });
+
+      // 3. Launch Checkout
+      cfInstance
+        .checkout({
+          paymentSessionId: sessionId, // ✅ FIXED: Key must be camelCase for v3 SDK
+          redirectTarget: "_self", // Options: "_self", "_modal", or "_blank"
+        })
+        .then((cfResult) => {
+          if (cfResult.error) {
+            console.error("Cashfree SDK Error:", cfResult.error);
+            showToast(cfResult.error.message, "error");
+          }
+
+          // Note: If redirectTarget is "_self", the page will redirect
+          // before this .then() fully executes on success.
+        });
     } else {
+      // Handle server-side failure
       showToast(result.message || "Submission failed", "error");
     }
   } catch (error) {
