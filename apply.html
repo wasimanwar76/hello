@@ -20,7 +20,7 @@
         font-family: "Poppins", sans-serif;
       }
       .fade-in {
-        animation: fadeIn 0.5s ease-out forwards;
+        animation: fadeIn 0.4s ease-out forwards;
       }
       @keyframes fadeIn {
         from {
@@ -36,6 +36,11 @@
         border-color: #ef4444 !important;
         background-color: #fef2f2 !important;
       }
+      .glass-effect {
+        background: rgba(255, 255, 255, 0.95);
+        backdrop-filter: blur(10px);
+      }
+      /* Custom Scrollbar */
       ::-webkit-scrollbar {
         width: 8px;
       }
@@ -48,10 +53,6 @@
       }
       ::-webkit-scrollbar-thumb:hover {
         background: #555;
-      }
-      .glass-effect {
-        background: rgba(255, 255, 255, 0.95);
-        backdrop-filter: blur(10px);
       }
     </style>
   </head>
@@ -79,13 +80,11 @@
               d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"
             />
           </svg>
-          <span class="font-bold text-yellow-500"
-            >IMPORTANT / महत्वपूर्ण सूचना:</span
-          >
+          <span class="font-bold text-yellow-500">IMPORTANT:</span>
         </span>
         <span
           >R2PS is a private consultancy and not affiliated with any government
-          body. / R2PS एक निजी परामर्श संस्था है।</span
+          body.</span
         >
       </div>
     </div>
@@ -103,25 +102,25 @@
         <div
           class="hidden md:flex items-center gap-8 text-sm font-medium text-slate-300"
         >
-          <a
-            href="https://www.r2ps.in/#about"
+          <button class="hover:text-white transition">
+            <a href="https://www.r2ps.in/">Home</a>
+          </button>
+          <button
+            onclick="switchView('apply')"
             class="hover:text-white transition"
-            >About</a
           >
-          <a
-            href="https://www.r2ps.in/#services"
+            Apply New
+          </button>
+          <button
+            onclick="switchView('track')"
             class="hover:text-white transition"
-            >Services</a
           >
-          <a
-            href="https://www.r2ps.in/#process"
-            class="hover:text-white transition"
-            >Process</a
-          >
+            Track Status
+          </button>
           <button
             class="bg-[#4f46e5] hover:bg-[#4338ca] text-white px-6 py-2.5 rounded-full font-semibold transition shadow-[0_0_15px_rgba(79,70,229,0.4)]"
           >
-            Consult Now
+            <a href="https://www.r2ps.in/#contact"> Consult Now </a>
           </button>
         </div>
       </div>
@@ -137,14 +136,12 @@
       >
         <button
           onclick="switchView('apply')"
-          id="btn-apply-hero"
           class="bg-white text-indigo-900 px-8 py-3.5 rounded-lg font-bold hover:scale-105 transition shadow-xl"
         >
           Start Application
         </button>
         <button
           onclick="switchView('track')"
-          id="btn-track-hero"
           class="border border-indigo-400/50 text-indigo-100 px-8 py-3.5 rounded-lg font-bold hover:bg-indigo-900/50 transition backdrop-blur-sm"
         >
           Track Status
@@ -155,7 +152,7 @@
     <main class="flex-1 -mt-20 px-4 pb-12 z-20 relative">
       <div
         id="view-apply"
-        class="max-w-4xl mx-auto glass-effect rounded-3xl shadow-2xl border border-white/20 overflow-hidden fade-in"
+        class="max-w-5xl mx-auto glass-effect rounded-3xl shadow-2xl border border-white/20 overflow-hidden fade-in"
         style="animation-delay: 0.4s"
       >
         <div
@@ -195,10 +192,10 @@
 
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div class="col-span-1 md:col-span-2">
-                <label class="block text-sm font-semibold text-slate-700 mb-1">
-                  Document Type / दस्तावेज़ का प्रकार
-                  <span class="text-red-500">*</span>
-                </label>
+                <label class="block text-sm font-semibold text-slate-700 mb-1"
+                  >Document Type / दस्तावेज़
+                  <span class="text-red-500">*</span></label
+                >
                 <select
                   id="documentType"
                   onchange="handleLogic()"
@@ -220,15 +217,15 @@
                   class="hidden text-xs text-red-500 mt-1"
                   id="err-documentType"
                 >
-                  Required / अनिवार्य
+                  Required
                 </p>
               </div>
 
               <div>
-                <label class="block text-sm font-semibold text-slate-700 mb-1">
-                  Applicant Name / आवेदक का नाम
-                  <span class="text-red-500">*</span>
-                </label>
+                <label class="block text-sm font-semibold text-slate-700 mb-1"
+                  >Applicant Name / नाम
+                  <span class="text-red-500">*</span></label
+                >
                 <input
                   type="text"
                   id="appName"
@@ -236,14 +233,14 @@
                   class="w-full px-4 py-3 bg-white border border-slate-300 rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none transition"
                 />
                 <p class="hidden text-xs text-red-500 mt-1" id="err-appName">
-                  Name is required
+                  Required
                 </p>
               </div>
 
               <div>
-                <label class="block text-sm font-semibold text-slate-700 mb-1">
-                  Gender / लिंग <span class="text-red-500">*</span>
-                </label>
+                <label class="block text-sm font-semibold text-slate-700 mb-1"
+                  >Gender / लिंग <span class="text-red-500">*</span></label
+                >
                 <select
                   id="gender"
                   onchange="handleLogic()"
@@ -259,35 +256,201 @@
               </div>
 
               <div>
-                <label class="block text-sm font-semibold text-slate-700 mb-1">
-                  Aadhaar Mobile Number / आधार मोबाइल नंबर
-                  <span class="text-red-500">*</span>
-                </label>
+                <label class="block text-sm font-semibold text-slate-700 mb-1"
+                  >Aadhaar Mobile / मोबाइल
+                  <span class="text-red-500">*</span></label
+                >
                 <input
                   type="tel"
                   id="mobile"
                   maxlength="10"
-                  placeholder="10 Digit Linked Mobile No."
+                  placeholder="10 Digit No."
                   class="w-full px-4 py-3 bg-white border border-slate-300 rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none transition"
                 />
                 <p class="hidden text-xs text-red-500 mt-1" id="err-mobile">
-                  Valid 10-digit number required
+                  Invalid Number
                 </p>
               </div>
 
               <div>
-                <label class="block text-sm font-semibold text-slate-700 mb-1">
-                  Email ID / ईमेल आईडी
+                <label class="block text-sm font-semibold text-slate-700 mb-1"
+                  >Email ID
                   <span class="text-xs font-normal text-slate-400"
-                    >(Optional / वैकल्पिक)</span
-                  >
-                </label>
+                    >(Optional)</span
+                  ></label
+                >
                 <input
                   type="email"
                   id="email"
                   placeholder="example@email.com"
                   class="w-full px-4 py-3 bg-white border border-slate-300 rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none transition"
                 />
+              </div>
+            </div>
+          </div>
+
+          <div id="divCasteVerification" class="hidden fade-in pt-4">
+            <h4
+              class="text-indigo-900 font-bold border-b-2 border-indigo-500 w-fit pb-1 mb-6 text-sm tracking-wider uppercase flex items-center gap-2"
+            >
+              CASTE VERIFICATION / जाति सत्यापन
+            </h4>
+            <div
+              class="bg-indigo-50/50 p-6 rounded-2xl border border-indigo-100"
+            >
+              <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+                <div>
+                  <label
+                    class="block text-xs font-bold text-slate-600 mb-1 uppercase"
+                    >Profession *</label
+                  >
+                  <select
+                    id="casteProfession"
+                    class="w-full px-3 py-2 bg-white border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-indigo-500 outline-none"
+                  >
+                    <option value="">Select</option>
+                    <option value="student">Student</option>
+                    <option value="govt">Govt Service</option>
+                    <option value="business">Business</option>
+                    <option value="farmer">Farmer</option>
+                  </select>
+                </div>
+                <div>
+                  <label
+                    class="block text-xs font-bold text-slate-600 mb-1 uppercase"
+                    >Category *</label
+                  >
+                  <select
+                    id="casteCategory"
+                    class="w-full px-3 py-2 bg-white border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-indigo-500 outline-none"
+                  >
+                    <option value="">Select</option>
+                    <option value="sc">SC</option>
+                    <option value="st">ST</option>
+                    <option value="obc">OBC</option>
+                    <option value="ebc">EBC-1</option>
+                  </select>
+                </div>
+                <div>
+                  <label
+                    class="block text-xs font-bold text-slate-600 mb-1 uppercase"
+                    >Caste *</label
+                  >
+                  <select
+                    id="casteName"
+                    class="w-full px-3 py-2 bg-white border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-indigo-500 outline-none"
+                  >
+                    <option value="">Select Caste</option>
+                    <option value="yadav">Yadav</option>
+                    <option value="kurmi">Kurmi</option>
+                    <option value="paswan">Paswan</option>
+                    <option value="ravidas">Ravidas</option>
+                  </select>
+                </div>
+                <div>
+                  <label
+                    class="block text-xs font-bold text-slate-600 mb-1 uppercase"
+                    >Sub-Caste</label
+                  >
+                  <select
+                    id="casteSub"
+                    class="w-full px-3 py-2 bg-white border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-indigo-500 outline-none"
+                  >
+                    <option value="">Select Sub-Caste</option>
+                    <option value="gwal">Gwal</option>
+                    <option value="dhusiya">Dhusiya</option>
+                  </select>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div id="divFinancialDisclosure" class="hidden fade-in pt-4">
+            <h4
+              class="text-emerald-900 font-bold border-b-2 border-emerald-500 w-fit pb-1 mb-6 text-sm tracking-wider uppercase flex items-center gap-2"
+            >
+              FINANCIAL DISCLOSURE / वित्तीय घोषणा
+            </h4>
+            <div
+              class="bg-emerald-50/50 p-6 rounded-2xl border border-emerald-100"
+            >
+              <div class="flex flex-col md:flex-row gap-4 items-end">
+                <div class="flex-1 w-full">
+                  <label
+                    class="block text-xs font-bold text-slate-500 mb-1 uppercase"
+                    >Govt Service</label
+                  >
+                  <div class="relative">
+                    <span class="absolute left-3 top-2 text-slate-400">₹</span>
+                    <input
+                      type="number"
+                      oninput="calcTotal()"
+                      id="incGovt"
+                      placeholder="0"
+                      class="w-full pl-6 pr-3 py-2 bg-white border border-slate-300 rounded-lg outline-none focus:border-emerald-500"
+                    />
+                  </div>
+                </div>
+                <div class="flex-1 w-full">
+                  <label
+                    class="block text-xs font-bold text-slate-500 mb-1 uppercase"
+                    >Business</label
+                  >
+                  <div class="relative">
+                    <span class="absolute left-3 top-2 text-slate-400">₹</span>
+                    <input
+                      type="number"
+                      oninput="calcTotal()"
+                      id="incBusiness"
+                      placeholder="0"
+                      class="w-full pl-6 pr-3 py-2 bg-white border border-slate-300 rounded-lg outline-none focus:border-emerald-500"
+                    />
+                  </div>
+                </div>
+                <div class="flex-1 w-full">
+                  <label
+                    class="block text-xs font-bold text-slate-500 mb-1 uppercase"
+                    >Agriculture</label
+                  >
+                  <div class="relative">
+                    <span class="absolute left-3 top-2 text-slate-400">₹</span>
+                    <input
+                      type="number"
+                      oninput="calcTotal()"
+                      id="incAgri"
+                      placeholder="0"
+                      class="w-full pl-6 pr-3 py-2 bg-white border border-slate-300 rounded-lg outline-none focus:border-emerald-500"
+                    />
+                  </div>
+                </div>
+                <div class="flex-1 w-full">
+                  <label
+                    class="block text-xs font-bold text-slate-500 mb-1 uppercase"
+                    >Other Sources</label
+                  >
+                  <div class="relative">
+                    <span class="absolute left-3 top-2 text-slate-400">₹</span>
+                    <input
+                      type="number"
+                      oninput="calcTotal()"
+                      id="incOther"
+                      placeholder="0"
+                      class="w-full pl-6 pr-3 py-2 bg-white border border-slate-300 rounded-lg outline-none focus:border-emerald-500"
+                    />
+                  </div>
+                </div>
+                <div class="w-full md:w-auto">
+                  <div
+                    class="bg-emerald-600 text-white rounded-xl px-6 py-2 text-center shadow-lg shadow-emerald-200"
+                  >
+                    <p class="text-[10px] font-bold opacity-80 uppercase">
+                      Annual Total
+                    </p>
+                    <p class="text-xl font-bold">
+                      ₹ <span id="incTotal">0</span>
+                    </p>
+                  </div>
+                </div>
               </div>
             </div>
           </div>
@@ -317,10 +480,8 @@
                 <div class="group">
                   <label
                     class="block text-xs font-bold text-slate-600 mb-2 uppercase tracking-wide"
+                    >Aadhaar Card <span class="text-red-500">*</span></label
                   >
-                    Aadhaar Card / आधार कार्ड
-                    <span class="text-red-500">*</span>
-                  </label>
                   <input
                     type="file"
                     id="fileAadhaar"
@@ -330,17 +491,15 @@
                     class="hidden text-xs text-red-500 mt-1"
                     id="err-fileAadhaar"
                   >
-                    File required
+                    Required
                   </p>
                 </div>
-
                 <div class="group">
                   <label
                     class="block text-xs font-bold text-slate-600 mb-2 uppercase tracking-wide"
+                    >Signed Photograph
+                    <span class="text-red-500">*</span></label
                   >
-                    Signed Photograph / हस्ताक्षरित फोटो
-                    <span class="text-red-500">*</span>
-                  </label>
                   <input
                     type="file"
                     id="fileSignedPhotoStatic"
@@ -350,7 +509,7 @@
                     class="hidden text-xs text-red-500 mt-1"
                     id="err-fileSignedPhotoStatic"
                   >
-                    Signed Photo is required
+                    Required
                   </p>
                 </div>
               </div>
@@ -359,13 +518,12 @@
                 id="divParentAadhaar"
                 class="hidden fade-in bg-amber-50 border border-amber-100 rounded-xl p-4"
               >
-                <label class="block text-sm font-bold text-slate-800 mb-1">
-                  Father/Mother Aadhaar / पिता/माता का आधार
-                  <span class="text-red-500">*</span>
-                </label>
+                <label class="block text-sm font-bold text-slate-800 mb-1"
+                  >Father/Mother Aadhaar
+                  <span class="text-red-500">*</span></label
+                >
                 <p class="text-xs text-amber-700 mb-2">
-                  Required for Income Certificate for Females / आय प्रमाण पत्र
-                  (महिला) के लिए अनिवार्य
+                  Required for Income Certificate for Females
                 </p>
                 <input
                   type="file"
@@ -376,7 +534,7 @@
                   class="hidden text-xs text-red-500 mt-1"
                   id="err-fileParentAadhaar"
                 >
-                  Parent Aadhaar is required
+                  Required
                 </p>
               </div>
 
@@ -387,14 +545,13 @@
                 <p
                   class="text-sm font-bold text-indigo-900 bg-indigo-50 p-2 rounded mb-4"
                 >
-                  Additional NCL Documents / अतिरिक्त दस्तावेज
+                  Additional NCL Documents
                 </p>
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
                   <div>
                     <label
                       class="block text-xs font-semibold text-slate-600 mb-1"
-                      >Old Domicile / पुराना निवास
-                      <span class="text-red-500">*</span></label
+                      >Old Domicile <span class="text-red-500">*</span></label
                     >
                     <input
                       type="file"
@@ -411,8 +568,7 @@
                   <div>
                     <label
                       class="block text-xs font-semibold text-slate-600 mb-1"
-                      >Old Caste / पुरानी जाति
-                      <span class="text-red-500">*</span></label
+                      >Old Caste <span class="text-red-500">*</span></label
                     >
                     <input
                       type="file"
@@ -429,8 +585,7 @@
                   <div>
                     <label
                       class="block text-xs font-semibold text-slate-600 mb-1"
-                      >Old Income / पुरानी आय
-                      <span class="text-red-500">*</span></label
+                      >Old Income <span class="text-red-500">*</span></label
                     >
                     <input
                       type="file"
@@ -455,10 +610,10 @@
               onclick="validateAndSubmit()"
               class="w-full sm:w-auto bg-[#4f46e5] hover:bg-[#4338ca] text-white text-lg font-bold px-12 py-4 rounded-xl shadow-xl hover:shadow-indigo-500/50 transition-all transform hover:-translate-y-1"
             >
-              Submit Application / आवेदन जमा करें
+              Submit Application
             </button>
             <p class="text-xs text-slate-400 mt-4">
-              By clicking Submit, you agree to our Terms & Conditions.
+              By clicking Submit, you agree to our Terms.
             </p>
           </div>
         </form>
@@ -471,37 +626,33 @@
           <h3 class="text-2xl font-bold text-slate-800 mb-1">
             Track Application / स्थिति देखें
           </h3>
-          <p class="text-sm text-slate-500 mb-6">
-            Enter details to check realtime status.
-          </p>
-
           <div class="space-y-4">
             <div>
               <label class="block text-sm font-semibold text-slate-700 mb-1"
-                >Mobile Number / मोबाइल नंबर</label
+                >Mobile Number</label
               >
               <input
                 type="tel"
                 id="trackMobile"
                 maxlength="10"
-                placeholder="Enter registered mobile number"
-                class="w-full px-4 py-3 bg-white border border-slate-300 rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none transition"
+                class="w-full px-4 py-3 bg-white border border-slate-300 rounded-xl outline-none"
+                placeholder="Registered Mobile"
               />
               <p class="hidden text-xs text-red-500 mt-1" id="err-trackMobile">
-                Invalid Mobile Number
+                Invalid Mobile
               </p>
             </div>
             <div>
               <label class="block text-sm font-semibold text-slate-700 mb-1"
-                >Date of Birth / जन्म तिथि</label
+                >Date of Birth</label
               >
               <input
                 type="date"
                 id="trackDob"
-                class="w-full px-4 py-3 bg-white border border-slate-300 rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none transition"
+                class="w-full px-4 py-3 bg-white border border-slate-300 rounded-xl outline-none"
               />
               <p class="hidden text-xs text-red-500 mt-1" id="err-trackDob">
-                Date is required
+                Required
               </p>
             </div>
             <button
@@ -511,7 +662,6 @@
               Track Status
             </button>
           </div>
-
           <div
             id="trackResult"
             class="hidden mt-8 pt-6 border-t border-slate-200"
@@ -519,17 +669,6 @@
         </div>
       </div>
     </main>
-
-    <a
-      href="#"
-      class="fixed bottom-6 right-6 z-50 bg-green-500 hover:bg-green-600 text-white p-4 rounded-full shadow-2xl hover:scale-110 transition flex items-center justify-center"
-    >
-      <svg class="w-8 h-8" fill="currentColor" viewBox="0 0 24 24">
-        <path
-          d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946.003-6.556 5.338-11.891 11.893-11.891 3.181.001 6.167 1.24 8.413 3.488 2.245 2.248 3.481 5.236 3.48 8.414-.003 6.557-5.338 11.892-11.893 11.892-1.99-.001-3.951-.5-5.688-1.448l-6.305 1.654zm6.597-3.807c1.676.995 3.276 1.591 5.392 1.592 5.448 0 9.886-4.434 9.889-9.885.002-5.462-4.415-9.89-9.881-9.892-5.452 0-9.887 4.434-9.889 9.884-.001 2.225.651 3.891 1.746 5.634l-.999 3.648 3.742-.981zm11.387-5.464c-.074-.124-.272-.198-.57-.347-.297-.149-1.758-.868-2.031-.967-.272-.099-.47-.149-.669.149-.198.297-.768.967-.941 1.165-.173.198-.347.223-.644.074-.297-.149-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.297-.347.446-.521.151-.172.2-.296.3-.495.099-.198.05-.372-.025-.521-.075-.148-.669-1.611-.916-2.206-.242-.579-.487-.501-.669-.51l-.57-.01c-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.463 1.065 2.876 1.213 3.074.149.198 2.095 3.2 5.076 4.487.709.306 1.263.489 1.694.626.712.226 1.36.194 1.872.118.571-.085 1.758-.719 2.006-1.413.248-.695.248-1.29.173-1.414z"
-        />
-      </svg>
-    </a>
 
     <script>
       // --- 1. VIEW SWITCHING ---
@@ -550,40 +689,58 @@
         }
       }
 
-      // --- 2. DYNAMIC FIELD LOGIC ---
+      // --- 2. INCOME CALCULATOR ---
+      function calcTotal() {
+        const g = Number(document.getElementById("incGovt").value) || 0;
+        const b = Number(document.getElementById("incBusiness").value) || 0;
+        const a = Number(document.getElementById("incAgri").value) || 0;
+        const o = Number(document.getElementById("incOther").value) || 0;
+        document.getElementById("incTotal").innerText = (
+          g +
+          b +
+          a +
+          o
+        ).toLocaleString();
+      }
+
+      // --- 3. DYNAMIC LOGIC ---
       function handleLogic() {
         const gender = document.getElementById("gender").value;
         const docType = document.getElementById("documentType").value;
 
         const divParentAadhaar = document.getElementById("divParentAadhaar");
         const divNclDocs = document.getElementById("divNclDocs");
+        const divCasteVer = document.getElementById("divCasteVerification");
+        const divFinDisc = document.getElementById("divFinancialDisclosure");
 
-        // --- CONDITIONS ---
-        // Parent Aadhaar: Only if INCOME certificate AND FEMALE
-        const showParent = docType === "income" && gender === "female";
+        // Reset all dynamic sections first
+        divParentAadhaar.classList.add("hidden");
+        divNclDocs.classList.add("hidden");
+        divCasteVer.classList.add("hidden");
+        divFinDisc.classList.add("hidden");
 
-        // NCL Docs: Only if NCL
-        const showNcl = docType === "ncl";
-
-        // --- APPLY VISIBILITY ---
-        if (showParent) {
+        // LOGIC A: Parent Aadhaar (Income + Female)
+        if (docType === "income" && gender === "female") {
           divParentAadhaar.classList.remove("hidden");
-        } else {
-          divParentAadhaar.classList.add("hidden");
-          resetError("fileParentAadhaar");
         }
 
-        if (showNcl) {
+        // LOGIC B: NCL Docs (NCL Only)
+        if (docType === "ncl") {
           divNclDocs.classList.remove("hidden");
-        } else {
-          divNclDocs.classList.add("hidden");
-          resetError("fileOldDomicile");
-          resetError("fileOldCaste");
-          resetError("fileOldIncome");
+        }
+
+        // LOGIC C: Caste Verification (Caste Only)
+        if (docType === "caste") {
+          divCasteVer.classList.remove("hidden");
+        }
+
+        // LOGIC D: Financial Disclosure (Income Only)
+        if (docType === "income") {
+          divFinDisc.classList.remove("hidden");
         }
       }
 
-      // --- 3. VALIDATION UTILS ---
+      // --- 4. VALIDATION UTILS ---
       function showError(id) {
         const input = document.getElementById(id);
         const err = document.getElementById("err-" + id);
@@ -602,17 +759,14 @@
 
       function checkFile(id) {
         const fileInput = document.getElementById(id);
-        // Only check if visible
         if (fileInput.offsetParent === null) return true; // hidden
         if (fileInput.files.length === 0) return showError(id);
         return resetError(id);
       }
 
-      // --- 4. FORM SUBMISSION ---
+      // --- 5. SUBMISSION ---
       function validateAndSubmit() {
         let isValid = true;
-
-        // Simple fields
         const name = document.getElementById("appName").value.trim();
         const gender = document.getElementById("gender").value;
         const mobile = document.getElementById("mobile").value.trim();
@@ -624,25 +778,19 @@
         else resetError("gender");
         if (!docType) isValid = showError("documentType");
         else resetError("documentType");
-
-        // Mobile Regex (10 digit)
         if (!/^[0-9]{10}$/.test(mobile)) isValid = showError("mobile");
         else resetError("mobile");
 
-        // Files (Mandatory Static)
+        // File Checks
         if (!checkFile("fileAadhaar")) isValid = false;
         if (!checkFile("fileSignedPhotoStatic")) isValid = false;
-
-        // Files (Dynamic)
         if (!checkFile("fileParentAadhaar")) isValid = false;
         if (!checkFile("fileOldDomicile")) isValid = false;
         if (!checkFile("fileOldCaste")) isValid = false;
         if (!checkFile("fileOldIncome")) isValid = false;
 
         if (isValid) {
-          alert(
-            "✅ Application Submitted!\n\nWe will contact you on your Aadhaar Mobile Number shortly.",
-          );
+          alert("✅ Application Submitted!\nWe will contact you shortly.");
         } else {
           document.getElementById("appForm").classList.add("animate-pulse");
           setTimeout(
@@ -655,92 +803,53 @@
         }
       }
 
-      // --- 5. TRACKING LOGIC ---
+      // --- 6. TRACKING ---
       function performTracking() {
-        // ... inside performTracking() function ...
-        setTimeout(() => {
-          // ... code to replace ...
-        }, 1500);
         const mobile = document.getElementById("trackMobile").value.trim();
         const dob = document.getElementById("trackDob").value;
-        let isValid = true;
+        if (!/^[0-9]{10}$/.test(mobile)) {
+          showError("trackMobile");
+          return;
+        } else resetError("trackMobile");
+        if (!dob) {
+          showError("trackDob");
+          return;
+        } else resetError("trackDob");
 
-        if (!/^[0-9]{10}$/.test(mobile)) isValid = showError("trackMobile");
-        else resetError("trackMobile");
-        if (!dob) isValid = showError("trackDob");
-        else resetError("trackDob");
-
-        if (!isValid) return;
-
-        // Simulate Loading
         const resDiv = document.getElementById("trackResult");
         resDiv.classList.remove("hidden");
-        resDiv.innerHTML = `<div class="text-center text-slate-500"><div class="inline-block w-6 h-6 border-2 border-indigo-600 border-t-transparent rounded-full animate-spin mb-2"></div><br>Fetching records...</div>`;
+        resDiv.innerHTML = `<div class="text-center text-slate-500 py-4">Fetching records...</div>`;
 
         setTimeout(() => {
-          // 1. Random Status Logic
-          const statuses = [
-            "Processing",
-            "Approved",
-            "Rejected",
-            "Verification Pending",
-          ];
+          const statuses = ["Processing", "Approved", "Rejected"];
           const status = statuses[Math.floor(Math.random() * statuses.length)];
+          let color = "bg-yellow-100 text-yellow-800";
+          if (status === "Approved") color = "bg-green-100 text-green-800";
+          if (status === "Rejected") color = "bg-red-100 text-red-800";
 
-          // 2. Status Colors
-          let color = "text-yellow-600 bg-yellow-100";
-          if (status === "Approved") color = "text-green-600 bg-green-100";
-          if (status === "Rejected") color = "text-red-600 bg-red-100";
-
-          // 3. Random Name
-          const names = [
-            "Ravi Kumar",
-            "Amit Singh",
-            "Priya Sharma",
-            "Rahul Verma",
-          ];
-          const randomName = names[Math.floor(Math.random() * names.length)];
-
-          // 4. Generate HTML
           resDiv.innerHTML = `
-                    <div class="bg-slate-50 rounded-xl p-5 border border-slate-200">
-                        
-                        <div class="flex justify-between items-start mb-4">
-                            <div>
-                                <p class="text-xs text-slate-500 uppercase font-bold">Applicant Name / आवेदक का नाम</p>
-                                <p class="text-lg font-bold text-slate-800">${randomName}</p>
-                            </div>
-                            <span class="${color} px-3 py-1 rounded-full text-xs font-bold shadow-sm border border-black/5">${status}</span>
+                    <div class="bg-slate-50 rounded-xl p-4 border border-slate-200">
+                        <div class="flex justify-between mb-4">
+                            <div><p class="text-xs text-slate-500 font-bold uppercase">Applicant</p><p class="font-bold">Guest User</p></div>
+                            <span class="${color} px-2 py-1 rounded text-xs font-bold h-fit">${status}</span>
                         </div>
-
-                        <div class="mb-6">
-                            <p class="text-xs text-slate-500 uppercase font-bold">Application Date / आवेदन तिथि</p>
-                            <p class="text-md font-medium text-slate-700">12 Feb, 2026</p>
-                        </div>
-
-                        <div class="flex flex-col gap-3">
-                            
-                            <button class="w-full bg-indigo-100 hover:bg-indigo-200 text-indigo-900 text-sm font-bold py-3 rounded-lg border border-indigo-200 transition flex justify-center items-center gap-2">
-                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
-                                Download Receipt / रसीद डाउनलोड करें
-                            </button>
-
-                            ${
-                              status === "Approved"
-                                ? `
-                            <button class="w-full bg-green-600 hover:bg-green-700 text-white text-sm font-bold py-3 rounded-lg shadow-md transition flex justify-center items-center gap-2">
-                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
-                                Download Certificate / प्रमाण पत्र डाउनलोड करें
-                            </button>
-                            `
-                                : ""
-                            }
-
-                        </div>
-                    </div>
-                `;
-        }, 1500);
+                        <div class="mb-4"><p class="text-xs text-slate-500 font-bold uppercase">Date</p><p>12 Feb, 2026</p></div>
+                        <button class="w-full bg-indigo-100 text-indigo-900 font-bold py-2 rounded mb-2 text-sm">Download Receipt</button>
+                        ${status === "Approved" ? '<button class="w-full bg-green-600 text-white font-bold py-2 rounded text-sm">Download Certificate</button>' : ""}
+                    </div>`;
+        }, 1000);
       }
+
+      // --- 7. URL AUTO-SELECT ---
+      window.addEventListener("DOMContentLoaded", () => {
+        const urlParams = new URLSearchParams(window.location.search);
+        const type = urlParams.get("type");
+        if (type && document.getElementById("documentType")) {
+          document.getElementById("documentType").value = type;
+          handleLogic();
+          switchView("apply");
+        }
+      });
     </script>
   </body>
 </html>
