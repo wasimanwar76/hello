@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Referral Generator</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+
+<body class="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-gray-100">
+
+  <div class="w-full max-w-md bg-white rounded-xl shadow-lg overflow-hidden">
+    
+    <!-- Header (R2PS style) -->
+    <div class="bg-blue-600 text-white text-center py-4">
+      <h1 class="text-lg font-semibold">Referral Link Generator</h1>
+      <p class="text-sm opacity-90">Create your unique referral link</p>
+    </div>
+
+    <!-- Form -->
+    <div class="p-6">
+      <form id="referralForm" class="space-y-4">
+
+        <div>
+          <label class="block text-sm font-medium mb-1">Full Name</label>
+          <input
+            type="text"
+            id="fullname"
+            required
+            class="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+            placeholder="Enter your full name"
+          />
+        </div>
+
+        <div>
+          <label class="block text-sm font-medium mb-1">Mobile Number</label>
+          <input
+            type="tel"
+            id="mobile"
+            maxlength="10"
+            required
+            class="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+            placeholder="Enter mobile number"
+          />
+        </div>
+
+        <button
+          type="submit"
+          id="submitBtn"
+          class="w-full flex items-center justify-center gap-2 bg-blue-600 text-white py-2.5 rounded-md hover:bg-blue-700 transition disabled:opacity-70"
+        >
+          <span id="btnText">Generate Referral Link</span>
+
+          <!-- Loader -->
+          <svg
+            id="loader"
+            class="hidden animate-spin h-5 w-5 text-white"
+            xmlns="http://www.w3.org/2000/svg"
+            fill="none"
+            viewBox="0 0 24 24"
+          >
+            <circle
+              class="opacity-25"
+              cx="12"
+              cy="12"
+              r="10"
+              stroke="currentColor"
+              stroke-width="4"
+            ></circle>
+            <path
+              class="opacity-75"
+              fill="currentColor"
+              d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"
+            ></path>
+          </svg>
+        </button>
+      </form>
+
+      <!-- Result -->
+      <div id="result" class="hidden mt-4">
+        <p class="text-sm font-medium mb-1">Your Referral Link</p>
+        <div
+          id="referralLink"
+          class="bg-gray-100 p-2 rounded text-sm break-all border"
+        ></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- JS -->
+  <script>
+    const form = document.getElementById("referralForm");
+    const loader = document.getElementById("loader");
+    const btnText = document.getElementById("btnText");
+    const submitBtn = document.getElementById("submitBtn");
+
+    form.addEventListener("submit", function (e) {
+      e.preventDefault();
+
+      // Show loader
+      loader.classList.remove("hidden");
+      btnText.textContent = "Generating...";
+      submitBtn.disabled = true;
+
+      setTimeout(() => {
+        const randomCode = Math.random().toString(36).substring(2, 8).toUpperCase();
+        const referralLink = `https://yourwebsite.com/referral/${randomCode}`;
+
+        document.getElementById("referralLink").innerText = referralLink;
+        document.getElementById("result").classList.remove("hidden");
+
+        // Reset button
+        loader.classList.add("hidden");
+        btnText.textContent = "Generate Referral Link";
+        submitBtn.disabled = false;
+      }, 1500); // fake delay for UX
+    });
+  </script>
+
+</body>
+</html>
