@@ -377,7 +377,7 @@ async function validateAndSubmit() {
 
     // 5. 💸 Call Localhost Payment API
     const paymentResponse = await fetch(
-      "http://localhost:5000/api/payment/create",
+      "https://paymentconfig.vercel.app/api/payment/create",
       {
         method: "POST",
         headers: { "Content-Type": "application/json" },
