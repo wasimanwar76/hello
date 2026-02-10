@@ -372,9 +372,10 @@ async function validateAndSubmit() {
     }
 
     // 4. ✅ Database Success
-    console.log("✅ Database Success. ID:", data[0].id);
-    showToast(`✅ Data Saved! Redirecting to Payment...`, "success");
-
+    showToast(
+      "Application saved. Redirecting to payment / आवेदन सुरक्षित, भुगतान के लिए आगे बढ़ रहे हैं...",
+      "success",
+    );
     // 5. 💸 Call Localhost Payment API
     const paymentResponse = await fetch(
       "https://paymentconfig.vercel.app/api/payment/create",
@@ -395,7 +396,6 @@ async function validateAndSubmit() {
       throw new Error("Payment Error: " + paymentData.message);
     }
 
-    console.log("✅ Payment Session Created:", paymentData.payment_session_id);
 
     // 6. 🚀 Trigger Cashfree Checkout
     const cashfree = Cashfree({ mode: "sandbox" }); // Use "production" when live
