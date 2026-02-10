@@ -34,7 +34,6 @@ let supabaseClient = null;
 // Initialize immediately with safety check
 if (window.supabase) {
   supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
-  console.log("✅ Supabase Initialized");
 } else {
   console.error("❌ Critical Error: Supabase library not loaded.");
   alert(
@@ -265,15 +264,13 @@ async function validateAndSubmit() {
   const submitBtn = document.querySelector(
     'button[onclick="validateAndSubmit()"]',
   );
-  const originalBtnText = "Submit Application / आवेदन जमा करें"; // Hardcoded backup or read current
+  const originalBtnText = "Submit Application / आवेदन जमा करें";
 
   // Change button state
-  submitBtn.innerHTML = `<i class="fas fa-circle-notch fa-spin"></i> Uploading...`;
+  submitBtn.innerHTML = `<i class="fas fa-circle-notch fa-spin"></i> Processing...`;
   submitBtn.disabled = true;
 
   try {
-    console.log("🚀 Starting Upload Process...");
-
     // 1. Upload Files
     const [
       urlAadhaarFront,
@@ -292,8 +289,6 @@ async function validateAndSubmit() {
       uploadToSupabase("fileOldCaste", "old_docs"),
       uploadToSupabase("fileOldIncome", "old_docs"),
     ]);
-
-    console.log("✅ Files Uploaded. Preparing Data...");
 
     // 2. Prepare Data
     const urlParams = new URLSearchParams(window.location.search);
@@ -376,35 +371,43 @@ async function validateAndSubmit() {
       throw new Error("Database insert failed: " + error.message);
     }
 
-    console.log("✅ Database Success:", data);
+    // 4. ✅ Database Success
+    console.log("✅ Database Success. ID:", data[0].id);
+    showToast(`✅ Data Saved! Redirecting to Payment...`, "success");
 
-    // Show Success UI
-    showToast(`✅ Submitted Successfully! Ref ID: ${data[0].id}`, "success");
+    // 5. 💸 Call Localhost Payment API
+    const paymentResponse = await fetch(
+      "http://localhost:5000/api/payment/create",
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          applicationId: data[0].id, // The ID we just created
+          customerPhone: mobile,
+          customerName: name,
+        }),
+      },
+    );
 
-    // --- RESET FORM LOGIC ---
-    setTimeout(() => {
-      // 1. Reset all input fields
-      document.getElementById("appForm").reset();
+    const paymentData = await paymentResponse.json();
 
-      // 2. Reset the dynamic logic (hides Income/Caste sections)
-      handleLogic();
+    if (!paymentData.success) {
+      throw new Error("Payment Error: " + paymentData.message);
+    }
 
-      // 3. Reset the calculated total income text
-      document.getElementById("incTotal").innerText = "0";
+    console.log("✅ Payment Session Created:", paymentData.payment_session_id);
 
-      // 4. Scroll to top to show a fresh form
-      const applyView = document.getElementById("view-apply");
-      if (window.innerWidth < 768) {
-        applyView.scrollIntoView({ behavior: "smooth", block: "start" });
-      } else {
-        window.scrollTo({ top: 0, behavior: "smooth" });
-      }
-    }, 2500); // 2.5 seconds delay so user sees success message
+    // 6. 🚀 Trigger Cashfree Checkout
+    const cashfree = Cashfree({ mode: "sandbox" }); // Use "production" when live
+    cashfree.checkout({
+      paymentSessionId: paymentData.payment_session_id,
+      redirectTarget: "_self", // Redirects user to payment page
+    });
   } catch (err) {
     console.error("❌ Submission Failed:", err);
     showToast(`❌ Error: ${err.message}`, "error");
-  } finally {
-    // Reset Button
+
+    // Re-enable button on error
     submitBtn.innerHTML = originalBtnText;
     submitBtn.disabled = false;
   }

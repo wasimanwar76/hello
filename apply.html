@@ -11,6 +11,7 @@
     />
     <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
     <script src="./apply.js"></script>
+    <script src="https://sdk.cashfree.com/js/v3/cashfree.js"></script>
     <style>
       body {
         font-family: "Inter", sans-serif;
@@ -360,9 +361,16 @@
                   >
                     <option value="">Select / चुनें</option>
                     <option value="student">Student / छात्र</option>
-                    <option value="govt">Govt Service / सरकारी सेवा</option>
-                    <option value="business">Business / व्यवसाय</option>
+                    <option value="govt_service">
+                      Govt. Service / सरकारी सेवा
+                    </option>
+                    <option value="private_service">
+                      Private Service / निजी सेवा
+                    </option>
+                    <option value="business">Business / व्यापार</option>
                     <option value="farmer">Farmer / किसान</option>
+                    <option value="housewife">Housewife / गृहिणी</option>
+                    <option value="other">Other / अन्य</option>
                   </select>
                 </div>
                 <div>
@@ -375,10 +383,21 @@
                     class="w-full px-3 py-2 bg-white border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-indigo-500 outline-none"
                   >
                     <option value="">Select / चुनें</option>
-                    <option value="sc">SC / अनुसूचित जाति</option>
-                    <option value="st">ST / अनुसूचित जनजाति</option>
-                    <option value="obc">OBC / अन्य पिछड़ा वर्ग</option>
-                    <option value="ebc">EBC-1 / अत्यंत पिछड़ा वर्ग</option>
+                    <option value="general">
+                      Unreserved (General) / सामान्य वर्ग
+                    </option>
+                    <option value="bc">
+                      Backward Class (BC) / पिछड़ा वर्ग
+                    </option>
+                    <option value="ebc">
+                      Extremely Backward Class (EBC) / अत्यंत पिछड़ा वर्ग
+                    </option>
+                    <option value="sc">
+                      Scheduled Caste (SC) / अनुसूचित जाति
+                    </option>
+                    <option value="st">
+                      Scheduled Tribe (ST) / अनुसूचित जनजाति
+                    </option>
                   </select>
                 </div>
                 <div>
@@ -390,11 +409,112 @@
                     id="casteName"
                     class="w-full px-3 py-2 bg-white border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-indigo-500 outline-none"
                   >
-                    <option value="">Select / चुनें</option>
-                    <option value="yadav">Yadav / यादव</option>
-                    <option value="kurmi">Kurmi / कुर्मी</option>
-                    <option value="paswan">Paswan / पासवान</option>
-                    <option value="ravidas">Ravidas / रविदास</option>
+                    <option value="">Select Caste / जाति चुनें</option>
+
+                    <optgroup label="General / सामान्य वर्ग">
+                      <option value="brahmin">Brahmin / ब्राह्मण</option>
+                      <option value="rajput">Rajput / राजपूत</option>
+                      <option value="bhumihar">Bhumihar / भूमिहार</option>
+                      <option value="kayastha">Kayastha / कायस्थ</option>
+                      <option value="sheikh">Sheikh / शेख</option>
+                      <option value="syed">Syed / सैयद</option>
+                      <option value="pathan">Pathan (Khan) / पठान (खान)</option>
+                      <option value="mallick">
+                        Mallick (Muslim) / मल्लिक (मुस्लिम)
+                      </option>
+                    </optgroup>
+
+                    <optgroup label="BC / पिछड़ा वर्ग (Annexure II)">
+                      <option value="yadav">
+                        Yadav (Ahir/Gwala) / यादव (अहीर)
+                      </option>
+                      <option value="kushwaha">
+                        Kushwaha (Koeri) / कुशवाहा (कोयरी)
+                      </option>
+                      <option value="kurmi">Kurmi / कुर्मी</option>
+                      <option value="bania">
+                        Bania (Sudi/Modi/Teli) / बनिया
+                      </option>
+                      <option value="sonar">Sonar / सोनार</option>
+                      <option value="goswami">
+                        Goswami (Sanyasi) / गोस्वामी
+                      </option>
+                      <option value="yadav_muslim">
+                        Yadav (Muslim) / यादव (मुस्लिम)
+                      </option>
+                      <option value="dangie">Dangie / दांगी</option>
+                      <option value="surjapuri_muslim">
+                        Surjapuri Muslim / सुरजापुरी मुस्लिम
+                      </option>
+                      <option value="bhat">Bhat / भाट</option>
+                      <option value="kalwar">Kalwar / कलवार</option>
+                      <option value="kaghzi">Kaghzi / कागजी</option>
+                    </optgroup>
+
+                    <optgroup label="EBC / अत्यंत पिछड़ा वर्ग (Annexure I)">
+                      <option value="teli">Teli / तेली</option>
+                      <option value="kanu">Kanu / कानू</option>
+                      <option value="dhanuk">Dhanuk / धानुक</option>
+                      <option value="kahar">Kahar / कहार</option>
+                      <option value="kumhar">
+                        Kumhar (Prajapati) / कुम्हार
+                      </option>
+                      <option value="lohar">Lohar / लोहार</option>
+                      <option value="mallah">
+                        Mallah (Nishad/Sahani) / मल्लाह (निषाद)
+                      </option>
+                      <option value="nai">Nai (Hajam) / नाई (हजाम)</option>
+                      <option value="badhai">Badhai / बढ़ई</option>
+                      <option value="tatwa">Tatwa / ततवा</option>
+                      <option value="nonia">Nonia / नोनिया</option>
+                      <option value="bind">Bind / बिंद</option>
+                      <option value="beldar">Beldar / बेलदार</option>
+                      <option value="ansari">
+                        Ansari (Momin) / अंसारी (मोमिन)
+                      </option>
+                      <option value="rayeen">
+                        Rayeen (Kunjra) / राईन (कुंजरा)
+                      </option>
+                      <option value="mansuri">
+                        Mansuri (Dhunia) / मंसूरी (धुनिया)
+                      </option>
+                      <option value="idrisi">
+                        Idrisi (Darzi) / इदरीसी (दर्जी)
+                      </option>
+                      <option value="quraishi">
+                        Quraishi (Kasai) / कुरैशी (कसाई)
+                      </option>
+                      <option value="churihar">Churihar / चूड़ीहार</option>
+                      <option value="bhatiyara">Bhatiyara / भटियारा</option>
+                    </optgroup>
+
+                    <optgroup label="SC / अनुसूचित जाति">
+                      <option value="chamar">
+                        Chamar (Ravidas/Mochi) / चमार (रविदास)
+                      </option>
+                      <option value="paswan">
+                        Paswan (Dusadh) / पासवान (दुसाध)
+                      </option>
+                      <option value="musahar">Musahar / मुसहर</option>
+                      <option value="dhobi">Dhobi (Rajak) / धोबी (रजक)</option>
+                      <option value="pasi">Pasi / पासी</option>
+                      <option value="dom">Dom / डोम</option>
+                      <option value="mehtar">Mehtar / मेहतर</option>
+                      <option value="bhuiya">Bhuiya / भुइया</option>
+                      <option value="choupal">Choupal / चौपाल</option>
+                      <option value="nat">Nat / नट</option>
+                    </optgroup>
+
+                    <optgroup label="ST / अनुसूचित जनजाति">
+                      <option value="santhal">Santhal / संथाल</option>
+                      <option value="oraon">Oraon / उरांव</option>
+                      <option value="gond">Gond / गोंड</option>
+                      <option value="tharu">Tharu / थारू</option>
+                      <option value="lohara">Lohara / लोहारा</option>
+                      <option value="kharwar">Kharwar / खरवार</option>
+                      <option value="bedia">Bedia / बेदिया</option>
+                    </optgroup>
+
                     <option value="other">Other / अन्य</option>
                   </select>
                 </div>

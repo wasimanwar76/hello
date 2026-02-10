@@ -53,7 +53,7 @@
         height: 100%;
         background-color: #6366f1;
         width: 0%;
-        transition: width 6s linear;
+        transition: width 3s linear; /* Faster transition */
       }
       .status-icon {
         width: 80px;
@@ -78,12 +78,12 @@
         id="ps-title"
         class="text-2xl font-extrabold text-slate-900 mb-4 tracking-tight"
       >
-        Verifying Payment
+        Verifying Payment...
       </h2>
 
       <p id="ps-message" class="text-slate-500 font-medium mb-6">
-        We are verifying your payment with the bank. Please do not refresh or go
-        back.
+        Please wait while we confirm your transaction with the bank. Do not
+        close this window.
       </p>
 
       <div class="progress-container" id="progress-bar">
@@ -94,76 +94,47 @@
         <p
           class="text-xs text-slate-400 mb-4 font-bold uppercase tracking-widest"
         >
-          Redirecting to dashboard...
+          Redirecting in <span id="countdown">5</span> seconds...
         </p>
         <button
-          onclick="goToDashboard()"
+          onclick="goHome()"
           class="w-full bg-indigo-600 hover:bg-indigo-700 text-white py-3 rounded-2xl font-bold transition-all shadow-lg shadow-indigo-100"
         >
-          Go to Dashboard
+          Go to Home
         </button>
       </div>
     </div>
 
     <script>
-      // Anti-DevTools Logic
-      (function () {
-        document.addEventListener("contextmenu", (e) => e.preventDefault());
-        document.addEventListener("keydown", function (e) {
-          if (
-            e.key === "F12" ||
-            (e.ctrlKey &&
-              e.shiftKey &&
-              (e.key === "I" || e.key === "J" || e.key === "C")) ||
-            (e.ctrlKey && e.key === "U")
-          ) {
-            e.preventDefault();
-          }
-        });
+      // --- CONFIGURATION ---
+      // CHANGE THIS TO YOUR LIVE SERVER URL WHEN DEPLOYING
+      const API_BASE = "http://localhost:5000/api";
 
-        const detectDevTools = () => {
-          const start = new Date();
-          debugger;
-          const end = new Date();
-          if (end - start > 100) {
-            document.body.innerHTML = `<div style="display:flex;justify-content:center;align-items:center;height:100vh;font-family:sans-serif;background:#0f172a;color:white;text-align:center"><div><h1 style="font-size:32px">⚠ Access Restricted</h1><p>Developer tools are not allowed on this panel.</p></div></div>`;
-          }
-        };
-        setInterval(detectDevTools, 1000);
-      })();
-      const API_BASE =
-        "https://backend-5gc912wx6-wasimsonu76-gmailcoms-projects.vercel.app/api";
-      let redirectTimer = null;
       let hasCalledApi = false;
 
-      function goToDashboard() {
-        if (redirectTimer) clearTimeout(redirectTimer);
-        window.location.href = "admin.html";
+      function goHome() {
+        window.location.href = "apply.html"; // Redirect to Home/Landing page
       }
 
       async function verifyPayment() {
         if (hasCalledApi) return;
 
+        // 1. Get Order ID from URL
         const urlParams = new URLSearchParams(window.location.search);
         const orderId = urlParams.get("order_id")?.trim();
-        const docType = decodeURIComponent(
-          urlParams.get("document_type") || "",
-        )?.trim();
-        const userId = urlParams.get("user_id")?.trim();
 
+        // 2. Start Progress Bar Animation
         const progressFill = document.getElementById("fill");
-        const actionArea = document.getElementById("action-area");
-
-        // Start progress bar visual
         setTimeout(() => {
-          progressFill.style.width = "100%";
+          progressFill.style.width = "90%";
         }, 100);
 
-        if (!orderId || !docType || !userId) {
+        // 3. Check for Order ID
+        if (!orderId) {
           showStatus(
             "failed",
-            "Invalid Session",
-            "Missing payment details from the URL.",
+            "Invalid Request",
+            "Order ID is missing from the URL.",
           );
           return;
         }
@@ -171,49 +142,66 @@
         hasCalledApi = true;
 
         try {
-          const response = await fetch(
-            `${API_BASE}/payments/verify/${docType}/${orderId}/${userId}`,
-          );
+          console.log("Verifying Order:", orderId);
+
+          // 4. Call Node.js Server (POST Request)
+          const response = await fetch(`${API_BASE}/payment/verify`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ orderId: orderId }),
+          });
+
           const data = await response.json();
 
-          if (data.success && data.status === "SUCCESS") {
-            showStatus(
-              "success",
-              "Payment Confirmed",
-              "Transaction successful! Your application status has been updated.",
-            );
-          } else if (data.status === "PENDING") {
-            showStatus(
-              "pending",
-              "Payment Pending",
-              "Your payment is currently pending. Please check your dashboard in a few minutes.",
-            );
-          } else {
-            showStatus(
-              "failed",
-              "Payment Failed",
-              data.message || "The transaction was declined or cancelled.",
-            );
-          }
+          // 5. Handle Response
+          setTimeout(() => {
+            progressFill.style.width = "100%"; // Finish bar
+
+            if (data.success && data.status === "COMPLETE") {
+              showStatus(
+                "success",
+                "Payment Successful!",
+                "Your application has been submitted successfully.",
+              );
+            } else if (data.status === "PENDING") {
+              showStatus(
+                "pending",
+                "Payment Pending",
+                "We are still waiting for bank confirmation. Please check back later.",
+              );
+            } else {
+              showStatus(
+                "failed",
+                "Payment Failed",
+                "The transaction could not be completed.",
+              );
+            }
+
+            startRedirectTimer();
+          }, 1500); // Small delay for UX
         } catch (error) {
+          console.error("Verification Error:", error);
           showStatus(
             "failed",
             "Connection Error",
-            "We couldn't reach the bank server. If money was debited, your status will update within 24 hours.",
+            "Could not reach the server. Please check your internet.",
           );
-        } finally {
-          actionArea.classList.remove("hidden");
-          redirectTimer = setTimeout(goToDashboard, 6000);
+          startRedirectTimer();
         }
       }
 
+      // --- UI HELPERS ---
       function showStatus(type, title, message) {
         const titleEl = document.getElementById("ps-title");
         const msgEl = document.getElementById("ps-message");
         const iconContainer = document.getElementById("icon-container");
+        const progressBar = document.getElementById("progress-bar");
+        const actionArea = document.getElementById("action-area");
 
         titleEl.innerText = title;
         msgEl.innerText = message;
+        progressBar.style.display = "none"; // Hide bar when done
+        actionArea.classList.remove("hidden");
 
         if (type === "success") {
           iconContainer.innerHTML = `<div class="status-icon bg-emerald-100 text-emerald-600">✓</div>`;
@@ -223,13 +211,27 @@
           iconContainer.innerHTML = `<div class="status-icon bg-rose-100 text-rose-600">✕</div>`;
           titleEl.className =
             "text-2xl font-extrabold text-rose-600 mb-4 tracking-tight";
-        } else if (type === "pending") {
+        } else {
           iconContainer.innerHTML = `<div class="status-icon bg-amber-100 text-amber-600">!</div>`;
           titleEl.className =
             "text-2xl font-extrabold text-amber-600 mb-4 tracking-tight";
         }
       }
 
+      function startRedirectTimer() {
+        let seconds = 5;
+        const countEl = document.getElementById("countdown");
+        const interval = setInterval(() => {
+          seconds--;
+          if (countEl) countEl.innerText = seconds;
+          if (seconds <= 0) {
+            clearInterval(interval);
+            goHome();
+          }
+        }, 1000);
+      }
+
+      // Run on Load
       window.onload = verifyPayment;
     </script>
   </body>
