@@ -396,7 +396,6 @@ async function validateAndSubmit() {
       throw new Error("Payment Error: " + paymentData.message);
     }
 
-
     // 6. 🚀 Trigger Cashfree Checkout
     const cashfree = Cashfree({ mode: "sandbox" }); // Use "production" when live
     cashfree.checkout({
@@ -414,23 +413,148 @@ async function validateAndSubmit() {
 }
 
 // --- 8. TRACKING LOGIC ---
-function performTracking() {
+async function performTracking() {
   const mobile = document.getElementById("trackMobile").value.trim();
-  const dob = document.getElementById("trackDob").value;
-
-  if (!/^[0-9]{10}$/.test(mobile)) return showError("trackMobile");
-  else resetError("trackMobile");
-  if (!dob) return showError("trackDob");
-  else resetError("trackDob");
-
+  const btn = document.getElementById("btn-track");
   const resDiv = document.getElementById("trackResult");
-  resDiv.classList.remove("hidden");
-  resDiv.innerHTML = `<div class="text-center text-slate-500 py-8"><div class="inline-block w-8 h-8 border-4 border-indigo-600 border-t-transparent rounded-full animate-spin mb-3"></div><br><span class="font-medium animate-pulse">Fetching records...</span></div>`;
+  const errMobile = document.getElementById("err-trackMobile");
 
-  setTimeout(() => {
-    showToast("Status Retrieved Successfully", "success");
-    resDiv.innerHTML = `<div class="bg-white rounded-2xl p-6 shadow-lg border border-slate-100"><p class="text-center text-slate-600">Demo Status: <b>Processing</b></p></div>`;
-  }, 1500);
+  // 1. Validation
+  if (!/^[0-9]{10}$/.test(mobile)) {
+    errMobile.classList.remove("hidden");
+    return;
+  } else {
+    errMobile.classList.add("hidden");
+  }
+
+  // 2. Show Loading State
+  btn.disabled = true;
+  const originalBtnText = btn.innerHTML;
+  btn.innerHTML = `<i class="fas fa-circle-notch fa-spin mr-2"></i> Searching / खोज रहा है...`;
+
+  resDiv.classList.remove("hidden");
+  resDiv.innerHTML = `
+    <div class="text-center text-slate-500 py-8">
+        <div class="inline-block w-8 h-8 border-4 border-indigo-600 border-t-transparent rounded-full animate-spin mb-3"></div>
+        <br><span class="font-medium animate-pulse">Fetching records / रिकॉर्ड खोज रहा है...</span>
+    </div>`;
+
+  try {
+    // 3. Fetch from Supabase
+    const { data, error } = await supabaseClient
+      .from("application_entries")
+      .select("*")
+      .eq("mobile", mobile)
+      .order("created_at", { ascending: false });
+
+    if (error) throw error;
+
+    // 4. Handle No Data
+    if (!data || data.length === 0) {
+      resDiv.innerHTML = `
+        <div class="bg-red-50 border border-red-100 rounded-2xl p-6 text-center">
+            <i class="fas fa-search text-3xl text-red-400 mb-3"></i>
+            <p class="text-slate-800 font-bold">No Records Found / कोई रिकॉर्ड नहीं मिला</p>
+            <p class="text-xs text-slate-500 mt-1">Check your mobile number / अपना मोबाइल नंबर जांचें</p>
+        </div>`;
+      return;
+    }
+
+    // 5. Build Result Cards
+    let html = "";
+
+    data.forEach((app) => {
+      // Status Logic
+      const docStatus = app.documents_status || "PENDING";
+      const isCompleted = docStatus === "COMPLETED" || docStatus === "APPROVED";
+
+      let statusColor = "bg-amber-100 text-amber-700 border-amber-200";
+      let statusIcon = "fa-clock";
+      let statusLabel = "Processing / प्रक्रिया में";
+
+      if (isCompleted) {
+        statusColor = "bg-emerald-100 text-emerald-700 border-emerald-200";
+        statusIcon = "fa-check-circle";
+        statusLabel = "Approved / स्वीकृत";
+      } else if (docStatus === "REJECTED") {
+        statusColor = "bg-rose-100 text-rose-700 border-rose-200";
+        statusIcon = "fa-times-circle";
+        statusLabel = "Rejected / अस्वीकृत";
+      }
+
+      // --- BUTTONS LOGIC ---
+      let actionButtons = "";
+
+      if (isCompleted) {
+        // Show TWO buttons (Receipt + Certificate)
+        const recBtn = app.receiving_document
+          ? `<a href="${app.receiving_document}" target="_blank" class="flex items-center justify-center w-full bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold py-3 rounded-xl transition text-sm border border-slate-300">
+                     <i class="fas fa-file-invoice mr-2"></i> Receipt / रसीद
+                   </a>`
+          : `<button disabled class="w-full bg-slate-50 text-slate-300 font-bold py-3 rounded-xl text-sm border border-slate-100 cursor-not-allowed">No Receipt</button>`;
+
+        const certBtn = app.certificate_document
+          ? `<a href="${app.certificate_document}" target="_blank" class="flex items-center justify-center w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-3 rounded-xl transition text-sm shadow-md shadow-emerald-100">
+                     <i class="fas fa-certificate mr-2"></i> Certificate / प्रमाण पत्र
+                   </a>`
+          : `<button disabled class="w-full bg-emerald-50 text-emerald-300 font-bold py-3 rounded-xl text-sm border border-emerald-100 cursor-not-allowed">Generating...</button>`;
+
+        actionButtons = `
+                <div class="mt-4 grid grid-cols-2 gap-3">
+                    ${recBtn}
+                    ${certBtn}
+                </div>`;
+      } else if (docStatus === "PENDING") {
+        // Just show Receipt if available
+        if (app.receiving_document) {
+          actionButtons = `
+                <div class="mt-4">
+                    <a href="${app.receiving_document}" target="_blank" class="flex items-center justify-center w-full bg-indigo-50 hover:bg-indigo-100 text-indigo-700 font-bold py-3 rounded-xl transition text-sm border border-indigo-200">
+                        <i class="fas fa-file-invoice mr-2"></i> Download Receipt / रसीद डाउनलोड करें
+                    </a>
+                    <p class="text-[10px] text-center text-slate-400 mt-2">Certificate will come after approval / स्वीकृति के बाद प्रमाण पत्र यहाँ आएगा</p>
+                </div>`;
+        } else {
+          actionButtons = `<div class="mt-4 text-center text-xs text-slate-400 italic bg-slate-50 py-3 rounded-xl border border-slate-100">Under Review / समीक्षाधीन</div>`;
+        }
+      } else if (docStatus === "REJECTED") {
+        actionButtons = `<div class="mt-4 text-center text-xs text-rose-500 font-bold bg-rose-50 py-3 rounded-xl border border-rose-100">Rejected / आवेदन अस्वीकृत</div>`;
+      }
+
+      // Card HTML
+      html += `
+        <div class="bg-white rounded-2xl p-5 shadow-lg border border-slate-100 hover:border-indigo-300 transition group relative overflow-hidden">
+            
+            <div class="flex justify-between items-start mb-4">
+                <div>
+                    <span class="text-[10px] font-bold bg-slate-100 text-slate-500 px-2 py-1 rounded uppercase tracking-wider">Ref: #${app.id}</span>
+                    <h3 class="text-lg font-bold text-slate-900 mt-2 leading-tight">${app.document_type ? app.document_type.toUpperCase() : "SERVICE"}</h3>
+                    <p class="text-xs text-slate-500 mt-1">Date / दिनांक: ${new Date(app.created_at).toLocaleDateString()}</p>
+                </div>
+                <div class="text-right">
+                    <span class="px-3 py-1 rounded-full text-xs font-bold border ${statusColor} flex items-center gap-1">
+                        <i class="fas ${statusIcon}"></i> ${statusLabel}
+                    </span>
+                </div>
+            </div>
+
+            <div class="border-t border-slate-100 pt-3">
+                 <p class="text-sm text-slate-600"><span class="font-semibold">Name / नाम:</span> ${app.applicant_name}</p>
+            </div>
+
+            ${actionButtons}
+        </div>`;
+    });
+
+    resDiv.innerHTML = html;
+  } catch (err) {
+    console.error("Tracking Error:", err);
+    resDiv.innerHTML = `<div class="text-center text-red-500 py-4">Error fetching data / डेटा लाने में त्रुटि</div>`;
+  } finally {
+    // Reset Button
+    btn.disabled = false;
+    btn.innerHTML = originalBtnText;
+  }
 }
 
 // --- 9. AUTO-SELECT ---
