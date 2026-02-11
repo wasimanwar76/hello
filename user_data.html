@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Admin Dashboard | R2PS</title>
+    <title>User Admin Dashboard | R2PS</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link
       href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
@@ -138,12 +138,12 @@
                 <th
                   class="px-6 py-3 text-left text-xs font-bold text-slate-500 uppercase tracking-wider"
                 >
-                  Payment
+                  Payment Status
                 </th>
                 <th
                   class="px-6 py-3 text-left text-xs font-bold text-slate-500 uppercase tracking-wider"
                 >
-                  Status
+                  Document Status
                 </th>
                 <th
                   class="px-6 py-3 text-right text-xs font-bold text-slate-500 uppercase tracking-wider"
@@ -436,142 +436,389 @@
         }
       }
 
+      // --- 3. RENDER TABLE (Updated for Dual Status Columns) ---
       function renderTable(data) {
         const tbody = document.getElementById("tableBody");
         let html = "";
+
         data.forEach((app) => {
-          const status = app.payment_status || "PENDING";
-          let badge =
-            status === "COMPLETE"
-              ? "bg-emerald-100 text-emerald-700"
-              : status === "FAILED"
-                ? "bg-rose-100 text-rose-700"
-                : "bg-amber-100 text-amber-700";
-          const date = new Date(app.created_at).toLocaleDateString();
+          // 1. Payment Status Logic
+          const pStatus = app.payment_status || "PENDING";
+          let pBadge = "";
+
+          if (pStatus === "COMPLETE") {
+            pBadge = `<span class="px-2.5 py-1 rounded-full text-xs font-bold bg-emerald-100 text-emerald-700 border border-emerald-200"><i class="fas fa-check-circle mr-1"></i> Paid</span>`;
+          } else if (pStatus === "FAILED") {
+            pBadge = `<span class="px-2.5 py-1 rounded-full text-xs font-bold bg-rose-100 text-rose-700 border border-rose-200"><i class="fas fa-times-circle mr-1"></i> Failed</span>`;
+          } else {
+            pBadge = `<span class="px-2.5 py-1 rounded-full text-xs font-bold bg-amber-100 text-amber-700 border border-amber-200"><i class="fas fa-clock mr-1"></i> Pending</span>`;
+          }
+
+          // 2. Document Status Logic
+          const dStatus = app.documents_status || "PENDING";
+          let dBadge = "";
+
+          if (dStatus === "APPROVED" || dStatus === "COMPLETED") {
+            dBadge = `<span class="px-2.5 py-1 rounded-full text-xs font-bold bg-indigo-100 text-indigo-700 border border-indigo-200"><i class="fas fa-check-double mr-1"></i> Approved</span>`;
+          } else if (dStatus === "REJECTED") {
+            dBadge = `<span class="px-2.5 py-1 rounded-full text-xs font-bold bg-slate-100 text-slate-500 border border-slate-200"><i class="fas fa-ban mr-1"></i> Rejected</span>`;
+          } else {
+            dBadge = `<span class="px-2.5 py-1 rounded-full text-xs font-bold bg-slate-50 text-slate-600 border border-slate-200"><i class="fas fa-hourglass-half mr-1"></i> Review</span>`;
+          }
+
+          // Format Date
+          const date = new Date(app.created_at).toLocaleDateString("en-IN", {
+            day: "numeric",
+            month: "short",
+            year: "numeric",
+          });
+
+          // Safe JSON for onclick
           const safeJson = JSON.stringify(app)
             .replace(/'/g, "&#39;")
             .replace(/"/g, "&quot;");
 
           html += `
-                <tr class="hover:bg-slate-50 transition border-b border-slate-100">
-                    <td class="px-6 py-4 text-xs font-bold text-slate-700">#${app.id}<div class="text-[10px] text-slate-400 font-normal">${date}</div></td>
-                    <td class="px-6 py-4 text-sm font-semibold text-slate-900">${app.applicant_name}<div class="text-xs text-slate-500">${app.mobile}</div></td>
-                    <td class="px-6 py-4"><span class="px-2 py-1 text-xs font-semibold rounded bg-indigo-50 text-indigo-700 uppercase">${app.document_type || "N/A"}</span></td>
-                    <td class="px-6 py-4 font-bold text-sm">₹${app.payment_amount || 0}</td>
-                    <td class="px-6 py-4"><span class="px-2 py-1 rounded-full text-xs font-bold ${badge}">${status}</span></td>
-                    <td class="px-6 py-4 text-right"><button onclick='openViewModal(${safeJson})' class="text-slate-500 hover:text-indigo-600 bg-slate-100 p-2 rounded hover:bg-indigo-50"><i class="fas fa-eye"></i></button></td>
-                </tr>`;
+            <tr class="hover:bg-slate-50 transition border-b border-slate-100 last:border-0 group">
+                <td class="px-6 py-4 whitespace-nowrap">
+                    <div class="text-xs font-bold text-slate-700">#${app.id}</div>
+                    <div class="text-[10px] text-slate-400 mt-0.5">${date}</div>
+                </td>
+                
+                <td class="px-6 py-4 whitespace-nowrap">
+                    <div class="text-sm font-semibold text-slate-900">${app.applicant_name}</div>
+                    <div class="text-xs text-slate-500">${app.mobile}</div>
+                </td>
+                
+                <td class="px-6 py-4 whitespace-nowrap">
+                    <span class="px-2 py-1 text-xs font-semibold rounded bg-indigo-50 text-indigo-700 uppercase">${app.document_type || "N/A"}</span>
+                </td>
+                
+                <td class="px-6 py-4 whitespace-nowrap">
+                    ${pBadge}
+                    <div class="text-[10px] text-slate-400 font-bold mt-1 ml-1">₹${app.payment_amount || 0}</div>
+                </td>
+                
+                <td class="px-6 py-4 whitespace-nowrap">
+                    ${dBadge}
+                </td>
+                
+                <td class="px-6 py-4 whitespace-nowrap text-right">
+                    <button onclick='openViewModal(${safeJson})' 
+                        class="text-slate-500 hover:text-white hover:bg-indigo-600 bg-slate-100 p-2 rounded-lg transition duration-200 shadow-sm" title="View Details">
+                        <i class="fas fa-eye"></i>
+                    </button>
+                </td>
+            </tr>`;
         });
+
         tbody.innerHTML = html;
       }
-
       // 4. MODAL LOGIC (With Admin Uploads)
+      // --- COMPLETE MODAL LOGIC (Matches Your Schema) ---
       function openViewModal(app) {
         currentAppId = app.id;
         const modal = document.getElementById("viewModal");
         const content = document.getElementById("viewModalContent");
+
         modal.classList.remove("hidden");
         setTimeout(() => {
           content.classList.remove("scale-95", "opacity-0");
           content.classList.add("scale-100", "opacity-100");
         }, 10);
 
-        // Populate Basic Info
-        document.getElementById("vm-title").innerText = app.applicant_name;
-        document.getElementById("vm-id").innerText = `Ref: ${app.id}`;
+        // 1. Header & Status
+        document.getElementById("vm-title").innerText =
+          app.applicant_name || "Unknown";
+        document.getElementById("vm-id").innerText = `Ref ID: ${app.id}`;
         document.getElementById("vm-amount").innerText =
-          `₹${app.payment_amount || 0}`;
-        document.getElementById("vm-status").innerText = app.payment_status;
+          `₹${app.payment_amount || "0"}`;
+        document.getElementById("vm-status").innerText =
+          app.payment_status || "PENDING";
 
-        // ... (Previous Personal & Payment info logic remains same, summarized here)
-        const pInfo = `Name: ${app.applicant_name}<br>Mobile: ${app.mobile}<br>Email: ${app.email}`;
-        document.getElementById("vm-personal").innerHTML =
-          createDetailRow("Full Name", app.applicant_name, "fas fa-user") +
-          createDetailRow("Mobile", app.mobile, "fas fa-phone"); // Add others as needed
+        // 2. Personal & Partner Information
+        let pHTML = "";
+        pHTML += createDetailRow(
+          "Full Name",
+          app.applicant_name,
+          "fas fa-user",
+        );
+        pHTML += createDetailRow("Mobile", app.mobile, "fas fa-phone");
+        pHTML += createDetailRow("Email", app.email, "fas fa-envelope");
+        pHTML += createDetailRow("Gender", app.gender, "fas fa-venus-mars");
 
-        // --- ADMIN UPLOAD LOGIC ---
+        // Partner / Referral Data (From Schema)
+        if (app.referral_code)
+          pHTML += createDetailRow(
+            "Referral Code",
+            app.referral_code,
+            "fas fa-code",
+          );
+        if (app.partner_name)
+          pHTML += createDetailRow(
+            "Partner Name",
+            app.partner_name,
+            "fas fa-handshake",
+          );
+
+        document.getElementById("vm-personal").innerHTML = pHTML;
+
+        // 3. Application Specifics (Dynamic based on data presence)
+        let sHTML = "";
+        sHTML += createDetailRow(
+          "Service Type",
+          app.document_type?.toUpperCase(),
+          "fas fa-file-contract",
+        );
+
+        // Income Fields
+        if (app.income_total > 0 || app.document_type === "income") {
+          if (app.income_profession)
+            sHTML += createDetailRow("Profession", app.income_profession);
+          if (app.income_govt > 0)
+            sHTML += createDetailRow("Govt Income", `₹${app.income_govt}`);
+          if (app.income_business > 0)
+            sHTML += createDetailRow(
+              "Business Income",
+              `₹${app.income_business}`,
+            );
+          if (app.income_agri > 0)
+            sHTML += createDetailRow(
+              "Agriculture Income",
+              `₹${app.income_agri}`,
+            );
+          if (app.income_other > 0)
+            sHTML += createDetailRow("Other Income", `₹${app.income_other}`);
+          sHTML += createDetailRow(
+            "Total Annual Income",
+            `₹${app.income_total || 0}`,
+            "fas fa-coins",
+          );
+        }
+
+        // Caste Fields
+        if (app.caste_category || app.document_type === "caste") {
+          if (app.caste_category)
+            sHTML += createDetailRow("Category", app.caste_category);
+          if (app.caste_name)
+            sHTML += createDetailRow("Caste Name", app.caste_name);
+          if (app.sub_caste)
+            sHTML += createDetailRow("Sub-Caste", app.sub_caste);
+          if (app.caste_profession)
+            sHTML += createDetailRow("Caste Profession", app.caste_profession);
+        }
+
+        // Fallback
+        if (sHTML === "")
+          sHTML = `<p class="text-slate-400 text-sm italic">No specific details provided.</p>`;
+        document.getElementById("vm-specifics").innerHTML = sHTML;
+
+        // 4. Payment & System Meta Data
+        let mHTML = "";
+        mHTML += createDetailRow(
+          "Order ID",
+          app.payment_order_id || "N/A",
+          "fas fa-hashtag",
+        );
+        mHTML += createDetailRow(
+          "Payment Status",
+          app.payment_status,
+          "fas fa-info-circle",
+        );
+        mHTML += createDetailRow(
+          "Commission",
+          `₹${app.commission_amount || "50.00"}`,
+          "fas fa-percentage",
+        );
+        mHTML += createDetailRow(
+          "Submission Date",
+          app.submission_date || "N/A",
+          "fas fa-calendar-check",
+        );
+        mHTML += createDetailRow(
+          "Created At",
+          new Date(app.created_at).toLocaleString(),
+          "fas fa-clock",
+        );
+        document.getElementById("vm-payment").innerHTML = mHTML;
+
+        // 5. User Uploaded Documents
+        renderUserDocs(app);
+
+        // 6. Admin Processing Section
         renderAdminUploadSection(app);
 
-        // Button Action
+        // 7. Approve Button Logic
         const btnApprove = document.getElementById("btn-approve");
-        btnApprove.onclick = () => updateDocStatus(app.id, "COMPLETED");
+        // Ensure we use a valid status from your check constraint ('APPROVED' or 'COMPLETED')
+        // Your schema has 'APPROVED' and 'COMPLETED' in the check constraint.
+        btnApprove.onclick = () => updateDocStatus(app.id, "APPROVED");
       }
 
-      // --- 5. RENDER ADMIN SECTION ---
+      // Helper to render user documents based on your Schema
+      function renderUserDocs(app) {
+        let docsHtml = "";
+
+        // Mapping Schema Columns to Display Labels
+        const fileMap = [
+          { label: "Aadhaar Front", url: app.file_aadhaar_front },
+          { label: "Aadhaar Back", url: app.file_aadhaar_back },
+          { label: "Signed Photo", url: app.file_signed_photo },
+          { label: "Parent Aadhaar", url: app.file_parent_aadhaar },
+          { label: "Old Domicile", url: app.file_old_domicile },
+          { label: "Old Caste Cert", url: app.file_old_caste },
+          { label: "Old Income Cert", url: app.file_old_income },
+        ];
+
+        fileMap.forEach((file) => {
+          if (file.url && file.url.length > 5) {
+            // Simple check to ensure url is not empty string
+            docsHtml += createDocCard(file.label, file.url);
+          }
+        });
+
+        document.getElementById("vm-docs").innerHTML =
+          docsHtml ||
+          '<p class="col-span-full text-center py-4 text-slate-400 italic text-sm border border-dashed border-slate-300 rounded-xl">No documents attached.</p>';
+      }
+
+      // Helper for row creation
+      function createDetailRow(label, value, icon) {
+        if (!value || value === "0.00") return "";
+        return `
+        <div class="border-b border-slate-100 pb-2 mb-2 last:border-0 last:mb-0">
+            <p class="text-[10px] uppercase tracking-wider text-slate-400 font-bold mb-0.5">${label}</p>
+            <p class="text-sm font-medium text-slate-800 flex items-center gap-2">
+                ${icon ? `<i class="${icon} text-slate-400 text-xs"></i>` : ""} 
+                ${value}
+            </p>
+        </div>`;
+      }
+
+      // Helper for Document Cards
+      function createDocCard(label, url) {
+        return `
+        <a href="${url}" target="_blank" class="group bg-white border border-slate-200 rounded-xl p-3 hover:border-indigo-500 hover:shadow-md transition flex items-center gap-3">
+            <div class="w-10 h-10 rounded-lg bg-indigo-50 text-indigo-600 flex items-center justify-center text-lg shrink-0 group-hover:bg-indigo-600 group-hover:text-white transition">
+                <i class="fas fa-file-image"></i>
+            </div>
+            <div class="overflow-hidden">
+                <p class="text-[10px] font-bold text-slate-400 uppercase tracking-wider truncate">${label}</p>
+                <p class="text-xs font-semibold text-slate-800 truncate group-hover:text-indigo-600">Click to View</p>
+            </div>
+        </a>`;
+      }
+      // --- 6. RENDER ADMIN UPLOAD & STATUS SECTION ---
       function renderAdminUploadSection(app) {
-        const receivingContainer = document.getElementById(
-          "admin-receiving-area",
-        );
-        const certContainer = document.getElementById("admin-certificate-area");
-        const statusContainer = document.getElementById("admin-status-area");
+        const recArea = document.getElementById("admin-receiving-area");
+        const certArea = document.getElementById("admin-certificate-area");
+        const statusArea = document.getElementById("admin-status-area");
+        const btnApprove = document.getElementById("btn-approve");
 
-        // 1. Receiving Document UI
+        // 1. Receiving Document Upload UI
         if (app.receiving_document) {
-          receivingContainer.innerHTML = `
-                    <div class="flex flex-col">
-                        <a href="${app.receiving_document}" target="_blank" class="text-emerald-600 font-bold text-sm flex items-center mb-2">
-                            <i class="fas fa-check-circle mr-2 text-lg"></i> Document Uploaded
-                        </a>
-                        <label class="cursor-pointer text-xs text-slate-400 hover:text-indigo-600 underline">
-                            Replace File
-                            <input type="file" hidden onchange="uploadAdminFile(this, 'receiving_document', ${app.id})">
-                        </label>
-                    </div>`;
+          recArea.innerHTML = `
+            <div class="flex flex-col w-full">
+                <a href="${app.receiving_document}" target="_blank" class="flex items-center text-emerald-600 font-bold text-sm mb-2 hover:underline">
+                    <i class="fas fa-check-circle mr-2 text-lg"></i> View Receipt
+                </a>
+                <label class="cursor-pointer text-xs text-slate-400 hover:text-indigo-600 underline">
+                    Replace File
+                    <input type="file" hidden onchange="handleAdminUpload(this, 'receiving_document', ${app.id})">
+                </label>
+            </div>`;
         } else {
-          receivingContainer.innerHTML = `
-                    <label class="flex items-center justify-center w-full px-4 py-2 border-2 border-dashed border-slate-300 rounded-lg cursor-pointer hover:border-indigo-500 hover:bg-indigo-50 transition">
-                        <span class="text-xs text-slate-500 font-semibold">Browse...</span>
-                        <input type="file" hidden onchange="uploadAdminFile(this, 'receiving_document', ${app.id})">
-                    </label>
-                    <p class="text-[10px] text-slate-400 mt-2">No file selected.</p>`;
+          recArea.innerHTML = `
+            <label class="flex items-center justify-center w-full px-4 py-2 border-2 border-dashed border-slate-300 rounded-lg cursor-pointer hover:border-indigo-500 hover:bg-indigo-50 transition bg-slate-50">
+                <span class="text-xs text-slate-500 font-bold">Upload Receipt...</span>
+                <input type="file" hidden onchange="handleAdminUpload(this, 'receiving_document', ${app.id})">
+            </label>`;
         }
 
-        // 2. Certificate Document UI
+        // 2. Certificate Document Upload UI
         if (app.certificate_document) {
-          certContainer.innerHTML = `
-                    <div class="flex flex-col">
-                        <a href="${app.certificate_document}" target="_blank" class="text-emerald-600 font-bold text-sm flex items-center mb-2">
-                            <i class="fas fa-check-circle mr-2 text-lg"></i> Document Uploaded
-                        </a>
-                        <label class="cursor-pointer text-xs text-slate-400 hover:text-indigo-600 underline">
-                            Replace File
-                            <input type="file" hidden onchange="uploadAdminFile(this, 'certificate_document', ${app.id})">
-                        </label>
-                    </div>`;
+          certArea.innerHTML = `
+            <div class="flex flex-col w-full">
+                <a href="${app.certificate_document}" target="_blank" class="flex items-center text-purple-600 font-bold text-sm mb-2 hover:underline">
+                    <i class="fas fa-check-circle mr-2 text-lg"></i> View Certificate
+                </a>
+                <label class="cursor-pointer text-xs text-slate-400 hover:text-indigo-600 underline">
+                    Replace File
+                    <input type="file" hidden onchange="handleAdminUpload(this, 'certificate_document', ${app.id})">
+                </label>
+            </div>`;
         } else {
-          certContainer.innerHTML = `
-                    <label class="flex items-center justify-center w-full px-4 py-2 border-2 border-dashed border-slate-300 rounded-lg cursor-pointer hover:border-indigo-500 hover:bg-indigo-50 transition">
-                        <span class="text-xs text-slate-500 font-semibold">Browse...</span>
-                        <input type="file" hidden onchange="uploadAdminFile(this, 'certificate_document', ${app.id})">
-                    </label>
-                    <p class="text-[10px] text-slate-400 mt-2">No file selected.</p>`;
+          certArea.innerHTML = `
+            <label class="flex items-center justify-center w-full px-4 py-2 border-2 border-dashed border-slate-300 rounded-lg cursor-pointer hover:border-purple-500 hover:bg-purple-50 transition bg-slate-50">
+                <span class="text-xs text-slate-500 font-bold">Upload Cert...</span>
+                <input type="file" hidden onchange="handleAdminUpload(this, 'certificate_document', ${app.id})">
+            </label>`;
         }
 
-        // 3. Status UI
-        const docStatus = app.documents_status || "Pending";
-        if (docStatus === "COMPLETED") {
-          statusContainer.innerHTML = `<span class="text-emerald-600 font-bold text-lg flex items-center"><i class="fas fa-circle text-[10px] mr-2"></i> Completed</span>`;
-        } else {
-          statusContainer.innerHTML = `<span class="text-amber-500 font-bold text-lg flex items-center"><i class="fas fa-circle text-[10px] mr-2"></i> Pending</span>`;
+        // 3. Verification Status UI
+        const currentStatus = app.documents_status || "PENDING";
+
+        // Handle Approved/Completed State
+        if (currentStatus === "APPROVED" || currentStatus === "COMPLETED") {
+          statusArea.innerHTML = `
+            <div class="flex items-center w-full">
+                <div class="w-2 h-2 rounded-full bg-emerald-500 mr-2"></div>
+                <span class="text-emerald-700 font-bold text-sm">Approved</span>
+            </div>
+            <p class="text-[10px] text-slate-400 mt-1 pl-4">Certificate is live.</p>
+          `;
+          // Hide approve button if already approved
+          if (btnApprove) btnApprove.style.display = "none";
+        }
+        // Handle Rejected State
+        else if (currentStatus === "REJECTED") {
+          statusArea.innerHTML = `
+            <div class="flex items-center w-full">
+                <div class="w-2 h-2 rounded-full bg-rose-500 mr-2"></div>
+                <span class="text-rose-700 font-bold text-sm">Rejected</span>
+            </div>
+            <p class="text-[10px] text-slate-400 mt-1 pl-4">User notified.</p>
+          `;
+          if (btnApprove) {
+            btnApprove.style.display = "block";
+            btnApprove.innerText = "Re-Approve Application";
+            btnApprove.className =
+              "mt-6 w-full bg-slate-800 hover:bg-slate-900 text-white font-bold py-4 rounded-xl transition shadow-lg flex items-center justify-center text-lg";
+          }
+        }
+        // Handle Pending State
+        else {
+          statusArea.innerHTML = `
+            <div class="flex items-center w-full">
+                <div class="w-2 h-2 rounded-full bg-amber-400 mr-2 animate-pulse"></div>
+                <span class="text-amber-700 font-bold text-sm">Pending Review</span>
+            </div>
+            <p class="text-[10px] text-slate-400 mt-1 pl-4">Action required.</p>
+          `;
+          if (btnApprove) {
+            btnApprove.style.display = "flex";
+            btnApprove.innerHTML = `<i class="fas fa-check-circle mr-2"></i> Mark Application as Approved`;
+          }
         }
       }
 
-      // --- 6. HANDLE FILE UPLOAD ---
-      async function uploadAdminFile(input, column, appId) {
+      // --- 7. HANDLE FILE UPLOAD ---
+      async function handleAdminUpload(input, column, appId) {
         const file = input.files[0];
         if (!file) return;
 
-        // Show Loading
-        const container = input.closest("div");
+        // Show UI Loader
+        const label = input.closest("label");
+        const container = label ? label.parentElement : input.closest("div");
         const originalHTML = container.innerHTML;
-        container.innerHTML = `<div class="text-xs font-bold text-indigo-600 flex items-center"><i class="fas fa-spinner fa-spin mr-2"></i> Uploading...</div>`;
+
+        container.innerHTML = `<div class="h-full flex items-center justify-center text-indigo-600 font-bold text-xs py-2"><i class="fas fa-spinner fa-spin mr-2"></i> Uploading...</div>`;
 
         try {
-          // Unique Name: app_id / column_timestamp.ext
+          // 1. Upload to Storage
           const fileExt = file.name.split(".").pop();
-          const fileName = `${appId}/${column}_${Date.now()}.${fileExt}`;
+          const fileName = `admin_docs/${appId}/${column}_${Date.now()}.${fileExt}`;
 
-          // 1. Upload to 'admin_uploads' bucket
           const { data, error: uploadError } = await supabaseClient.storage
             .from("admin_uploads")
             .upload(fileName, file, { upsert: true });
@@ -593,25 +840,31 @@
 
           if (dbError) throw dbError;
 
-          // 4. Refresh & UI Update
-          await fetchApplications(); // Refresh global data
+          // 4. Success Toast
+          // alert("File Uploaded Successfully!"); // Optional: Remove to be less intrusive
 
-          // Find updated app data locally
+          // 5. Refresh Data
+          await fetchApplications(); // Refresh global list
+
+          // Re-render just this section to prevent modal flicker
           const updatedApp = applicationsData.find((a) => a.id === appId);
-          renderAdminUploadSection(updatedApp); // Re-render just this section
+          if (updatedApp) renderAdminUploadSection(updatedApp);
         } catch (err) {
           console.error(err);
           alert("Upload Failed: " + err.message);
-          container.innerHTML = originalHTML; // Revert
+          container.innerHTML = originalHTML; // Revert UI
         }
       }
 
-      // --- 7. HANDLE STATUS UPDATE ---
+      // --- 8. HANDLE APPROVE STATUS ---
       async function updateDocStatus(appId, status) {
         const btn = document.getElementById("btn-approve");
+        if (!btn) return;
+
         const originalText = btn.innerHTML;
         btn.innerHTML = `<i class="fas fa-spinner fa-spin mr-2"></i> Updating...`;
         btn.disabled = true;
+        btn.classList.add("opacity-75", "cursor-not-allowed");
 
         try {
           const { error } = await supabaseClient
@@ -621,18 +874,23 @@
 
           if (error) throw error;
 
-          await fetchApplications();
+          await fetchApplications(); // Refresh data
+
           const updatedApp = applicationsData.find((a) => a.id === appId);
-          renderAdminUploadSection(updatedApp);
-          alert("Application Status Updated!");
+          if (updatedApp) renderAdminUploadSection(updatedApp);
+
+          // alert("Application Status Updated!"); // Optional
         } catch (err) {
           alert("Error: " + err.message);
         } finally {
-          btn.innerHTML = originalText;
-          btn.disabled = false;
+          // Reset Button State if needed (though UI usually updates to hidden)
+          if (btn) {
+            btn.innerHTML = originalText;
+            btn.disabled = false;
+            btn.classList.remove("opacity-75", "cursor-not-allowed");
+          }
         }
       }
-
       function createDetailRow(label, value, icon) {
         if (!value) return "";
         return `<div class="border-b border-slate-100 pb-2"><p class="text-[10px] uppercase text-slate-400 font-bold">${label}</p><p class="text-sm font-medium text-slate-800 flex items-center gap-2"><i class="${icon} text-slate-400 text-xs"></i> ${value}</p></div>`;
