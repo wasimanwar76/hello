@@ -208,210 +208,189 @@ async function uploadToSupabase(fileInputId, folder) {
   }
 }
 
-// --- 7. MAIN SUBMISSION ---
-async function validateAndSubmit() {
-  if (!supabaseClient) {
-    alert("Database not ready. Please refresh the page.");
-    return;
-  }
+async function handleFormSubmit(e) {
+  e.preventDefault();
 
-  let isValid = true;
+  const submitBtn = document.querySelector('button[type="submit"]');
+  const originalBtnText = submitBtn.innerHTML;
 
-  // Basic Fields
-  const name = document.getElementById("appName").value.trim();
-  const gender = document.getElementById("gender").value;
-  const mobile = document.getElementById("mobile").value.trim();
-  const docType = document.getElementById("documentType").value;
-  const email = document.getElementById("email").value.trim();
-
-  // Validation - Basic Info
-  if (name.length < 3) isValid = showError("appName");
-  else resetError("appName");
-  if (!gender) isValid = showError("gender");
-  else resetError("gender");
-  if (!docType) isValid = showError("documentType");
-  else resetError("documentType");
-  if (!/^[0-9]{10}$/.test(mobile)) isValid = showError("mobile");
-  else resetError("mobile");
-
-  // Validation - Files (Standard)
-  if (!checkFile("fileAadhaarFront")) isValid = false;
-  if (!checkFile("fileAadhaarBack")) isValid = false;
-  if (!checkFile("fileSignedPhotoStatic")) isValid = false;
-
-  // Validation - Files (Dynamic)
-  if (!checkFile("fileParentAadhaar")) isValid = false;
-  if (!checkFile("fileOldDomicile")) isValid = false;
-  if (!checkFile("fileOldCaste")) isValid = false;
-  if (!checkFile("fileOldIncome")) isValid = false;
-
-  // Validation - Income Profession
-  if (docType === "income") {
-    if (!document.getElementById("incomeProfession").value)
-      isValid = showError("incomeProfession");
-    else resetError("incomeProfession");
-  }
-
-  if (!isValid) {
-    const form = document.getElementById("appForm");
-    form.classList.add("animate-pulse");
-    setTimeout(() => form.classList.remove("animate-pulse"), 500);
-    showToast("⚠️ Please fill all required fields.", "error");
-    return;
-  }
-
-  // --- START PROCESSING ---
-  const submitBtn = document.querySelector(
-    'button[onclick="validateAndSubmit()"]',
-  );
-  const originalBtnText = "Submit Application / आवेदन जमा करें";
-
-  // Change button state
-  submitBtn.innerHTML = `<i class="fas fa-circle-notch fa-spin"></i> Processing...`;
-  submitBtn.disabled = true;
+  // 1. Basic Validation
+  if (!validateForm()) return;
 
   try {
-    // 1. Upload Files
-    const [
-      urlAadhaarFront,
-      urlAadhaarBack,
-      urlPhoto,
-      urlParent,
-      urlOldDom,
-      urlOldCaste,
-      urlOldInc,
-    ] = await Promise.all([
-      uploadToSupabase("fileAadhaarFront", "aadhaar"),
-      uploadToSupabase("fileAadhaarBack", "aadhaar"),
-      uploadToSupabase("fileSignedPhotoStatic", "photos"),
-      uploadToSupabase("fileParentAadhaar", "parents"),
-      uploadToSupabase("fileOldDomicile", "old_docs"),
-      uploadToSupabase("fileOldCaste", "old_docs"),
-      uploadToSupabase("fileOldIncome", "old_docs"),
-    ]);
+    // 2. Show Loading State
+    submitBtn.disabled = true;
+    submitBtn.innerHTML = `<i class="fas fa-circle-notch fa-spin mr-2"></i> Processing...`;
 
-    // 2. Prepare Data
-    const urlParams = new URLSearchParams(window.location.search);
-    const referralCode = urlParams.get("ref") || "DIRECT";
+    // 3. Collect Form Data
+    const formData = new FormData();
 
-    const payload = {
-      referral_code: referralCode,
-      submission_date: new Date().toISOString().split("T")[0],
+    // --- Personal ---
+    const docType = document.getElementById("documentType").value;
+    const mobile = document.getElementById("mobile").value;
+    const name = document.getElementById("applicantName").value;
+    const email = document.getElementById("email").value;
+    const gender = document.getElementById("gender").value;
 
-      // Personal
-      applicant_name: name,
-      gender: gender,
-      mobile: mobile,
-      email: email,
-      document_type: docType,
+    formData.append("document_type", docType);
+    formData.append("applicant_name", name);
+    formData.append("mobile", mobile);
+    formData.append("email", email);
+    formData.append("gender", gender);
 
-      // Files
-      file_aadhaar_front: urlAadhaarFront,
-      file_aadhaar_back: urlAadhaarBack,
-      file_signed_photo: urlPhoto,
-      file_parent_aadhaar: urlParent,
-      file_old_domicile: urlOldDom,
-      file_old_caste: urlOldCaste,
-      file_old_income: urlOldInc,
+    // --- Files (Upload to Storage & Get URL) ---
+    // Helper to upload file and return public URL
+    async function uploadFile(fileInputId, path) {
+      const input = document.getElementById(fileInputId);
+      if (input && input.files.length > 0) {
+        const file = input.files[0];
+        const fileExt = file.name.split(".").pop();
+        const fileName = `${mobile}/${path}_${Date.now()}.${fileExt}`;
 
-      // Caste Data
-      caste_profession:
-        docType === "caste"
-          ? document.getElementById("casteProfession").value
-          : "",
-      caste_category:
-        docType === "caste"
-          ? document.getElementById("casteCategory").value
-          : "",
-      caste_name:
-        docType === "caste" ? document.getElementById("casteName").value : "",
-      sub_caste:
-        docType === "caste" ? document.getElementById("casteSub").value : "",
+        const { data, error } = await supabase.storage
+          .from("user_uploads")
+          .upload(fileName, file);
 
-      // Income Data
-      income_profession:
-        docType === "income"
-          ? document.getElementById("incomeProfession").value
-          : "",
-      income_govt:
-        docType === "income"
-          ? Number(document.getElementById("incGovt").value) || 0
-          : 0,
-      income_business:
-        docType === "income"
-          ? Number(document.getElementById("incBusiness").value) || 0
-          : 0,
-      income_agri:
-        docType === "income"
-          ? Number(document.getElementById("incAgri").value) || 0
-          : 0,
-      income_other:
-        docType === "income"
-          ? Number(document.getElementById("incOther").value) || 0
-          : 0,
-      income_total:
-        docType === "income"
-          ? Number(
-              document.getElementById("incTotal").innerText.replace(/,/g, ""),
-            ) || 0
-          : 0,
+        if (error) throw error;
 
-      documents_status: "PENDING",
-      payment_status: "PENDING",
-    };
+        const { data: urlData } = supabase.storage
+          .from("user_uploads")
+          .getPublicUrl(fileName);
 
-    // 3. Insert to DB
-    const { data, error } = await supabaseClient
-      .from("application_entries")
-      .insert([payload])
-      .select();
-
-    if (error) {
-      console.error("Supabase Insert Error:", error);
-      throw new Error("Database insert failed: " + error.message);
+        return urlData.publicUrl;
+      }
+      return "";
     }
 
-    // 4. ✅ Database Success
-    showToast(
-      "Application saved. Redirecting to payment / आवेदन सुरक्षित, भुगतान के लिए आगे बढ़ रहे हैं...",
-      "success",
+    // Upload Common Docs
+    formData.append(
+      "file_aadhaar_front",
+      await uploadFile("aadhaarFront", "aadhaar_front"),
     );
-    // 5. 💸 Call Localhost Payment API
-    const paymentResponse = await fetch(
-      "https://paymentconfig.vercel.app/api/payment/create",
+    formData.append(
+      "file_aadhaar_back",
+      await uploadFile("aadhaarBack", "aadhaar_back"),
+    );
+    formData.append(
+      "file_signed_photo",
+      await uploadFile("signedPhoto", "signed_photo"),
+    );
+
+    // Upload Specific Docs
+    if (docType === "income") {
+      formData.append(
+        "income_profession",
+        document.getElementById("incProfession").value,
+      );
+      formData.append(
+        "income_govt",
+        document.getElementById("incGovt").value || 0,
+      );
+      formData.append(
+        "income_business",
+        document.getElementById("incBusiness").value || 0,
+      );
+      formData.append(
+        "income_agri",
+        document.getElementById("incAgri").value || 0,
+      );
+      formData.append(
+        "income_other",
+        document.getElementById("incOther").value || 0,
+      );
+      // Calculate Total
+      const total =
+        Number(formData.get("income_govt")) +
+        Number(formData.get("income_business")) +
+        Number(formData.get("income_agri")) +
+        Number(formData.get("income_other"));
+      formData.append("income_total", total);
+    } else if (docType === "caste") {
+      formData.append(
+        "caste_category",
+        document.getElementById("casteCategory").value,
+      );
+      formData.append("caste_name", document.getElementById("casteName").value);
+      formData.append("sub_caste", document.getElementById("subCaste").value);
+      formData.append(
+        "caste_profession",
+        document.getElementById("casteProfession").value,
+      );
+      formData.append(
+        "file_old_caste",
+        await uploadFile("oldCaste", "old_caste"),
+      );
+    } else if (docType === "residence") {
+      // Add residence specific logic if you have extra fields
+      formData.append(
+        "file_old_domicile",
+        await uploadFile("oldDomicile", "old_domicile"),
+      );
+    }
+
+    // 4. Save to Database (Create Order)
+    // Convert FormData to JSON object for Supabase
+    const dbData = {};
+    formData.forEach((value, key) => (dbData[key] = value));
+
+    // Initial Payment Status
+    dbData.payment_status = "PENDING";
+    dbData.documents_status = "PENDING";
+    dbData.payment_amount = "50.00";
+
+    const { data: insertData, error: insertError } = await supabase
+      .from("application_entries")
+      .insert([dbData])
+      .select()
+      .single();
+
+    if (insertError) throw insertError;
+
+    // 5. Create Payment Session (Call Your Backend)
+    const response = await fetch(
+      "https://your-backend-url.onrender.com/create-order",
       {
+        // REPLACE WITH YOUR REAL BACKEND URL
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          applicationId: data[0].id, // The ID we just created
+          orderId: `ORD_${insertData.id}_${Date.now()}`,
+          amount: 50,
+          customerId: mobile,
           customerPhone: mobile,
           customerName: name,
         }),
       },
     );
 
-    const paymentData = await paymentResponse.json();
+    const paymentData = await response.json();
 
-    if (!paymentData.success) {
-      throw new Error("Payment Error: " + paymentData.message);
+    if (!paymentData.payment_session_id) {
+      throw new Error("Failed to generate payment session");
     }
 
-    // 6. 🚀 Trigger Cashfree Checkout
-    const cashfree = Cashfree({ mode: "sandbox" }); // Use "production" when live
+    // Update DB with Order ID
+    await supabase
+      .from("application_entries")
+      .update({ payment_order_id: paymentData.order_id })
+      .eq("id", insertData.id);
+
+    // 6. 🚀 Trigger Cashfree Checkout (FIXED LINE BELOW)
+    const cashfree = new window.Cashfree({ mode: "production" });
+
     cashfree.checkout({
       paymentSessionId: paymentData.payment_session_id,
-      redirectTarget: "_self", // Redirects user to payment page
+      redirectTarget: "_self",
     });
   } catch (err) {
     console.error("❌ Submission Failed:", err);
-    showToast(`❌ Error: ${err.message}`, "error");
+    alert(`Error: ${err.message}`);
 
-    // Re-enable button on error
+    // Reset Button
     submitBtn.innerHTML = originalBtnText;
     submitBtn.disabled = false;
   }
 }
-
 // --- 8. TRACKING LOGIC ---
 async function performTracking() {
   const mobile = document.getElementById("trackMobile").value.trim();
