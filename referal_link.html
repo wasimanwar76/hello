@@ -211,15 +211,37 @@
           <div class="overflow-x-auto">
             <table class="w-full text-left border-collapse">
               <thead>
-                <tr
-                  class="bg-slate-50 border-b border-slate-200 text-xs uppercase text-slate-500 font-bold tracking-wider"
-                >
-                  <th class="px-6 py-4 w-24">ID</th>
-                  <th class="px-6 py-4">Partner Details</th>
-                  <th class="px-6 py-4 text-center">Code</th>
-                  <th class="px-6 py-4 text-right">Total (₹)</th>
-                  <th class="px-6 py-4 text-right">Pending (₹)</th>
-                  <th class="px-6 py-4 text-center">Action</th>
+                <tr class="bg-slate-50/50 border-b border-slate-200">
+                  <th
+                    class="px-6 py-4 w-24 text-[10px] uppercase tracking-widest text-slate-400 font-black"
+                  >
+                    Serial No.
+                  </th>
+                  <th
+                    class="px-6 py-4 text-[10px] uppercase tracking-widest text-slate-400 font-black"
+                  >
+                    Partner Name
+                  </th>
+                  <th
+                    class="px-6 py-4 text-center text-[10px] uppercase tracking-widest text-slate-400 font-black"
+                  >
+                    Referral Code
+                  </th>
+                  <th
+                    class="px-6 py-4 text-right text-[10px] uppercase tracking-widest text-slate-400 font-black"
+                  >
+                    Total Earned (₹)
+                  </th>
+                  <th
+                    class="px-6 py-4 text-right text-[10px] uppercase tracking-widest text-slate-400 font-black"
+                  >
+                    Balance Due (₹)
+                  </th>
+                  <th
+                    class="px-6 py-4 text-center text-[10px] uppercase tracking-widest text-slate-400 font-black"
+                  >
+                    Actions
+                  </th>
                 </tr>
               </thead>
               <tbody
@@ -256,89 +278,16 @@
         SUPABASE_URL,
         SUPABASE_KEY,
       );
-
-      // ==========================================
-      // FEATURE 1: GENERATE PARTNER LINK
-      // ==========================================
-      window.generateLink = async function () {
-        const nameInput = document.getElementById("partnerName");
-        const mobileInput = document.getElementById("partnerMobile");
-        const name = nameInput.value.trim();
-        const mobile = mobileInput.value.trim();
-        const btn = document.getElementById("genBtn");
-
-        // Validation
-        if (!name || mobile.length !== 10) {
-          alert("⚠️ Please enter a valid Name and 10-digit Mobile Number.");
-          return;
-        }
-
-        // Loading State
-        const originalContent = btn.innerHTML;
-        btn.innerHTML = `<i class="fas fa-circle-notch fa-spin"></i> Processing...`;
-        btn.disabled = true;
-
-        try {
-          // A. Check if user exists
-          let { data: partner, error } = await supabaseClient
-            .from("referral_partners")
-            .select("*")
-            .eq("mobile", mobile)
-            .single();
-
-          // B. If not, create new user
-          if (!partner) {
-            const codePrefix = name
-              .replace(/[^a-zA-Z]/g, "")
-              .substring(0, 3)
-              .toUpperCase();
-            const uniqueCode = codePrefix + mobile.slice(-4); // e.g., WAS3288
-
-            const { data: newPartner, error: insertError } =
-              await supabaseClient
-                .from("referral_partners")
-                .insert([
-                  {
-                    partner_name: name,
-                    mobile: mobile,
-                    referral_code: uniqueCode,
-                  },
-                ])
-                .select()
-                .single();
-
-            if (insertError) throw insertError;
-            partner = newPartner;
-          }
-
-          // C. Display Link
-          const baseUrl = "https://www.r2ps.in/apply.html";
-          const finalLink = `${baseUrl}?ref=${partner.referral_code}&partner=${encodeURIComponent(partner.partner_name.split(" ")[0])}`;
-
-          document.getElementById("generatedUrl").value = finalLink;
-          document.getElementById("linkResult").classList.remove("hidden");
-
-          // Refresh table to show new entry
-          window.fetchAllPartners();
-        } catch (err) {
-          console.error("Generate Error:", err);
-          alert("Error: " + err.message);
-        } finally {
-          btn.innerHTML = originalContent;
-          btn.disabled = false;
-        }
-      };
-
-      // ==========================================
-      // FEATURE 2: FETCH & RENDER TABLE
-      // ==========================================
-      window.fetchAllPartners = async function () {
+      // ============================================
+      // 2. FETCH DATA & RENDER TABLE
+      // ============================================
+      window.fetchPartners = async function () {
         const tbody = document.getElementById("partnersTableBody");
-        const countSpan = document.getElementById("totalPartnersCount");
         const refreshBtn = document.getElementById("refreshBtn");
 
-        // Spin Refresh Icon
-        if (refreshBtn) refreshBtn.querySelector("i").classList.add("fa-spin");
+        // Show Loading Spinner
+        if (refreshBtn)
+          refreshBtn.innerHTML = `<i class="fa-solid fa-spin fa-spinner"></i> Refreshing...`;
 
         try {
           let { data: partners, error } = await supabaseClient
@@ -349,92 +298,167 @@
           if (error) throw error;
 
           if (!partners || partners.length === 0) {
-            tbody.innerHTML = `<tr><td colspan="6" class="text-center py-8 text-slate-400 italic">No partners found in database.</td></tr>`;
-            countSpan.innerText = "Total: 0";
+            tbody.innerHTML = `<tr><td colspan="6" class="text-center py-12 text-slate-400">No partners found.</td></tr>`;
             return;
           }
 
-          countSpan.innerText = `Total Partners: ${partners.length}`;
-
-          // RENDER ROWS
           tbody.innerHTML = partners
             .map((partner) => {
-              const dateStr = new Date(partner.created_at).toLocaleDateString(
-                "en-IN",
-                { day: "numeric", month: "short" },
-              );
-              const initial = partner.partner_name.charAt(0).toUpperCase();
-
-              // Financial Math
+              // Safe Math
               const total = Number(partner.total_earnings || 0);
               const paid = Number(partner.paid_amount || 0);
-              // We calculate pending dynamically to be safe
               const pending = total - paid;
 
-              // Sanitize name for JS function calls
+              // Safe Name for HTML
               const safeName = partner.partner_name.replace(/'/g, "\\'");
 
-              return `
-              <tr class="hover:bg-indigo-50/30 transition border-b border-slate-100 last:border-0 group">
-                <td class="px-6 py-4">
-                   <span class="font-mono text-xs text-slate-400 bg-slate-100 px-2 py-0.5 rounded">#${partner.id}</span>
-                </td>
-                <td class="px-6 py-4">
-                  <div class="flex items-center gap-3">
-                    <div class="h-8 w-8 rounded-full bg-indigo-100 text-indigo-700 flex items-center justify-center font-bold text-xs shadow-sm ring-2 ring-white">
-                      ${initial}
-                    </div>
-                    <div>
-                      <div class="font-bold text-slate-800 text-sm">${partner.partner_name}</div>
-                      <div class="text-xs text-slate-500 font-mono tracking-tight">${partner.mobile}</div>
-                    </div>
-                  </div>
-                </td>
-                <td class="px-6 py-4 text-center">
-                  <span class="bg-slate-50 text-slate-600 px-2 py-1 rounded text-xs font-mono font-bold border border-slate-200">
-                    ${partner.referral_code}
-                  </span>
-                </td>
-                <td class="px-6 py-4 text-right">
-                  <div class="text-sm font-bold text-slate-700">₹${total.toLocaleString("en-IN")}</div>
-                </td>
-                <td class="px-6 py-4 text-right">
-                  <div class="text-sm font-bold ${pending > 0 ? "text-amber-600" : "text-emerald-500"}">
-                    ₹${pending.toLocaleString("en-IN")}
-                  </div>
-                </td>
-                <td class="px-6 py-4 text-center">
-                  <div class="flex items-center justify-center gap-2">
-                    ${
-                      pending > 0
-                        ? `<button onclick="window.openPaymentPrompt(${partner.id}, '${safeName}', ${pending}, ${paid})" 
-                          class="bg-emerald-600 hover:bg-emerald-700 text-white px-3 py-1.5 rounded-lg text-xs font-bold transition shadow-sm active:translate-y-0.5 flex items-center gap-1">
-                          <i class="fa-solid fa-check-double"></i> Pay
-                         </button>`
-                        : `<span class="text-[10px] text-slate-400 bg-slate-100 px-2 py-1 rounded border border-slate-200 font-medium">Settled</span>`
-                    }
-                    <button onclick="window.deletePartner(${partner.id})" 
-                      class="h-7 w-7 rounded-lg bg-white border border-slate-200 text-slate-400 hover:text-rose-500 hover:border-rose-200 hover:bg-rose-50 transition flex items-center justify-center shadow-sm" title="Delete">
-                      <i class="fa-regular fa-trash-can text-xs"></i>
-                    </button>
-                  </div>
-                </td>
-              </tr>
-            `;
+              // 1. Get the Initial for the Avatar (Add this line BEFORE the return)
+              const initial = partner.partner_name.charAt(0).toUpperCase();
+
+              return `<tr class="group hover:bg-slate-50/80 transition duration-200 border-b border-slate-100 last:border-0">
+    
+    <td class="px-6 py-4">
+        <span class="text-[10px] text-slate-400 font-mono font-bold">#${partner.id}</span>
+    </td>
+
+    <td class="px-6 py-4">
+        <div class="flex items-center gap-3">
+            <div class="h-8 w-8 rounded-full bg-indigo-100 text-indigo-700 flex items-center justify-center font-bold text-xs shadow-sm">
+                ${initial}
+            </div>
+            <span class="font-semibold text-slate-800 text-sm">${partner.partner_name}</span>
+        </div>
+    </td>
+
+    <td class="px-6 py-4 text-center">
+        <div class="inline-flex items-center gap-2 px-3 py-1 rounded-md bg-slate-50 border border-slate-200 text-slate-600 text-xs font-mono font-bold select-all cursor-pointer hover:bg-white transition">
+            ${partner.referral_code}
+            <i class="fa-regular fa-copy text-[10px] text-slate-400"></i>
+        </div>
+    </td>
+
+    <td class="px-6 py-4 text-right">
+        <span class="text-sm font-bold text-slate-700 tabular-nums">
+            ₹${total.toLocaleString("en-IN")}
+        </span>
+    </td>
+
+    <td class="px-6 py-4 text-right">
+        <span class="text-sm font-bold tabular-nums ${pending > 0 ? "text-amber-600" : "text-slate-300"}">
+            ₹${pending.toLocaleString("en-IN")}
+        </span>
+    </td>
+
+    <td class="px-6 py-4 text-center">
+        <div class="flex items-center justify-center gap-2">
+            ${
+              pending > 0
+                ? `<button onclick="window.openPaymentPrompt(${partner.id}, '${safeName}', ${pending}, ${paid})" 
+                   class="bg-indigo-600 hover:bg-indigo-700 text-white px-3 py-1.5 rounded-lg text-xs font-semibold shadow-md transition-all flex items-center gap-1.5">
+                   <i class="fa-solid fa-indian-rupee-sign text-[10px]"></i> Pay
+                  </button>`
+                : `<span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-100 text-[10px] font-bold uppercase tracking-wide">
+                    <i class="fa-solid fa-check"></i> Settled
+                   </span>`
+            }
+            
+            <button onclick="window.deletePartner(${partner.id})" 
+                class="h-8 w-8 flex items-center justify-center rounded-lg text-slate-300 hover:text-rose-600 hover:bg-rose-50 transition-all" 
+                title="Delete">
+                <i class="fa-regular fa-trash-can"></i>
+            </button>
+        </div>
+    </td>
+</tr>`;
             })
             .join("");
         } catch (err) {
           console.error("Fetch Error:", err);
-          tbody.innerHTML = `<tr><td colspan="6" class="text-center py-4 text-rose-500">Error loading data. Check console.</td></tr>`;
+          tbody.innerHTML = `<tr><td colspan="6" class="text-center py-4 text-red-500">Error loading data.</td></tr>`;
         } finally {
           if (refreshBtn)
-            refreshBtn.querySelector("i").classList.remove("fa-spin");
+            refreshBtn.innerHTML = `<i class="fa-solid fa-rotate"></i> Refresh`;
         }
       };
 
-      // ==========================================
-      // FEATURE 3: PARTIAL PAYMENT LOGIC
-      // ==========================================
+      // ============================================
+      // 3. GENERATE LINK
+      // ============================================
+      window.generateLink = async function () {
+        // 1. Get Elements
+        const nameInput = document.getElementById("partnerName");
+        const mobileInput = document.getElementById("partnerMobile");
+        const btn = document.getElementById("genBtn");
+
+        // DEBUG: Check if inputs exist
+        if (!nameInput || !mobileInput || !btn) {
+          return alert(
+            "Critical Error: Missing HTML elements. Check IDs: partnerName, partnerMobile, genBtn",
+          );
+        }
+
+        const name = nameInput.value.trim();
+        const mobile = mobileInput.value.trim();
+
+        if (!name || mobile.length !== 10)
+          return alert("Please enter valid Name & Mobile");
+
+        // 2. Loading State
+        const originalText = btn.innerHTML;
+        btn.innerHTML = "Processing...";
+        btn.disabled = true;
+
+        try {
+          // 3. Database Check
+          let { data: partner } = await supabaseClient
+            .from("referral_partners")
+            .select("*")
+            .eq("mobile", mobile)
+            .single();
+
+          if (!partner) {
+            const code = name.substring(0, 3).toUpperCase() + mobile.slice(-4);
+            const { data, error } = await supabaseClient
+              .from("referral_partners")
+              .insert([
+                { partner_name: name, mobile: mobile, referral_code: code },
+              ])
+              .select()
+              .single();
+
+            if (error) throw error;
+            partner = data;
+          }
+
+          // 4. Show Result (SAFE MODE)
+          const link = `https://www.r2ps.in/apply.html?ref=${partner.referral_code}`;
+          const urlInput = document.getElementById("generatedUrl");
+
+          // Try to find the box by BOTH common names
+          const resultBox =
+            document.getElementById("resultBox") ||
+            document.getElementById("linkResult");
+
+          if (resultBox && urlInput) {
+            urlInput.value = link;
+            resultBox.classList.remove("hidden"); // This is where it was failing
+          } else {
+            // Fallback if HTML is missing
+            console.error("Missing ID: resultBox or linkResult");
+            alert("Link Generated: " + link);
+          }
+
+          window.fetchPartners();
+        } catch (err) {
+          alert("Error: " + err.message);
+        } finally {
+          btn.innerHTML = originalText;
+          btn.disabled = false;
+        }
+      };
+      // ============================================
+      // 4. SMART PAYMENT SYSTEM (The Fix)
+      // ============================================
       window.openPaymentPrompt = async function (
         id,
         name,
@@ -443,98 +467,68 @@
       ) {
         // 1. Get Amount
         const amountStr = prompt(
-          `PAYMENT FOR: ${name}\n\n• Total Pending: ₹${currentPending}\n\nEnter amount to pay now:`,
+          `PAYING: ${name}\n\n• Pending: ₹${currentPending}\n• Paid so far: ₹${currentPaid}\n\nEnter amount to pay now:`,
           currentPending,
         );
-
-        if (amountStr === null) return; // Cancelled
+        if (!amountStr) return;
 
         const payAmount = Number(amountStr);
 
         // 2. Validate
-        if (isNaN(payAmount) || payAmount <= 0) {
-          alert("❌ Error: Please enter a valid positive number.");
-          return;
-        }
-        if (payAmount > currentPending) {
-          alert(
-            `❌ Error: You cannot pay ₹${payAmount}. The max pending amount is ₹${currentPending}.`,
-          );
-          return;
-        }
-
-        // 3. Calculate New Database Values
-        const newPaidTotal = Number(currentPaid) + payAmount;
-        // The DB stores 'pending_amount', so we must update it too.
-        const newPendingTotal = Number(currentPending) - payAmount;
+        if (isNaN(payAmount) || payAmount <= 0) return alert("Invalid Amount");
+        if (payAmount > currentPending)
+          return alert(`Error: You can only pay up to ₹${currentPending}`);
 
         try {
+          // 3. Calculate New Totals
+          const newPaid = Number(currentPaid) + payAmount;
+          const newPending = Number(currentPending) - payAmount;
+
           // 4. Update Database
           const { error } = await supabaseClient
             .from("referral_partners")
             .update({
-              paid_amount: newPaidTotal,
-              pending_amount: newPendingTotal,
+              paid_amount: newPaid,
+              pending_amount: newPending,
             })
             .eq("id", id);
 
           if (error) throw error;
 
-          // 5. Success
-          alert(
-            `✅ Success! Paid ₹${payAmount} to ${name}.\nRemaining Pending: ₹${newPendingTotal}`,
-          );
-          window.fetchAllPartners(); // Refresh UI
+          alert(`✅ Success! Paid ₹${payAmount}`);
+
+          // 5. CRITICAL: Refresh Table to update buttons with new math
+          await window.fetchPartners();
         } catch (err) {
-          console.error("Payment Error:", err);
-          alert("❌ Database Error: " + err.message);
+          alert("Payment Failed: " + err.message);
         }
       };
 
-      // ==========================================
-      // FEATURE 4: DELETE PARTNER
-      // ==========================================
+      // ============================================
+      // 5. DELETE PARTNER
+      // ============================================
       window.deletePartner = async function (id) {
-        if (
-          !confirm(
-            "⚠️ DANGER ZONE\n\nAre you sure you want to PERMANENTLY delete this partner?\nThis action cannot be undone.",
-          )
-        ) {
-          return;
-        }
-
-        try {
-          const { error } = await supabaseClient
-            .from("referral_partners")
-            .delete()
-            .eq("id", id);
-
-          if (error) throw error;
-
-          window.fetchAllPartners(); // Refresh UI
-        } catch (err) {
-          console.error("Delete Error:", err);
-          alert("❌ Error: Could not delete. " + err.message);
-        }
+        if (!confirm("Are you sure you want to delete this partner?")) return;
+        const { error } = await supabaseClient
+          .from("referral_partners")
+          .delete()
+          .eq("id", id);
+        if (error) alert("Error: " + error.message);
+        else window.fetchPartners();
       };
 
-      // ==========================================
-      // FEATURE 5: UTILITIES
-      // ==========================================
+      // ============================================
+      // 6. UTILITIES
+      // ============================================
       window.copyLink = function () {
         const copyText = document.getElementById("generatedUrl");
         copyText.select();
-        copyText.setSelectionRange(0, 99999);
         navigator.clipboard.writeText(copyText.value);
-
-        const btn = event.currentTarget;
-        const original = btn.innerHTML;
-        btn.innerHTML = `<i class="fa-solid fa-check"></i> Copied!`;
-        setTimeout(() => (btn.innerHTML = original), 2000);
+        alert("Link Copied!");
       };
 
-      // Initialize on load
-      document.addEventListener("DOMContentLoaded", window.fetchAllPartners);
+      // Initialize
+      document.addEventListener("DOMContentLoaded", window.fetchPartners);
     </script>
   </body>
 </html>
