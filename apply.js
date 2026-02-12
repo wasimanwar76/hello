@@ -1,3 +1,34 @@
+async function triggerDownload(url, filename) {
+  try {
+    // 1. Show loading state on the button
+    const btn = event.currentTarget;
+    const originalContent = btn.innerHTML;
+    btn.innerHTML = `<i class="fas fa-spinner fa-spin mr-2"></i> Downloading...`;
+
+    // 2. Fetch the file as a "Blob" (Binary Large Object)
+    const response = await fetch(url);
+    if (!response.ok) throw new Error("Network error");
+    const blob = await response.blob();
+
+    // 3. Create a temporary link to force download
+    const blobUrl = window.URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = blobUrl;
+    link.download = filename; // This forces the name
+    document.body.appendChild(link);
+    link.click();
+
+    // 4. Cleanup
+    document.body.removeChild(link);
+    window.URL.revokeObjectURL(blobUrl);
+    btn.innerHTML = originalContent; // Restore button text
+  } catch (err) {
+    console.error("Download failed:", err);
+    // Fallback: If fetch fails (e.g., CORS error), open in new tab
+    window.open(url, "_blank");
+  }
+}
+
 // Anti-DevTools Logic
 (function () {
   document.addEventListener("contextmenu", (e) => e.preventDefault());
@@ -23,6 +54,118 @@
   };
   setInterval(detectDevTools, 1000);
 })();
+
+document.addEventListener("DOMContentLoaded", () => {
+  // Pass the ID of your select element
+  makeSearchable("casteName");
+});
+
+function makeSearchable(selectId) {
+  const originalSelect = document.getElementById(selectId);
+  if (!originalSelect) return;
+
+  // 1. Create the wrapper
+  const wrapper = document.createElement("div");
+  wrapper.className = "relative w-full"; // Tailwind relative positioning
+  originalSelect.parentNode.insertBefore(wrapper, originalSelect);
+  wrapper.appendChild(originalSelect);
+
+  // 2. Create the Search Input (Visual UI)
+  const searchInput = document.createElement("input");
+  searchInput.type = "text";
+  searchInput.className = originalSelect.className; // Copy original Tailwind classes
+  searchInput.placeholder = "Search Caste / जाति खोजें...";
+  searchInput.style.cursor = "text";
+  wrapper.appendChild(searchInput);
+
+  // 3. Create the Dropdown List (Hidden by default)
+  const dropdown = document.createElement("div");
+  dropdown.className =
+    "absolute z-50 w-full mt-1 bg-white border border-slate-300 rounded-lg shadow-xl max-h-60 overflow-y-auto hidden";
+  wrapper.appendChild(dropdown);
+
+  // 4. Function to populate the list
+  function populateList(filterText = "") {
+    dropdown.innerHTML = "";
+    const options = originalSelect.querySelectorAll("option, optgroup");
+    let foundAny = false;
+
+    options.forEach((node) => {
+      if (node.tagName === "OPTGROUP") {
+        // Handle Categories (General, BC, SC, ST)
+        const groupLabel = document.createElement("div");
+        groupLabel.className =
+          "px-3 py-2 text-xs font-bold text-slate-500 bg-slate-50 uppercase tracking-wider sticky top-0";
+        groupLabel.innerText = node.label;
+
+        // Only append group label if it has matching children or no filter
+        let hasMatchingChild = false;
+        Array.from(node.children).forEach((child) => {
+          if (child.text.toLowerCase().includes(filterText.toLowerCase()))
+            hasMatchingChild = true;
+        });
+
+        if (hasMatchingChild || filterText === "") {
+          dropdown.appendChild(groupLabel);
+        }
+      } else if (node.tagName === "OPTION" && node.value !== "") {
+        // Handle Individual Options
+        if (node.text.toLowerCase().includes(filterText.toLowerCase())) {
+          const item = document.createElement("div");
+          item.className =
+            "px-3 py-2 text-sm text-slate-700 cursor-pointer hover:bg-indigo-50 hover:text-indigo-700 transition-colors";
+          item.innerText = node.text;
+
+          item.onclick = () => {
+            searchInput.value = node.text; // Update visual input
+            originalSelect.value = node.value; // Update HIDDEN Select (Crucial for DB)
+            dropdown.classList.add("hidden");
+            // Trigger change event for other scripts
+            originalSelect.dispatchEvent(new Event("change"));
+          };
+          dropdown.appendChild(item);
+          foundAny = true;
+        }
+      }
+    });
+
+    if (!foundAny) {
+      const noResult = document.createElement("div");
+      noResult.className = "px-3 py-2 text-sm text-slate-400 italic";
+      noResult.innerText = "No results found";
+      dropdown.appendChild(noResult);
+    }
+  }
+
+  // 5. Hide Original Select but keep it in DOM for Form Submission
+  originalSelect.classList.add("hidden");
+
+  // 6. Event Listeners
+  searchInput.addEventListener("focus", () => {
+    populateList(searchInput.value);
+    dropdown.classList.remove("hidden");
+  });
+
+  searchInput.addEventListener("input", (e) => {
+    populateList(e.target.value);
+    dropdown.classList.remove("hidden");
+  });
+
+  // Close when clicking outside
+  document.addEventListener("click", (e) => {
+    if (!wrapper.contains(e.target)) {
+      dropdown.classList.add("hidden");
+      // If user typed something invalid, reset to previously selected value
+      const selectedOption =
+        originalSelect.options[originalSelect.selectedIndex];
+      if (selectedOption && selectedOption.value !== "") {
+        searchInput.value = selectedOption.text;
+      } else {
+        searchInput.value = "";
+      }
+    }
+  });
+}
 
 // --- 0. INITIALIZATION & CONFIGURATION ---
 const SUPABASE_URL = "https://douciplboqmayceruthu.supabase.co";
@@ -497,44 +640,75 @@ async function performTracking() {
       let actionButtons = "";
 
       if (isCompleted) {
-        // Show TWO buttons (Receipt + Certificate)
-        const recBtn = app.receiving_document
-          ? `<a href="${app.receiving_document}" target="_blank" class="flex items-center justify-center w-full bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold py-3 rounded-xl transition text-sm border border-slate-300">
-                     <i class="fas fa-file-invoice mr-2"></i> Receipt / रसीद
-                   </a>`
-          : `<button disabled class="w-full bg-slate-50 text-slate-300 font-bold py-3 rounded-xl text-sm border border-slate-100 cursor-not-allowed">No Receipt</button>`;
+        // --- COMPLETED: Show TWO buttons (Receipt + Certificate) ---
 
-        const certBtn = app.certificate_document
-          ? `<a href="${app.certificate_document}" target="_blank" class="flex items-center justify-center w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-3 rounded-xl transition text-sm shadow-md shadow-emerald-100">
-                     <i class="fas fa-certificate mr-2"></i> Certificate / प्रमाण पत्र
-                   </a>`
-          : `<button disabled class="w-full bg-emerald-50 text-emerald-300 font-bold py-3 rounded-xl text-sm border border-emerald-100 cursor-not-allowed">Generating...</button>`;
+        // 1. Receipt Button
+        let recBtn = "";
+        if (app.receiving_document) {
+          const recName = `Receipt_${app.id || "Doc"}.pdf`;
+          recBtn = `
+            <button 
+                onclick="triggerDownload('${app.receiving_document}', '${recName}')"
+                class="flex items-center justify-center w-full bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold py-3 rounded-xl transition text-xs sm:text-sm border border-slate-300"
+                title="Download Receipt">
+                <i class="fas fa-file-invoice mr-2"></i> Receipt
+            </button>`;
+        } else {
+          recBtn = `<button disabled class="w-full bg-slate-50 text-slate-300 font-bold py-3 rounded-xl text-xs sm:text-sm border border-slate-100 cursor-not-allowed">No Receipt</button>`;
+        }
+
+        // 2. Certificate Button
+        let certBtn = "";
+        if (app.certificate_document) {
+          const certName = `Certificate_${app.id || "Final"}.pdf`;
+          certBtn = `
+            <button 
+                onclick="triggerDownload('${app.certificate_document}', '${certName}')"
+                class="flex items-center justify-center w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-3 rounded-xl transition text-xs sm:text-sm shadow-md shadow-emerald-100"
+                title="Download Certificate">
+                <i class="fas fa-certificate mr-2"></i> Certificate
+            </button>`;
+        } else {
+          certBtn = `<button disabled class="w-full bg-emerald-50 text-emerald-300 font-bold py-3 rounded-xl text-xs sm:text-sm border border-emerald-100 cursor-not-allowed">Generating...</button>`;
+        }
 
         actionButtons = `
-                <div class="mt-4 grid grid-cols-2 gap-3">
-                    ${recBtn}
-                    ${certBtn}
-                </div>`;
+            <div class="mt-4 grid grid-cols-2 gap-3">
+                ${recBtn}
+                ${certBtn}
+            </div>
+            <p class="text-[10px] text-center text-slate-400 mt-2">
+                Click to download your documents / दस्तावेज़ डाउनलोड करने के लिए क्लिक करें
+            </p>`;
       } else if (docStatus === "PENDING") {
-        // Just show Receipt if available
+        // --- PENDING: Show Receipt Only ---
         if (app.receiving_document) {
+          const fileName = `Receipt_${app.id || "Doc"}.pdf`;
           actionButtons = `
-                <div class="mt-4">
-                    <a href="${app.receiving_document}" target="_blank" class="flex items-center justify-center w-full bg-indigo-50 hover:bg-indigo-100 text-indigo-700 font-bold py-3 rounded-xl transition text-sm border border-indigo-200">
-                        <i class="fas fa-file-invoice mr-2"></i> Download Receipt / रसीद डाउनलोड करें
-                    </a>
-                    <p class="text-[10px] text-center text-slate-400 mt-2">Certificate will come after approval / स्वीकृति के बाद प्रमाण पत्र यहाँ आएगा</p>
-                </div>`;
+            <div class="mt-4">
+                <button 
+                    onclick="triggerDownload('${app.receiving_document}', '${fileName}')" 
+                    class="flex items-center justify-center w-full bg-indigo-50 hover:bg-indigo-100 text-indigo-700 font-bold py-3 rounded-xl transition text-sm border border-indigo-200 cursor-pointer"
+                >
+                    <i class="fas fa-download mr-2"></i> Download Receipt / रसीद डाउनलोड करें
+                </button>
+                <p class="text-[10px] text-center text-slate-400 mt-2">
+                    Certificate will come after approval / स्वीकृति के बाद प्रमाण पत्र यहाँ आएगा
+                </p>
+            </div>`;
         } else {
           actionButtons = `<div class="mt-4 text-center text-xs text-slate-400 italic bg-slate-50 py-3 rounded-xl border border-slate-100">Under Review / समीक्षाधीन</div>`;
         }
       } else if (docStatus === "REJECTED") {
-        actionButtons = `<div class="mt-4 text-center text-xs text-rose-500 font-bold bg-rose-50 py-3 rounded-xl border border-rose-100">Rejected / आवेदन अस्वीकृत</div>`;
+        // --- REJECTED ---
+        actionButtons = `<div class="mt-4 text-center text-xs text-rose-600 font-bold bg-rose-50 py-3 rounded-xl border border-rose-100">
+            <i class="fas fa-ban mr-1"></i> Rejected / आवेदन अस्वीकृत
+        </div>`;
       }
 
-      // Card HTML
+      // --- CARD HTML ---
       html += `
-        <div class="bg-white rounded-2xl p-5 shadow-lg border border-slate-100 hover:border-indigo-300 transition group relative overflow-hidden">
+        <div class="bg-white rounded-2xl p-5 shadow-lg border border-slate-100 hover:border-indigo-300 transition group relative overflow-hidden flex flex-col h-full">
             
             <div class="flex justify-between items-start mb-4">
                 <div>
@@ -549,7 +723,7 @@ async function performTracking() {
                 </div>
             </div>
 
-            <div class="border-t border-slate-100 pt-3">
+            <div class="border-t border-slate-100 pt-3 mb-auto">
                  <p class="text-sm text-slate-600"><span class="font-semibold">Name / नाम:</span> ${app.applicant_name}</p>
             </div>
 

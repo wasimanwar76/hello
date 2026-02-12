@@ -3,8 +3,10 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>R2PS - Partner Dashboard</title>
+    <title>R2PS - Admin Partner Dashboard</title>
+
     <script src="https://cdn.tailwindcss.com"></script>
+
     <link
       href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&family=Inter:wght@300;400;500;600&display=swap"
       rel="stylesheet"
@@ -13,6 +15,9 @@
       rel="stylesheet"
       href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
     />
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
     <style>
       body {
         font-family: "Inter", sans-serif;
@@ -23,6 +28,7 @@
       .brand-font {
         font-family: "Poppins", sans-serif;
       }
+
       .fade-in {
         animation: fadeIn 0.5s ease-out forwards;
       }
@@ -36,19 +42,25 @@
           transform: translateY(0);
         }
       }
+
+      /* Glassmorphism Utilities */
       .glass-card {
         background: white;
         border: 1px solid #e2e8f0;
-        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+        box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
       }
-      /* Custom deep purple for the generator card */
       .bg-r2ps-purple {
         background-color: #312e81;
+      }
+
+      /* Table Hover Effects */
+      tr.group:hover td {
+        background-color: #f8fafc;
       }
     </style>
   </head>
 
-  <body class="bg-slate-50 min-h-screen font-sans text-slate-800">
+  <body class="bg-slate-50 min-h-screen text-slate-800">
     <nav class="bg-[#1e1b4b] text-white shadow-lg sticky top-0 z-50">
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div class="flex justify-between h-16 items-center">
@@ -56,20 +68,18 @@
             <h1 class="text-2xl font-extrabold tracking-tighter brand-font">
               R2PS<span class="text-indigo-400">.</span>
               <span
-                class="text-xs font-normal opacity-70 ml-2 border-l border-gray-600 pl-2 font-sans"
+                class="text-xs font-normal opacity-70 ml-2 border-l border-gray-600 pl-2 font-sans hidden sm:inline-block"
                 >Partner Hub</span
               >
             </h1>
           </div>
           <div class="flex items-center gap-3">
             <div class="text-right hidden sm:block">
-              <p class="text-sm font-bold text-white" id="navName">
-                Admin User
-              </p>
-              <p class="text-[10px] text-indigo-200">Dashboard Access</p>
+              <p class="text-sm font-bold text-white">Admin User</p>
+              <p class="text-[10px] text-indigo-200">Super Admin Access</p>
             </div>
             <div
-              class="h-9 w-9 bg-indigo-500 rounded-full flex items-center justify-center font-bold border-2 border-indigo-300"
+              class="h-9 w-9 bg-indigo-500 rounded-full flex items-center justify-center font-bold border-2 border-indigo-300 shadow-md"
             >
               <i class="fa-solid fa-user-shield"></i>
             </div>
@@ -80,411 +90,451 @@
 
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
       <div
-        class="bg-r2ps-purple rounded-2xl p-6 md:p-8 shadow-xl text-white relative overflow-hidden fade-in"
+        class="bg-r2ps-purple rounded-2xl p-6 md:p-8 shadow-xl text-white relative overflow-hidden fade-in border border-indigo-800"
       >
         <div
-          class="absolute top-0 right-0 -mt-10 -mr-10 h-40 w-40 bg-white opacity-5 rounded-full blur-3xl"
+          class="absolute top-0 right-0 -mt-10 -mr-10 h-64 w-64 bg-indigo-500 opacity-20 rounded-full blur-3xl pointer-events-none"
         ></div>
 
-        <h2 class="text-2xl font-bold mb-1 brand-font">
-          Create Referral Link / रेफरल लिंक बनाएं
+        <h2 class="text-2xl font-bold mb-1 brand-font flex items-center gap-2">
+          <i class="fa-solid fa-link text-indigo-300"></i> Create Referral Link
         </h2>
-        <p class="text-indigo-200 text-sm mb-6 max-w-3xl">
-          Enter your details to generate a unique tracking link. Share this link
-          to earn commission on every successful application.
+        <p class="text-indigo-200 text-sm mb-6 max-w-2xl">
+          Register a new partner to generate their unique tracking link. They
+          will earn commissions on every successful application.
         </p>
 
-        <div class="flex flex-col lg:flex-row gap-4 items-end">
+        <div
+          class="flex flex-col lg:flex-row gap-4 items-end bg-white/5 p-4 rounded-xl border border-white/10 backdrop-blur-sm"
+        >
           <div class="w-full lg:w-1/3">
             <label
               class="block text-xs font-bold text-indigo-200 mb-1 uppercase tracking-wider"
-              >Your Name / नाम</label
+              >Partner Name / नाम</label
             >
-            <input
-              type="text"
-              id="partnerName"
-              value="Wasim Anwar"
-              class="w-full px-4 py-3 rounded-lg text-slate-900 font-medium outline-none focus:ring-2 focus:ring-indigo-400 transition shadow-sm"
-            />
+            <div class="relative">
+              <i
+                class="fa-solid fa-user absolute left-3 top-3.5 text-indigo-300"
+              ></i>
+              <input
+                type="text"
+                id="partnerName"
+                placeholder="Ex: Wasim Anwar"
+                class="w-full pl-10 pr-4 py-3 rounded-lg bg-indigo-900/50 border border-indigo-400/30 text-white placeholder-indigo-300/50 font-medium outline-none focus:ring-2 focus:ring-indigo-400 transition shadow-sm"
+              />
+            </div>
           </div>
           <div class="w-full lg:w-1/3">
             <label
               class="block text-xs font-bold text-indigo-200 mb-1 uppercase tracking-wider"
               >Mobile Number / मोबाइल</label
             >
-            <input
-              type="tel"
-              id="partnerMobile"
-              value="8709863288"
-              maxlength="10"
-              class="w-full px-4 py-3 rounded-lg text-slate-900 font-medium outline-none focus:ring-2 focus:ring-indigo-400 transition shadow-sm"
-            />
+            <div class="relative">
+              <i
+                class="fa-solid fa-phone absolute left-3 top-3.5 text-indigo-300"
+              ></i>
+              <input
+                type="tel"
+                id="partnerMobile"
+                placeholder="Ex: 8709863288"
+                maxlength="10"
+                class="w-full pl-10 pr-4 py-3 rounded-lg bg-indigo-900/50 border border-indigo-400/30 text-white placeholder-indigo-300/50 font-medium outline-none focus:ring-2 focus:ring-indigo-400 transition shadow-sm"
+              />
+            </div>
           </div>
           <div class="w-full lg:w-auto">
             <button
-              onclick="generateLink()"
-              class="w-full lg:w-auto bg-white text-indigo-900 font-bold px-8 py-3 rounded-lg hover:bg-indigo-50 transition shadow-lg flex items-center justify-center gap-2"
+              onclick="window.generateLink()"
+              id="genBtn"
+              class="w-full lg:w-auto bg-white text-indigo-900 font-bold px-8 py-3 rounded-lg hover:bg-indigo-50 active:scale-95 transition shadow-lg flex items-center justify-center gap-2 h-[48px]"
             >
-              <i class="fa-solid fa-link"></i> Generate
+              <i class="fa-solid fa-bolt"></i> Generate
             </button>
           </div>
         </div>
 
         <div
           id="linkResult"
-          class="hidden mt-6 bg-white/10 backdrop-blur-md border border-white/20 p-4 rounded-xl flex flex-col md:flex-row gap-4 items-center"
+          class="hidden mt-6 bg-emerald-900/40 backdrop-blur-md border border-emerald-500/30 p-4 rounded-xl flex flex-col md:flex-row gap-4 items-center animate-pulse-once"
         >
           <div
-            class="h-10 w-10 bg-green-500 rounded-full flex items-center justify-center text-white shrink-0 shadow-lg"
+            class="h-10 w-10 bg-emerald-500 rounded-full flex items-center justify-center text-white shrink-0 shadow-lg ring-4 ring-emerald-500/20"
           >
             <i class="fa-solid fa-check"></i>
           </div>
           <div class="flex-1 w-full overflow-hidden">
             <p
-              class="text-[10px] text-indigo-200 uppercase font-bold tracking-widest mb-1"
+              class="text-[10px] text-emerald-300 uppercase font-bold tracking-widest mb-1"
             >
-              YOUR UNIQUE LINK
+              SUCCESSFULLY GENERATED
             </p>
             <input
               type="text"
               id="generatedUrl"
               readonly
-              class="bg-transparent text-white font-mono text-sm w-full outline-none truncate font-medium"
+              class="bg-transparent text-white font-mono text-sm w-full outline-none truncate font-medium tracking-wide"
             />
           </div>
           <button
-            onclick="copyLink()"
-            class="shrink-0 bg-green-500 hover:bg-green-600 text-white px-6 py-2.5 rounded-lg text-sm font-bold transition shadow-lg active:scale-95"
+            onclick="window.copyLink()"
+            class="shrink-0 bg-emerald-500 hover:bg-emerald-400 text-white px-6 py-2.5 rounded-lg text-sm font-bold transition shadow-lg active:scale-95 flex items-center gap-2"
           >
-            Copy Link
+            <i class="fa-regular fa-copy"></i> Copy Link
           </button>
         </div>
       </div>
 
-      <div
-        class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 fade-in"
-        style="animation-delay: 0.1s"
-      >
+      <div class="space-y-4">
         <div
-          class="glass-card p-6 rounded-2xl border-l-4 border-l-indigo-600 flex justify-between items-start"
+          class="flex flex-col md:flex-row justify-between items-end md:items-center gap-4"
         >
           <div>
-            <p
-              class="text-slate-500 text-[10px] font-bold uppercase tracking-widest mb-1"
-            >
-              TOTAL EARNINGS / कुल कमाई
-            </p>
-            <h3 class="text-3xl font-black text-slate-800 tracking-tight">
-              ₹<span id="totalEarnings">0</span>
-            </h3>
-            <p class="text-xs text-slate-400 mt-2">Lifetime Commission</p>
-          </div>
-          <div class="bg-indigo-100 p-2.5 rounded-lg text-indigo-600">
-            <i class="fa-solid fa-sack-dollar text-xl"></i>
-          </div>
-        </div>
-
-        <div
-          class="glass-card p-6 rounded-2xl border-l-4 border-l-orange-500 bg-orange-50/20 flex justify-between items-start"
-        >
-          <div>
-            <p
-              class="text-orange-700 text-[10px] font-bold uppercase tracking-widest mb-1"
-            >
-              PENDING / बकाया राशि
-            </p>
-            <h3 class="text-3xl font-black text-orange-600 tracking-tight">
-              ₹<span id="pendingBalance">0</span>
-            </h3>
-            <p class="text-xs text-orange-600/70 mt-2">
-              Action needed to clear
+            <h2 class="text-2xl font-bold text-slate-800 brand-font">
+              Partner Overview
+            </h2>
+            <p class="text-slate-500 text-sm">
+              Real-time earnings and payment management.
             </p>
           </div>
-          <div class="bg-orange-100 p-2.5 rounded-lg text-orange-600">
-            <i class="fa-solid fa-hourglass-half text-xl"></i>
-          </div>
-        </div>
-
-        <div
-          class="glass-card p-6 rounded-2xl border-l-4 border-l-green-500 flex justify-between items-start"
-        >
-          <div>
-            <p
-              class="text-slate-500 text-[10px] font-bold uppercase tracking-widest mb-1"
-            >
-              PAID OUT / भुगतान किया
-            </p>
-            <h3 class="text-3xl font-black text-emerald-600 tracking-tight">
-              ₹<span id="totalPaid">0</span>
-            </h3>
-            <p class="text-xs text-slate-400 mt-2">Successfully settled</p>
-          </div>
-          <div class="bg-green-100 p-2.5 rounded-lg text-green-600">
-            <i class="fa-solid fa-check text-xl"></i>
-          </div>
-        </div>
-
-        <div
-          class="glass-card p-6 rounded-2xl border-l-4 border-l-blue-500 flex justify-between items-start"
-        >
-          <div>
-            <p
-              class="text-slate-500 text-[10px] font-bold uppercase tracking-widest mb-1"
-            >
-              APPLICATIONS / आवेदन
-            </p>
-            <h3
-              class="text-3xl font-black text-slate-800 tracking-tight"
-              id="totalApps"
-            >
-              0
-            </h3>
-            <p class="text-xs text-slate-400 mt-2">Successful forms</p>
-          </div>
-          <div class="bg-blue-100 p-2.5 rounded-lg text-blue-600">
-            <i class="fa-solid fa-file-contract text-xl"></i>
-          </div>
-        </div>
-      </div>
-
-      <div
-        class="glass-card rounded-2xl overflow-hidden shadow-lg fade-in"
-        style="animation-delay: 0.2s"
-      >
-        <div
-          class="px-6 py-5 border-b border-slate-100 bg-white flex flex-col md:flex-row justify-between items-center gap-4"
-        >
-          <h3
-            class="font-bold text-lg text-slate-800 flex items-center gap-2 brand-font"
+          <button
+            onclick="window.fetchAllPartners()"
+            id="refreshBtn"
+            class="bg-white text-indigo-600 border border-indigo-100 px-4 py-2 rounded-lg text-sm font-bold hover:bg-indigo-50 hover:border-indigo-200 transition shadow-sm flex items-center gap-2"
           >
-            <i class="fa-solid fa-list text-indigo-600"></i> Referral History /
-            इतिहास
-          </h3>
-
-          <div class="relative w-full md:w-72">
-            <div
-              class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none"
-            >
-              <i class="fa-solid fa-magnifying-glass text-gray-400"></i>
-            </div>
-            <input
-              type="text"
-              id="searchInput"
-              onkeyup="filterTable()"
-              placeholder="Filter by Name..."
-              class="pl-10 pr-4 py-2 border border-slate-200 rounded-lg text-sm w-full outline-none focus:ring-2 focus:ring-indigo-500 transition bg-slate-50 focus:bg-white"
-            />
-          </div>
-        </div>
-
-        <div class="overflow-x-auto">
-          <table class="w-full text-left text-sm whitespace-nowrap">
-            <thead
-              class="bg-slate-50 text-slate-500 text-[10px] uppercase font-bold tracking-wider"
-            >
-              <tr>
-                <th class="px-6 py-4">Applicant Name</th>
-                <th class="px-6 py-4">Service</th>
-                <th class="px-6 py-4">Date</th>
-                <th class="px-6 py-4 text-right">Commission</th>
-                <th class="px-6 py-4 text-center">Status</th>
-                <th class="px-6 py-4 text-center">Action</th>
-              </tr>
-            </thead>
-            <tbody
-              id="txTableBody"
-              class="divide-y divide-slate-100 bg-white font-medium text-slate-700"
-            ></tbody>
-          </table>
+            <i class="fa-solid fa-rotate"></i> Refresh Data
+          </button>
         </div>
 
         <div
-          class="px-6 py-4 bg-slate-50 border-t border-slate-100 text-center text-xs text-slate-400"
+          class="bg-white rounded-2xl shadow-xl border border-slate-200 overflow-hidden"
         >
-          End of list
+          <div class="overflow-x-auto">
+            <table class="w-full text-left border-collapse">
+              <thead>
+                <tr
+                  class="bg-slate-50 border-b border-slate-200 text-xs uppercase text-slate-500 font-bold tracking-wider"
+                >
+                  <th class="px-6 py-4 w-24">ID</th>
+                  <th class="px-6 py-4">Partner Details</th>
+                  <th class="px-6 py-4 text-center">Code</th>
+                  <th class="px-6 py-4 text-right">Total (₹)</th>
+                  <th class="px-6 py-4 text-right">Pending (₹)</th>
+                  <th class="px-6 py-4 text-center">Action</th>
+                </tr>
+              </thead>
+              <tbody
+                id="partnersTableBody"
+                class="text-sm text-slate-700 divide-y divide-slate-100"
+              >
+                <tr>
+                  <td colspan="6" class="text-center py-12 text-slate-400">
+                    <i class="fas fa-spinner fa-spin mr-2 text-xl"></i
+                    ><br />Loading database...
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <div
+            class="bg-slate-50 px-6 py-3 border-t border-slate-200 text-xs text-slate-500 flex justify-between items-center"
+          >
+            <span id="totalPartnersCount" class="font-bold">Total: 0</span>
+            <span class="italic">Auto-sync active</span>
+          </div>
         </div>
       </div>
     </div>
 
     <script>
-      // --- 1. MOCK DATA (Simulating Database) ---
-      // Matches the names/dates in your image
-      let transactions = [
-        {
-          id: 101,
-          name: "Rahul Kumar",
-          service: "Domicile Cert",
-          date: "2026-02-08",
-          comm: 50,
-          status: "pending",
-        },
-        {
-          id: 102,
-          name: "Anita Singh",
-          service: "Caste Cert",
-          date: "2026-02-07",
-          comm: 50,
-          status: "paid",
-        },
-        {
-          id: 103,
-          name: "Vikram Roy",
-          service: "Income Cert",
-          date: "2026-02-07",
-          comm: 50,
-          status: "pending",
-        },
-        {
-          id: 104,
-          name: "S. Gupta",
-          service: "NCL Cert",
-          date: "2026-02-06",
-          comm: 100,
-          status: "pending",
-        },
-        {
-          id: 105,
-          name: "Md. Karim",
-          service: "Domicile Cert",
-          date: "2026-02-05",
-          comm: 50,
-          status: "paid",
-        },
-        {
-          id: 106,
-          name: "Priya Sharma",
-          service: "Income Cert",
-          date: "2026-02-04",
-          comm: 50,
-          status: "paid",
-        },
-      ];
+      // 1. INITIALIZE SUPABASE
+      // Using the keys provided in your previous prompt
+      const SUPABASE_URL = "https://douciplboqmayceruthu.supabase.co";
+      const SUPABASE_KEY = "sb_publishable_1CKpfNGUpUFQqOeIENMe_A_7Yk84j_z";
 
-      // --- 2. GENERATE LINK LOGIC ---
-      function generateLink() {
-        const name = document.getElementById("partnerName").value.trim();
-        const mobile = document.getElementById("partnerMobile").value.trim();
+      const supabaseClient = window.supabase.createClient(
+        SUPABASE_URL,
+        SUPABASE_KEY,
+      );
 
-        if (name === "" || mobile.length !== 10) {
-          alert("Please enter valid Name and 10-digit Mobile Number.");
+      // ==========================================
+      // FEATURE 1: GENERATE PARTNER LINK
+      // ==========================================
+      window.generateLink = async function () {
+        const nameInput = document.getElementById("partnerName");
+        const mobileInput = document.getElementById("partnerMobile");
+        const name = nameInput.value.trim();
+        const mobile = mobileInput.value.trim();
+        const btn = document.getElementById("genBtn");
+
+        // Validation
+        if (!name || mobile.length !== 10) {
+          alert("⚠️ Please enter a valid Name and 10-digit Mobile Number.");
           return;
         }
 
-        // Create Fake Link structure matching your image
-        // Ref ID logic: Random string
-        const refId = "0DcwOTg2" + Math.floor(Math.random() * 100);
-        const link = `https://www.r2ps.in/apply.html?ref=${refId}&partner=${name.split(" ")[0]}`;
+        // Loading State
+        const originalContent = btn.innerHTML;
+        btn.innerHTML = `<i class="fas fa-circle-notch fa-spin"></i> Processing...`;
+        btn.disabled = true;
 
-        document.getElementById("generatedUrl").value = link;
-        document.getElementById("linkResult").classList.remove("hidden");
+        try {
+          // A. Check if user exists
+          let { data: partner, error } = await supabaseClient
+            .from("referral_partners")
+            .select("*")
+            .eq("mobile", mobile)
+            .single();
 
-        // Update UI Name (Simulating login state change)
-        document.getElementById("navName").innerText = name;
-      }
+          // B. If not, create new user
+          if (!partner) {
+            const codePrefix = name
+              .replace(/[^a-zA-Z]/g, "")
+              .substring(0, 3)
+              .toUpperCase();
+            const uniqueCode = codePrefix + mobile.slice(-4); // e.g., WAS3288
 
-      function copyLink() {
+            const { data: newPartner, error: insertError } =
+              await supabaseClient
+                .from("referral_partners")
+                .insert([
+                  {
+                    partner_name: name,
+                    mobile: mobile,
+                    referral_code: uniqueCode,
+                  },
+                ])
+                .select()
+                .single();
+
+            if (insertError) throw insertError;
+            partner = newPartner;
+          }
+
+          // C. Display Link
+          const baseUrl = "https://www.r2ps.in/apply.html";
+          const finalLink = `${baseUrl}?ref=${partner.referral_code}&partner=${encodeURIComponent(partner.partner_name.split(" ")[0])}`;
+
+          document.getElementById("generatedUrl").value = finalLink;
+          document.getElementById("linkResult").classList.remove("hidden");
+
+          // Refresh table to show new entry
+          window.fetchAllPartners();
+        } catch (err) {
+          console.error("Generate Error:", err);
+          alert("Error: " + err.message);
+        } finally {
+          btn.innerHTML = originalContent;
+          btn.disabled = false;
+        }
+      };
+
+      // ==========================================
+      // FEATURE 2: FETCH & RENDER TABLE
+      // ==========================================
+      window.fetchAllPartners = async function () {
+        const tbody = document.getElementById("partnersTableBody");
+        const countSpan = document.getElementById("totalPartnersCount");
+        const refreshBtn = document.getElementById("refreshBtn");
+
+        // Spin Refresh Icon
+        if (refreshBtn) refreshBtn.querySelector("i").classList.add("fa-spin");
+
+        try {
+          let { data: partners, error } = await supabaseClient
+            .from("referral_partners")
+            .select("*")
+            .order("id", { ascending: false });
+
+          if (error) throw error;
+
+          if (!partners || partners.length === 0) {
+            tbody.innerHTML = `<tr><td colspan="6" class="text-center py-8 text-slate-400 italic">No partners found in database.</td></tr>`;
+            countSpan.innerText = "Total: 0";
+            return;
+          }
+
+          countSpan.innerText = `Total Partners: ${partners.length}`;
+
+          // RENDER ROWS
+          tbody.innerHTML = partners
+            .map((partner) => {
+              const dateStr = new Date(partner.created_at).toLocaleDateString(
+                "en-IN",
+                { day: "numeric", month: "short" },
+              );
+              const initial = partner.partner_name.charAt(0).toUpperCase();
+
+              // Financial Math
+              const total = Number(partner.total_earnings || 0);
+              const paid = Number(partner.paid_amount || 0);
+              // We calculate pending dynamically to be safe
+              const pending = total - paid;
+
+              // Sanitize name for JS function calls
+              const safeName = partner.partner_name.replace(/'/g, "\\'");
+
+              return `
+              <tr class="hover:bg-indigo-50/30 transition border-b border-slate-100 last:border-0 group">
+                <td class="px-6 py-4">
+                   <span class="font-mono text-xs text-slate-400 bg-slate-100 px-2 py-0.5 rounded">#${partner.id}</span>
+                </td>
+                <td class="px-6 py-4">
+                  <div class="flex items-center gap-3">
+                    <div class="h-8 w-8 rounded-full bg-indigo-100 text-indigo-700 flex items-center justify-center font-bold text-xs shadow-sm ring-2 ring-white">
+                      ${initial}
+                    </div>
+                    <div>
+                      <div class="font-bold text-slate-800 text-sm">${partner.partner_name}</div>
+                      <div class="text-xs text-slate-500 font-mono tracking-tight">${partner.mobile}</div>
+                    </div>
+                  </div>
+                </td>
+                <td class="px-6 py-4 text-center">
+                  <span class="bg-slate-50 text-slate-600 px-2 py-1 rounded text-xs font-mono font-bold border border-slate-200">
+                    ${partner.referral_code}
+                  </span>
+                </td>
+                <td class="px-6 py-4 text-right">
+                  <div class="text-sm font-bold text-slate-700">₹${total.toLocaleString("en-IN")}</div>
+                </td>
+                <td class="px-6 py-4 text-right">
+                  <div class="text-sm font-bold ${pending > 0 ? "text-amber-600" : "text-emerald-500"}">
+                    ₹${pending.toLocaleString("en-IN")}
+                  </div>
+                </td>
+                <td class="px-6 py-4 text-center">
+                  <div class="flex items-center justify-center gap-2">
+                    ${
+                      pending > 0
+                        ? `<button onclick="window.openPaymentPrompt(${partner.id}, '${safeName}', ${pending}, ${paid})" 
+                          class="bg-emerald-600 hover:bg-emerald-700 text-white px-3 py-1.5 rounded-lg text-xs font-bold transition shadow-sm active:translate-y-0.5 flex items-center gap-1">
+                          <i class="fa-solid fa-check-double"></i> Pay
+                         </button>`
+                        : `<span class="text-[10px] text-slate-400 bg-slate-100 px-2 py-1 rounded border border-slate-200 font-medium">Settled</span>`
+                    }
+                    <button onclick="window.deletePartner(${partner.id})" 
+                      class="h-7 w-7 rounded-lg bg-white border border-slate-200 text-slate-400 hover:text-rose-500 hover:border-rose-200 hover:bg-rose-50 transition flex items-center justify-center shadow-sm" title="Delete">
+                      <i class="fa-regular fa-trash-can text-xs"></i>
+                    </button>
+                  </div>
+                </td>
+              </tr>
+            `;
+            })
+            .join("");
+        } catch (err) {
+          console.error("Fetch Error:", err);
+          tbody.innerHTML = `<tr><td colspan="6" class="text-center py-4 text-rose-500">Error loading data. Check console.</td></tr>`;
+        } finally {
+          if (refreshBtn)
+            refreshBtn.querySelector("i").classList.remove("fa-spin");
+        }
+      };
+
+      // ==========================================
+      // FEATURE 3: PARTIAL PAYMENT LOGIC
+      // ==========================================
+      window.openPaymentPrompt = async function (
+        id,
+        name,
+        currentPending,
+        currentPaid,
+      ) {
+        // 1. Get Amount
+        const amountStr = prompt(
+          `PAYMENT FOR: ${name}\n\n• Total Pending: ₹${currentPending}\n\nEnter amount to pay now:`,
+          currentPending,
+        );
+
+        if (amountStr === null) return; // Cancelled
+
+        const payAmount = Number(amountStr);
+
+        // 2. Validate
+        if (isNaN(payAmount) || payAmount <= 0) {
+          alert("❌ Error: Please enter a valid positive number.");
+          return;
+        }
+        if (payAmount > currentPending) {
+          alert(
+            `❌ Error: You cannot pay ₹${payAmount}. The max pending amount is ₹${currentPending}.`,
+          );
+          return;
+        }
+
+        // 3. Calculate New Database Values
+        const newPaidTotal = Number(currentPaid) + payAmount;
+        // The DB stores 'pending_amount', so we must update it too.
+        const newPendingTotal = Number(currentPending) - payAmount;
+
+        try {
+          // 4. Update Database
+          const { error } = await supabaseClient
+            .from("referral_partners")
+            .update({
+              paid_amount: newPaidTotal,
+              pending_amount: newPendingTotal,
+            })
+            .eq("id", id);
+
+          if (error) throw error;
+
+          // 5. Success
+          alert(
+            `✅ Success! Paid ₹${payAmount} to ${name}.\nRemaining Pending: ₹${newPendingTotal}`,
+          );
+          window.fetchAllPartners(); // Refresh UI
+        } catch (err) {
+          console.error("Payment Error:", err);
+          alert("❌ Database Error: " + err.message);
+        }
+      };
+
+      // ==========================================
+      // FEATURE 4: DELETE PARTNER
+      // ==========================================
+      window.deletePartner = async function (id) {
+        if (
+          !confirm(
+            "⚠️ DANGER ZONE\n\nAre you sure you want to PERMANENTLY delete this partner?\nThis action cannot be undone.",
+          )
+        ) {
+          return;
+        }
+
+        try {
+          const { error } = await supabaseClient
+            .from("referral_partners")
+            .delete()
+            .eq("id", id);
+
+          if (error) throw error;
+
+          window.fetchAllPartners(); // Refresh UI
+        } catch (err) {
+          console.error("Delete Error:", err);
+          alert("❌ Error: Could not delete. " + err.message);
+        }
+      };
+
+      // ==========================================
+      // FEATURE 5: UTILITIES
+      // ==========================================
+      window.copyLink = function () {
         const copyText = document.getElementById("generatedUrl");
         copyText.select();
+        copyText.setSelectionRange(0, 99999);
         navigator.clipboard.writeText(copyText.value);
-        alert("Referral Link copied to clipboard!");
-      }
 
-      // --- 3. DASHBOARD RENDER LOGIC ---
-      function renderDashboard(data = transactions) {
-        const tbody = document.getElementById("txTableBody");
-        tbody.innerHTML = "";
+        const btn = event.currentTarget;
+        const original = btn.innerHTML;
+        btn.innerHTML = `<i class="fa-solid fa-check"></i> Copied!`;
+        setTimeout(() => (btn.innerHTML = original), 2000);
+      };
 
-        let totalEarnings = 0;
-        let pendingBalance = 0;
-        let totalPaid = 0;
-        // Use original full list for totals, even if filtered
-        let totalApps = transactions.length;
-
-        // Calculate Totals based on FULL data, not filtered data
-        transactions.forEach((tx) => {
-          totalEarnings += tx.comm;
-          if (tx.status === "pending") pendingBalance += tx.comm;
-          else totalPaid += tx.comm;
-        });
-
-        // Render Rows based on FILTERED data
-        if (data.length === 0) {
-          tbody.innerHTML = `<tr><td colspan="6" class="text-center py-8 text-slate-400">No records found matching your search.</td></tr>`;
-        } else {
-          data.forEach((tx) => {
-            // Status Badge Styling
-            const statusBadge =
-              tx.status === "pending"
-                ? `<span class="bg-orange-100 text-orange-700 px-3 py-1 rounded-md text-xs font-bold border border-orange-200">Pending</span>`
-                : `<span class="bg-green-100 text-green-700 px-3 py-1 rounded-md text-xs font-bold border border-green-200">Paid</span>`;
-
-            // Action Button Styling (Purple for Action, Grey text for Settled)
-            const actionBtn =
-              tx.status === "pending"
-                ? `<button onclick="markAsPaid(${tx.id})" class="bg-[#4f46e5] hover:bg-indigo-700 text-white text-xs font-bold px-4 py-2 rounded-lg shadow-md hover:shadow-lg transition-all transform hover:-translate-y-0.5">
-                            Mark Paid / भुगतान
-                        </button>`
-                : `<span class="text-slate-400 text-xs italic flex items-center justify-center gap-1"><i class="fa-solid fa-check"></i> Settled</span>`;
-
-            const row = `
-                        <tr class="hover:bg-slate-50 transition border-b border-slate-50 last:border-0 group">
-                            <td class="px-6 py-4 font-semibold text-slate-800 group-hover:text-indigo-700 transition">${tx.name}</td>
-                            <td class="px-6 py-4 text-slate-500">${tx.service}</td>
-                            <td class="px-6 py-4 text-slate-400 text-xs font-mono">${tx.date}</td>
-                            <td class="px-6 py-4 text-right font-bold text-slate-800">₹${tx.comm}</td>
-                            <td class="px-6 py-4 text-center">${statusBadge}</td>
-                            <td class="px-6 py-4 text-center">${actionBtn}</td>
-                        </tr>
-                    `;
-            tbody.innerHTML += row;
-          });
-        }
-
-        // Update Stats in DOM
-        document.getElementById("totalEarnings").innerText = totalEarnings;
-        document.getElementById("pendingBalance").innerText = pendingBalance;
-        document.getElementById("totalPaid").innerText = totalPaid;
-        document.getElementById("totalApps").innerText = totalApps;
-      }
-
-      // --- 4. MARK AS PAID ACTION ---
-      function markAsPaid(id) {
-        const index = transactions.findIndex((t) => t.id === id);
-        if (index !== -1) {
-          // Confirm dialog
-          if (
-            confirm(
-              `Confirm payment of ₹${transactions[index].comm} for ${transactions[index].name}?\n\nThis will move the amount from 'Pending' to 'Paid Out'.`,
-            )
-          ) {
-            // Update Data
-            transactions[index].status = "paid";
-            // Re-render (keeps current filter if any)
-            filterTable();
-          }
-        }
-      }
-
-      // --- 5. FILTER FUNCTION ---
-      function filterTable() {
-        const input = document
-          .getElementById("searchInput")
-          .value.toLowerCase();
-        const filteredData = transactions.filter(
-          (tx) =>
-            tx.name.toLowerCase().includes(input) ||
-            tx.service.toLowerCase().includes(input),
-        );
-        renderDashboard(filteredData);
-      }
-
-      // Initialize
-      window.addEventListener("DOMContentLoaded", () => {
-        // Generate link automatically on load for demo visualization
-        generateLink();
-        // Render table
-        renderDashboard();
-      });
+      // Initialize on load
+      document.addEventListener("DOMContentLoaded", window.fetchAllPartners);
     </script>
   </body>
 </html>
