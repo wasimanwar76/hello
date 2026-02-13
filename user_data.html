@@ -381,8 +381,18 @@
     </div>
 
     <script>
+      document.addEventListener("DOMContentLoaded", () => {
+        const token = localStorage.getItem("token");
 
-      
+        if (!token) {
+          // Option A: Hard Redirect (Your current way)
+          window.location.href = "/login.html";
+        } else {
+          // Option B: Initialize the page data
+          console.log("Access Granted. Fetching data...");
+          fetchUserData();
+        }
+      });
       // 1. PROTECTION
       (function () {
         document.addEventListener("contextmenu", (e) => e.preventDefault());
