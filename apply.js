@@ -537,15 +537,17 @@ async function validateAndSubmit() {
         redirectTarget: "_self",
       })
       .then(async (result) => {
+        // 1. Handle Errors
         if (result.error) {
-          showToast(
-            "Payment failed or closed / भुगतान विफल या बंद कर दिया गया।",
-            "error",
-          );
+          showToast("Payment failed or cancelled / भुगतान विफल रहा।", "error");
           submitBtn.innerHTML = originalBtnText;
           submitBtn.disabled = false;
-        } else {
-          // पेमेंट सफल: पार्टनर को रिवॉर्ड दें
+          return;
+        }
+
+        // 2. Handle Success OR Pending
+        // We reward the partner if the payment is successful OR waiting for confirmation
+        if (result.status === "SUCCESS" || result.status === "PENDING") {
           if (referralCode !== "DIRECT") {
             try {
               await supabaseClient.rpc("increment_partner_stats", {
@@ -557,14 +559,20 @@ async function validateAndSubmit() {
           }
 
           showToast(
-            "Payment Successful! Application submitted / भुगतान सफल! आवेदन जमा हो गया है।",
+            "Application submitted successfully! / आवेदन सफलतापूर्वक जमा हो गया है।",
             "success",
           );
-
-          // 2 सेकंड बाद वापस Apply पेज पर भेजें
           setTimeout(() => {
             window.location.href = "https://www.r2ps.in/apply.html";
           }, 2000);
+        } else {
+          // If the status is "FAILED" or something else
+          showToast(
+            "Payment was not successful. / भुगतान सफल नहीं हुआ।",
+            "error",
+          );
+          submitBtn.innerHTML = originalBtnText;
+          submitBtn.disabled = false;
         }
       });
   } catch (err) {
