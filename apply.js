@@ -414,7 +414,7 @@ async function validateAndSubmit() {
   submitBtn.disabled = true;
 
   try {
-    // 1. Upload Files
+    // 1. फाइलें अपलोड करें (Upload Files)
     const [
       urlAadhaarFront,
       urlAadhaarBack,
@@ -433,22 +433,18 @@ async function validateAndSubmit() {
       uploadToSupabase("fileOldIncome", "old_docs"),
     ]);
 
-    // 2. Prepare Data
+    // 2. डेटा और रेफरल कोड तैयार करें
     const urlParams = new URLSearchParams(window.location.search);
     const referralCode = urlParams.get("ref") || "DIRECT";
 
     const payload = {
       referral_code: referralCode,
       submission_date: new Date().toISOString().split("T")[0],
-
-      // Personal
       applicant_name: name,
       gender: gender,
       mobile: mobile,
       email: email,
       document_type: docType,
-
-      // Files
       file_aadhaar_front: urlAadhaarFront,
       file_aadhaar_back: urlAadhaarBack,
       file_signed_photo: urlPhoto,
@@ -457,7 +453,6 @@ async function validateAndSubmit() {
       file_old_caste: urlOldCaste,
       file_old_income: urlOldInc,
 
-      // Caste Data
       caste_profession:
         docType === "caste"
           ? document.getElementById("casteProfession").value
@@ -471,7 +466,6 @@ async function validateAndSubmit() {
       sub_caste:
         docType === "caste" ? document.getElementById("casteSub").value : "",
 
-      // Income Data
       income_profession:
         docType === "income"
           ? document.getElementById("incomeProfession").value
@@ -503,30 +497,27 @@ async function validateAndSubmit() {
       payment_status: "PENDING",
     };
 
-    // 3. Insert to DB
+    // 3. Supabase में डेटा डालें
     const { data, error } = await supabaseClient
       .from("application_entries")
       .insert([payload])
       .select();
 
-    if (error) {
-      console.error("Supabase Insert Error:", error);
-      throw new Error("Database insert failed: " + error.message);
-    }
+    if (error) throw new Error("Database error: " + error.message);
 
-    // 4. ✅ Database Success
+    // 4. पेमेंट गेटवे खोलें
     showToast(
-      "Application saved. Redirecting to payment / आवेदन सुरक्षित, भुगतान के लिए आगे बढ़ रहे हैं...",
+      "Application saved. Opening payment / आवेदन सुरक्षित, भुगतान पोर्टल खुल रहा है...",
       "success",
     );
-    // 5. 💸 Call Localhost Payment API
+
     const paymentResponse = await fetch(
       "https://paymentconfig.vercel.app/api/payment/create",
       {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          applicationId: data[0].id, // The ID we just created
+          applicationId: data[0].id,
           customerPhone: mobile,
           customerName: name,
         }),
@@ -534,32 +525,60 @@ async function validateAndSubmit() {
     );
 
     const paymentData = await paymentResponse.json();
-
-    if (!paymentData.success) {
+    if (!paymentData.success)
       throw new Error("Payment Error: " + paymentData.message);
-    }
 
-    // 6. 🚀 Trigger Cashfree Checkout
-    // FIX: Use 'new window.Cashfree' to access the global variable correctly
-    const cashfree = new window.Cashfree({
-      mode: "production", // Ensure this matches your backend environment
-    });
+    // 5. Cashfree पेमेंट शुरू करें
+    const cashfree = new window.Cashfree({ mode: "production" });
 
-    cashfree.checkout({
-      paymentSessionId: paymentData.payment_session_id,
-      redirectTarget: "_self", // Redirects user to payment page
-    });
+    cashfree
+      .checkout({
+        paymentSessionId: paymentData.payment_session_id,
+        redirectTarget: "_self",
+      })
+      .then(async (result) => {
+        if (result.error) {
+          showToast(
+            "Payment failed or closed / भुगतान विफल या बंद कर दिया गया।",
+            "error",
+          );
+          submitBtn.innerHTML = originalBtnText;
+          submitBtn.disabled = false;
+        } else {
+          // पेमेंट सफल: पार्टनर को रिवॉर्ड दें
+          if (referralCode !== "DIRECT") {
+            try {
+              await supabaseClient.rpc("increment_partner_stats", {
+                row_code: referralCode,
+              });
+            } catch (rpcErr) {
+              console.error("Partner update failed:", rpcErr);
+            }
+          }
+
+          showToast(
+            "Payment Successful! Application submitted / भुगतान सफल! आवेदन जमा हो गया है।",
+            "success",
+          );
+
+          // 2 सेकंड बाद वापस Apply पेज पर भेजें
+          setTimeout(() => {
+            window.location.href = "https://www.r2ps.in/apply.html";
+          }, 2000);
+        }
+      });
   } catch (err) {
     console.error("❌ Submission Failed:", err);
 
-    // Check if showToast function exists, otherwise fallback to alert
+    // एरर मैसेज हिंदी और इंग्लिश में
+    const errorMsg = `❌ Error: ${err.message} / त्रुटि: आवेदन जमा नहीं हो सका। कृपया पुनः प्रयास करें।`;
+
     if (typeof showToast === "function") {
-      showToast(`❌ Error: ${err.message}`, "error");
+      showToast(errorMsg, "error");
     } else {
-      alert(`❌ Error: ${err.message}`);
+      alert(errorMsg);
     }
 
-    // Re-enable button on error
     if (submitBtn) {
       submitBtn.innerHTML = originalBtnText;
       submitBtn.disabled = false;
