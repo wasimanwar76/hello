@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Partner Portal | R2PS</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&display=swap" rel="stylesheet">
+    
+    <style>
+        body { font-family: 'Plus Jakarta Sans', sans-serif; }
+        .fade-in { animation: fadeIn 0.5s ease-out forwards; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        .shimmer-btn { position: relative; overflow: hidden; }
+        .shimmer-btn::after {
+            content: ''; position: absolute; top: -50%; left: -50%; width: 200%; height: 200%;
+            background: linear-gradient(45deg, transparent, rgba(255,255,255,0.1), transparent);
+            transform: rotate(45deg); animation: shimmerEffect 3s infinite;
+        }
+        @keyframes shimmerEffect { 0% { transform: translateX(-100%) rotate(45deg); } 100% { transform: translateX(100%) rotate(45deg); } }
+    </style>
+</head>
+<body class="bg-[#F8FAFC] antialiased">
+
+    <div id="loader" class="hidden fixed inset-0 z-[100] bg-white/90 backdrop-blur-md flex items-center justify-center">
+        <div class="flex flex-col items-center">
+            <div class="relative w-16 h-16">
+                <div class="absolute inset-0 border-4 border-indigo-100 rounded-full"></div>
+                <div class="absolute inset-0 border-4 border-indigo-600 rounded-full border-t-transparent animate-spin"></div>
+            </div>
+            <p class="mt-4 text-slate-600 font-bold tracking-wide animate-pulse">Syncing... / सिंक हो रहा है...</p>
+        </div>
+    </div>
+
+    <div id="toast" class="fixed top-5 left-1/2 -translate-x-1/2 z-[110] hidden pointer-events-none">
+        <div class="bg-slate-900 text-white px-6 py-3 rounded-2xl shadow-2xl flex items-center gap-3 fade-in border border-white/10">
+            <i id="toastIcon" class="fas fa-info-circle text-indigo-400"></i>
+            <span id="toastMsg" class="text-sm font-bold tracking-tight">Message</span>
+        </div>
+    </div>
+
+    <div id="loginView" class="min-h-screen flex flex-col items-center justify-center p-6 fade-in">
+        <div class="w-full max-w-sm">
+            <div class="text-center mb-10">
+                <div class="w-20 h-20 bg-indigo-600 rounded-3xl flex items-center justify-center mx-auto mb-6 shadow-2xl shadow-indigo-200">
+                    <i class="fas fa-handshake-angle text-white text-3xl"></i>
+                </div>
+                <h1 class="text-3xl font-black text-slate-900 tracking-tight">Partner Portal</h1>
+                <p class="text-slate-500 mt-2 font-medium">Enter mobile to check earnings</p>
+            </div>
+
+            <div class="bg-white p-2 rounded-[32px] shadow-xl shadow-slate-200/50 border border-white">
+                <div class="p-6 space-y-4">
+                    <div class="space-y-2">
+                        <label class="text-[10px] font-black uppercase tracking-[2px] text-slate-400 ml-1">Verified Mobile</label>
+                        <input type="tel" id="mobileInput" maxlength="10" placeholder="10 Digit Number" 
+                            class="w-full px-5 py-4 bg-slate-50 border border-slate-100 rounded-2xl focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-600 outline-none transition-all font-bold text-slate-700 text-lg">
+                    </div>
+                    <button onclick="handlePartnerAuth()" 
+                        class="shimmer-btn w-full bg-slate-900 hover:bg-indigo-600 text-white font-bold py-5 rounded-2xl shadow-lg transition-all active:scale-95 flex items-center justify-center gap-2">
+                        Get Data <i class="fas fa-arrow-right text-xs"></i>
+                    </button>
+                </div>
+            </div>
+
+            <div id="errorState" class="hidden mt-6 p-4 bg-rose-50 border border-rose-100 rounded-2xl flex items-center gap-4 fade-in">
+                <div class="h-10 w-10 bg-rose-500 text-white rounded-full flex items-center justify-center shrink-0 shadow-lg shadow-rose-200">
+                    <i class="fas fa-user-xmark text-sm"></i>
+                </div>
+                <div>
+                    <p class="text-rose-900 font-bold text-xs leading-tight">No Partner Found / कोई रिकॉर्ड नहीं मिला</p>
+                    <p class="text-rose-600 text-[10px] font-medium mt-0.5">Please check your number or contact Admin.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="dashboardView" class="hidden min-h-screen pb-10 fade-in">
+        <div class="px-6 py-8 flex justify-between items-center bg-white border-b border-slate-100">
+            <div class="flex items-center gap-3">
+                <div id="avatar" class="h-11 w-11 rounded-xl bg-indigo-600 text-white flex items-center justify-center font-black shadow-lg shadow-indigo-100"></div>
+                <div>
+                    <h2 id="partnerName" class="font-bold text-slate-900 leading-tight tracking-tight">Partner</h2>
+                    <span class="text-[10px] text-emerald-500 font-black uppercase tracking-widest flex items-center gap-1">
+                        <i class="fas fa-shield-check"></i> Verified Account
+                    </span>
+                </div>
+            </div>
+            <button onclick="location.reload()" class="h-10 w-10 bg-slate-50 text-slate-400 rounded-xl flex items-center justify-center hover:text-rose-500 transition-colors">
+                <i class="fas fa-power-off"></i>
+            </button>
+        </div>
+
+        <div class="px-6 mt-6 mb-8">
+            <div class="bg-slate-900 rounded-[40px] p-8 text-white relative overflow-hidden shadow-2xl">
+                <div class="absolute -right-10 -top-10 w-40 h-40 bg-indigo-500/20 rounded-full blur-3xl"></div>
+                <p class="text-indigo-300/60 text-[10px] font-black uppercase tracking-[3px] mb-2">Available Balance</p>
+                <h3 id="pendingAmount" class="text-4xl font-black tracking-tighter mb-8 tabular-nums">₹0</h3>
+                
+                <div class="grid grid-cols-2 gap-4 border-t border-white/10 pt-6">
+                    <div>
+                        <p class="text-white/40 text-[9px] font-bold uppercase tracking-widest">Total Earned</p>
+                        <p id="totalEarnings" class="font-bold text-lg tabular-nums">₹0</p>
+                    </div>
+                    <div class="border-l border-white/10 pl-4">
+                        <p class="text-white/40 text-[9px] font-bold uppercase tracking-widest">Already Paid</p>
+                        <p id="paidAmount" class="font-bold text-lg tabular-nums">₹0</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="px-6 grid grid-cols-2 gap-4 mb-8">
+            <div class="bg-white p-6 rounded-[32px] border border-slate-100 shadow-sm">
+                <div class="w-10 h-10 bg-indigo-50 text-indigo-600 rounded-xl flex items-center justify-center mb-3">
+                    <i class="fas fa-users-line"></i>
+                </div>
+                <p class="text-slate-400 text-[9px] font-black uppercase tracking-widest mb-1">Applications</p>
+                <p id="totalApps" class="text-2xl font-black text-slate-800">0</p>
+            </div>
+            <div class="bg-white p-6 rounded-[32px] border border-slate-100 shadow-sm">
+                <div class="w-10 h-10 bg-emerald-50 text-emerald-600 rounded-xl flex items-center justify-center mb-3">
+                    <i class="fas fa-qrcode"></i>
+                </div>
+                <p class="text-slate-400 text-[9px] font-black uppercase tracking-widest mb-1">Invite Code</p>
+                <p id="refCode" class="text-xl font-black text-indigo-600">--</p>
+            </div>
+        </div>
+
+        <div class="px-6">
+            <button onclick="copyMyLink()" class="w-full bg-white text-indigo-600 font-bold py-5 rounded-[24px] shadow-sm border border-indigo-100 flex items-center justify-center gap-3 active:scale-95 transition-all">
+                <i class="fas fa-share-nodes"></i> Copy Referral Link
+            </button>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script>
+        const SUPABASE_URL = "https://douciplboqmayceruthu.supabase.co";
+        const SUPABASE_KEY = "sb_publishable_1CKpfNGUpUFQqOeIENMe_A_7Yk84j_z";
+        const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+        let currentPartner = null;
+
+        function showToast(msg, icon = 'fa-info-circle') {
+            const toast = document.getElementById('toast');
+            document.getElementById('toastMsg').innerText = msg;
+            document.getElementById('toastIcon').className = `fas ${icon} text-indigo-400`;
+            toast.classList.remove('hidden');
+            setTimeout(() => toast.classList.add('hidden'), 3000);
+        }
+
+        async function handlePartnerAuth() {
+            const mobile = document.getElementById('mobileInput').value.trim();
+            const loader = document.getElementById('loader');
+            const errorState = document.getElementById('errorState');
+
+            errorState.classList.add('hidden');
+
+            if (!/^[0-9]{10}$/.test(mobile)) {
+                showToast("Invalid Number / गलत नंबर", 'fa-circle-exclamation');
+                return;
+            }
+
+            loader.classList.remove('hidden');
+
+            try {
+                const { data, error } = await supabaseClient
+                    .from('referral_partners')
+                    .select('*')
+                    .eq('mobile', mobile)
+                    .single();
+
+                await new Promise(res => setTimeout(res, 800));
+
+                if (error || !data) {
+                    loader.classList.add('hidden');
+                    errorState.classList.remove('hidden');
+                    return;
+                }
+
+                currentPartner = data;
+                populateDashboard(data);
+
+                document.getElementById('loginView').classList.add('hidden');
+                document.getElementById('dashboardView').classList.remove('hidden');
+                loader.classList.add('hidden');
+                showToast("Access Granted / स्वागत है", 'fa-circle-check');
+
+            } catch (err) {
+                loader.classList.add('hidden');
+                showToast("Network Error / सर्वर त्रुटि", 'fa-triangle-exclamation');
+            }
+        }
+
+        function populateDashboard(data) {
+            document.getElementById('partnerName').innerText = data.partner_name;
+            document.getElementById('avatar').innerText = data.partner_name.charAt(0).toUpperCase();
+            
+            const formatter = new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR', maximumFractionDigits: 0 });
+
+            document.getElementById('pendingAmount').innerText = formatter.format(data.pending_amount || 0);
+            document.getElementById('totalEarnings').innerText = formatter.format(data.total_earnings || 0);
+            document.getElementById('paidAmount').innerText = formatter.format(data.paid_amount || 0);
+            document.getElementById('totalApps').innerText = data.total_applications || 0;
+            document.getElementById('refCode').innerText = data.referral_code;
+        }
+
+        function copyMyLink() {
+            if (!currentPartner) return;
+            const link = `https://www.r2ps.in/apply.html?ref=${currentPartner.referral_code}`;
+            navigator.clipboard.writeText(link).then(() => {
+                showToast("Link Copied / लिंक कॉपी हुआ", 'fa-clipboard-check');
+            });
+        }
+    </script>
+</body>
+</html>
