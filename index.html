@@ -6,29 +6,66 @@
       name="viewport"
       content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"
     />
-    <title>R2PS | Professional Documentation & Compliance</title>
+    <title>R2PS | Elite Documentation for Every Village & City</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link
       rel="stylesheet"
       href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"
     />
     <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet" />
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
-      /* Absolute Mobile Width Protection */
-      html,
+      @import url("https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;600;800&display=swap");
+
+      :root {
+        --brand-indigo: #4338ca;
+        --brand-purple: #7c3aed;
+      }
       body {
-        max-width: 100%;
+        font-family: "Plus Jakarta Sans", sans-serif;
         overflow-x: hidden;
-        position: relative;
-        margin: 0;
-        padding: 0;
       }
 
-      * {
-        box-sizing: border-box;
+      .hero-gradient {
+        background: radial-gradient(
+          circle at 50% 50%,
+          #4338ca 0%,
+          #1e1b4b 100%
+        );
+      }
+      .blob {
+        position: absolute;
+        width: 500px;
+        height: 500px;
+        background: linear-gradient(
+          135deg,
+          rgba(124, 58, 237, 0.3) 0%,
+          rgba(67, 56, 202, 0.3) 100%
+        );
+        filter: blur(80px);
+        border-radius: 50%;
+        z-index: 1;
+        animation: float 20s infinite alternate;
+      }
+      @keyframes float {
+        0% {
+          transform: translate(0, 0);
+        }
+        100% {
+          transform: translate(100px, 50px);
+        }
       }
 
-      /* Instant Marquee Logic */
+      .bento-item {
+        transition: all 0.5s cubic-bezier(0.23, 1, 0.32, 1);
+        border: 1px solid rgba(0, 0, 0, 0.05);
+      }
+      .bento-item:hover {
+        transform: translateY(-8px);
+        box-shadow: 0 30px 60px -12px rgba(67, 56, 202, 0.15);
+        border-color: var(--brand-indigo);
+      }
+
       @keyframes marquee {
         0% {
           transform: translateX(0);
@@ -37,717 +74,653 @@
           transform: translateX(-50%);
         }
       }
-
       .animate-marquee {
-        display: inline-block;
-        white-space: nowrap;
-        animation: marquee 20s linear infinite;
+        animation: marquee 30s linear infinite;
       }
-
-      .glass-card {
-        background: rgba(255, 255, 255, 0.95);
-        backdrop-filter: blur(10px);
-        transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-      }
-
-      .glass-card:hover {
-        transform: translateY(-12px);
-        box-shadow: 0 25px 50px -12px rgba(67, 56, 202, 0.15);
-      }
-
-      .step-number {
-        -webkit-text-stroke: 1px #4338ca;
-        color: transparent;
-      }
-
-      /* Custom scrollbar for premium feel */
-      ::-webkit-scrollbar {
-        width: 8px;
-      }
-      ::-webkit-scrollbar-track {
-        background: #f1f1f1;
-      }
-      ::-webkit-scrollbar-thumb {
-        background: #4338ca;
-        border-radius: 10px;
+      .glass-nav {
+        background: rgba(255, 255, 255, 0.85);
+        backdrop-filter: saturate(180%) blur(20px);
       }
     </style>
   </head>
 
-  <body class="bg-slate-50 text-slate-900 font-sans leading-normal">
+  <body class="bg-[#fafafa] text-slate-900">
     <div
-      class="bg-indigo-900 text-white py-3 overflow-hidden sticky top-0 z-[70] shadow-lg border-b border-indigo-800 w-full"
+      class="bg-indigo-950 text-white py-2 marquee-container overflow-hidden sticky top-0 z-[100] border-b border-indigo-800"
     >
-      <div class="animate-marquee whitespace-nowrap flex items-center">
-        <span class="mx-6 flex items-center text-sm md:text-base">
-          <i class="fas fa-exclamation-triangle mr-3 text-yellow-400"></i>
-          <strong>महत्वपूर्ण सूचना:</strong> R2PS एक निजी परामर्श संस्था है। हम
-          RTPS बिहार या किसी सरकारी निकाय से संबद्ध नहीं हैं।
+      <div
+        class="animate-marquee whitespace-nowrap flex items-center font-medium"
+      >
+        <span class="mx-8 flex items-center text-xs md:text-sm">
+          <i class="fas fa-bullhorn text-yellow-400 mr-2"></i>
+          R2PS provides professional documentation help. We are a private
+          agency. R2PS सरकारी फॉर्म भरने में आपकी सहायता करता है। हम एक प्राइवेट
+          एजेंसी हैं।
         </span>
-        <span class="mx-6 text-indigo-400 font-bold">||</span>
-        <span class="mx-6 flex items-center text-sm md:text-base">
-          <i class="fas fa-info-circle mr-3 text-indigo-300"></i>
-          <strong>DISCLAIMER:</strong> R2PS is a private consultancy and not
-          affiliated with any government body.
-        </span>
-        <span class="mx-6 flex items-center text-sm md:text-base">
-          <i class="fas fa-exclamation-triangle mr-3 text-yellow-400"></i>
-          <strong>महत्वपूर्ण सूचना:</strong> R2PS एक निजी परामर्श संस्था है।
+        <span class="mx-8 flex items-center text-xs md:text-sm">
+          <i class="fas fa-shield-halved text-green-400 mr-2"></i>
+          Secure & Verified Process. आपका डेटा हमारे पास पूरी तरह सुरक्षित है।
         </span>
       </div>
     </div>
 
-    <header
-      class="bg-white/90 backdrop-blur-md shadow-sm sticky top-10 md:top-12 z-50 w-full"
-    >
-      <div
-        class="max-w-7xl mx-auto px-4 md:px-6 py-4 flex justify-between items-center"
+    <header class="fixed top-10 md:top-12 left-0 right-0 z-50 px-4 md:px-8">
+      <nav
+        class="max-w-7xl mx-auto glass-nav rounded-2xl md:rounded-full border border-white/20 shadow-2xl px-5 py-3 md:py-4 flex justify-between items-center"
       >
-        <div
-          class="text-2xl md:text-3xl font-black text-indigo-700 tracking-tighter"
-        >
-          R2PS<span class="text-purple-600">.</span>
+        <div class="flex items-center gap-2">
+          <div
+            class="w-10 h-10 bg-indigo-600 rounded-xl flex items-center justify-center text-white shadow-lg"
+          >
+            <i class="fas fa-paper-plane"></i>
+          </div>
+          <div class="flex flex-col leading-none">
+            <span
+              class="text-xl md:text-2xl font-black text-slate-900 tracking-tighter"
+              >R2PS<span class="text-indigo-600">.</span></span
+            >
+            <span
+              class="text-[8px] uppercase tracking-widest text-slate-400 font-bold hidden md:block"
+              >Private Consultancy</span
+            >
+          </div>
         </div>
 
-        <nav
-          class="hidden lg:flex space-x-10 font-bold items-center text-slate-600"
+        <ul
+          class="hidden lg:flex items-center gap-6 xl:gap-8 text-sm font-bold text-slate-600"
         >
-          <a href="#about" class="hover:text-indigo-600 transition-colors"
-            >About</a
-          >
-          <a href="#services" class="hover:text-indigo-600 transition-colors"
-            >Services</a
-          >
-          <a href="#process" class="hover:text-indigo-600 transition-colors"
-            >Process</a
-          >
-          <a
-            href="#contact"
-            class="bg-indigo-600 text-white px-8 py-2.5 rounded-full hover:bg-indigo-700 transition-all shadow-xl shadow-indigo-100"
-            >Consult Now</a
-          >
-        </nav>
+          <li>
+            <a href="#services" class="hover:text-indigo-600 transition-colors"
+              >Services / सेवाएं</a
+            >
+          </li>
+          <li>
+            <a
+              href="https://www.r2ps.in/apply.html"
+              class="hover:text-indigo-600 transition-colors"
+              >Apply / आवेदन</a
+            >
+          </li>
+          <li>
+            <a
+              href="#track"
+              class="text-indigo-600 border border-indigo-100 bg-indigo-50/50 px-4 py-2 rounded-lg hover:bg-indigo-600 hover:text-white transition-all"
+              >Track Status / स्थिति जांचें</a
+            >
+          </li>
+          <li>
+            <a
+              href="https://wa.me/91XXXXXXXXXX"
+              class="bg-green-600 text-white px-6 py-2.5 rounded-full flex items-center gap-2 hover:bg-green-700 transition-all shadow-lg shadow-green-100"
+            >
+              <i class="fab fa-whatsapp text-lg"></i> Chat / बात करें
+            </a>
+          </li>
+        </ul>
 
-        <button
-          id="menu-btn"
-          class="lg:hidden text-indigo-700 p-2 border border-slate-100 rounded-lg focus:outline-none"
-        >
-          <i class="fas fa-bars text-xl"></i>
-        </button>
-      </div>
+        <div class="flex items-center gap-3 lg:hidden">
+          <a
+            href="tel:+91XXXXXXXXXX"
+            class="w-10 h-10 bg-slate-100 text-indigo-600 rounded-lg flex items-center justify-center border border-slate-200"
+          >
+            <i class="fas fa-phone-alt"></i>
+          </a>
+          <button
+            id="menu-btn"
+            class="w-10 h-10 bg-indigo-600 text-white rounded-lg flex items-center justify-center shadow-lg"
+          >
+            <i class="fas fa-th-large"></i>
+          </button>
+        </div>
+      </nav>
 
       <div
         id="mobile-menu"
-        class="hidden lg:hidden bg-white border-t p-6 shadow-2xl absolute w-full left-0 z-50"
+        class="hidden absolute top-full left-0 right-0 mt-4 mx-4 bg-white rounded-3xl shadow-2xl border border-slate-100 p-6 z-[60] overflow-hidden"
       >
-        <nav class="flex flex-col space-y-6 font-bold text-center">
-          <a href="#about" class="mobile-link text-xl text-slate-800"
-            >About / हमारे बारे में</a
-          >
-          <a href="#services" class="mobile-link text-xl text-slate-800"
-            >Services / सेवाएं</a
-          >
-          <a href="#process" class="mobile-link text-xl text-slate-800"
-            >Process / प्रक्रिया</a
+        <div class="flex flex-col gap-4 text-center">
+          <a
+            href="#services"
+            class="mobile-link py-4 text-slate-800 font-bold border-b border-slate-50"
+            >Our Services / सेवाएं</a
           >
           <a
-            href="#contact"
-            class="mobile-link bg-indigo-600 text-white py-4 rounded-2xl shadow-lg"
-            >Contact Us / संपर्क</a
+            href="https://www.r2ps.in/apply.html"
+            class="mobile-link py-4 text-slate-800 font-bold border-b border-slate-50"
+            >Apply / आवेदन</a
           >
-        </nav>
+          <a
+            href="#track"
+            class="mobile-link py-4 text-indigo-600 font-black border-b border-slate-50 bg-indigo-50 rounded-xl"
+            >Track Application / स्थिति जांचें</a
+          >
+
+          <div class="grid grid-cols-2 gap-3 mt-4">
+            <a
+              href="https://wa.me/91XXXXXXXXXX"
+              class="mobile-link bg-green-600 text-white py-4 rounded-2xl font-black text-sm flex items-center justify-center gap-2"
+            >
+              <i class="fab fa-whatsapp"></i> WhatsApp
+            </a>
+            <a
+              href="tel:+91XXXXXXXXXX"
+              class="mobile-link bg-slate-900 text-white py-4 rounded-2xl font-black text-sm flex items-center justify-center gap-2"
+            >
+              <i class="fas fa-phone-alt"></i> Direct Call
+            </a>
+          </div>
+        </div>
       </div>
     </header>
 
     <section
-  class="relative bg-indigo-900 text-white pt-20 pb-24 lg:pt-32 lg:pb-48 overflow-hidden w-full"
->
-  <div
-    class="absolute inset-0 opacity-20 bg-[url('https://www.transparenttextures.com/patterns/carbon-fibre.png')]"
-  ></div>
-
-  <div class="max-w-7xl mx-auto px-6 text-center relative z-10">
-    <span
-      class="inline-block px-4 py-1.5 mb-6 rounded-full bg-indigo-500/20 border border-indigo-400/30 text-indigo-200 text-xs font-bold uppercase tracking-widest"
-      data-aos="fade-down"
+      class="relative min-h-screen flex items-center justify-center hero-gradient pt-32 pb-20 overflow-hidden"
     >
-      Trusted Documentation Partner
-    </span>
+      <div class="blob -top-20 -left-20"></div>
+      <div class="blob bottom-0 right-0" style="animation-delay: -5s"></div>
 
-    <h1
-      class="text-4xl md:text-7xl lg:text-8xl font-black mb-8 leading-[1.1]"
-      data-aos="fade-up"
-    >
-      Seamless Filing. <br /><span class="text-indigo-300"
-        >Verified Approvals.</span
-      >
-    </h1>
-
-    <p
-      class="text-base md:text-2xl max-w-4xl mx-auto opacity-80 mb-12 leading-relaxed"
-      data-aos="fade-up"
-      data-aos-delay="100"
-    >
-      सरकारी दस्तावेजों की जटिल प्रक्रिया अब सरल। हम सटीकता और गति के साथ आपके
-      प्रमाण पत्र सुनिश्चित करते हैं।
-      <span class="block mt-2 font-medium italic text-indigo-200"
-        >Navigating complex compliance with precision and speed.</span
-      >
-    </p>
-
-    <div
-      class="flex flex-col sm:flex-row justify-center gap-4 md:gap-6"
-      data-aos="fade-up"
-      data-aos-delay="200"
-    >
-      <a
-        href="#apply"
-        class="bg-white text-indigo-900 px-8 md:px-12 py-4 md:py-5 rounded-2xl font-black text-lg hover:scale-105 transition-all shadow-2xl hover:shadow-indigo-500/50"
-      >
-        Apply Now
-      </a>
-      <a
-        href="#services"
-        class="border-2 border-white/20 hover:bg-white/10 px-8 md:px-12 py-4 md:py-5 rounded-2xl font-bold text-lg transition-all backdrop-blur-sm"
-      >
-        Our Services
-      </a>
-    </div>
-  </div>
-</section>
-
-    <section
-      class="relative z-20 -mt-12 md:-mt-16 max-w-7xl mx-auto px-4 md:px-6 w-full"
-    >
-      <div
-        class="bg-white rounded-[2rem] md:rounded-[3rem] p-6 md:p-12 shadow-2xl border border-indigo-50 grid grid-cols-2 lg:grid-cols-4 gap-6 md:gap-12"
-        data-aos="zoom-in"
-      >
-        <div class="text-center">
-          <div class="text-3xl md:text-5xl font-black text-indigo-600 mb-2">
-            10k+
-          </div>
-          <p
-            class="text-slate-500 uppercase tracking-widest text-[9px] md:text-[10px] font-bold"
+      <div class="max-w-7xl mx-auto px-6 relative z-10 text-center">
+        <div data-aos="fade-up">
+          <h1
+            class="text-4xl md:text-7xl lg:text-8xl font-black text-white leading-tight tracking-tighter mb-6"
           >
-            Successful Cases
-          </p>
-        </div>
-        <div class="text-center border-l border-slate-100">
-          <div class="text-3xl md:text-5xl font-black text-indigo-600 mb-2">
-            99%
-          </div>
+            Certificate Ready <br /><span class="text-indigo-300"
+              >In Simple Clicks.</span
+            >
+          </h1>
           <p
-            class="text-slate-500 uppercase tracking-widest text-[9px] md:text-[10px] font-bold"
+            class="text-indigo-100 text-lg md:text-2xl max-w-4xl mx-auto leading-relaxed mb-10 font-medium"
           >
-            Accuracy Level
+            अब ब्लॉक जाने की जरूरत नहीं! घर बैठे बनवाएं अपना आय, जाति, निवास और
+            अन्य सरकारी प्रमाण पत्र।<br />
+            <span class="text-indigo-200 font-light italic"
+              >Fast, professional, and error-free filing for all rural and city
+              citizens.</span
+            >
           </p>
-        </div>
-        <div
-          class="text-center border-t md:border-t-0 lg:border-l border-slate-100 pt-6 md:pt-0"
-        >
-          <div class="text-3xl md:text-5xl font-black text-indigo-600 mb-2">
-            1hr
+          <div
+            class="flex flex-col md:flex-row items-center justify-center gap-6"
+          >
+            <a
+              href="#apply"
+              class="w-full md:w-auto bg-white text-indigo-900 px-12 py-5 rounded-2xl font-black text-xl shadow-2xl hover:bg-indigo-100 transition-all"
+            >
+              Apply Now / अभी आवेदन करें
+            </a>
+            <a
+              href="#services"
+              class="w-full md:w-auto border border-white/30 text-white px-12 py-5 rounded-2xl font-bold text-xl backdrop-blur-md hover:bg-white/10 transition-all"
+            >
+              View Services / सेवाएं देखें
+            </a>
           </div>
-          <p
-            class="text-slate-500 uppercase tracking-widest text-[9px] md:text-[10px] font-bold"
-          >
-            Consultation
-          </p>
-        </div>
-        <div
-          class="text-center border-t md:border-t-0 lg:border-l border-slate-100 pt-6 md:pt-0"
-        >
-          <div class="text-3xl md:text-5xl font-black text-indigo-600 mb-2">
-            50+
-          </div>
-          <p
-            class="text-slate-500 uppercase tracking-widest text-[9px] md:text-[10px] font-bold"
-          >
-            B2B Partners
-          </p>
         </div>
       </div>
     </section>
 
-    <section
-      id="services"
-      class="py-20 md:py-32 w-full overflow-hidden bg-slate-50"
-    >
+    <section id="services" class="py-32 bg-white">
       <div class="max-w-7xl mx-auto px-6">
-        <div
-          class="flex flex-col lg:flex-row justify-between items-center lg:items-end mb-12 gap-8 text-center lg:text-left"
-        >
-          <div class="max-w-2xl" data-aos="fade-right">
-            <h2
-              class="text-4xl md:text-6xl font-black text-slate-900 mb-4 tracking-tight"
-            >
-              हमारी प्रमुख सेवाएं
-            </h2>
-            <p class="text-slate-500 text-lg">
-              Essential Certificate Services / आवश्यक प्रमाण पत्र सेवाएं
-            </p>
-          </div>
-          <div data-aos="fade-left" class="hidden lg:block">
-            <span class="text-slate-400 text-sm"
-              >Select a category below &darr;</span
-            >
-          </div>
+        <div class="text-center md:text-left mb-16">
+          <h2 class="text-4xl md:text-6xl font-black text-slate-900 mb-4">
+            Service Catalog <span class="text-indigo-600">/ हमारी सेवाएं</span>
+          </h2>
+          <p class="text-slate-500 text-xl">
+            Select the document you need. हम हर कदम पर आपके साथ हैं।
+          </p>
         </div>
 
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-          <a
-            href="apply.html?type=domicile"
-            class="glass-card p-6 rounded-3xl border border-slate-200 bg-white shadow-sm hover:shadow-xl transition-all duration-300 flex flex-col h-full group cursor-pointer block text-left"
+        <div class="grid grid-cols-1 md:grid-cols-6 gap-6">
+          <div
+            class="md:col-span-3 bento-item bg-indigo-50 rounded-[2.5rem] p-10 flex flex-col justify-between"
             data-aos="fade-up"
           >
-            <div
-              class="w-14 h-14 bg-teal-50 rounded-2xl flex items-center justify-center mb-6 text-teal-600 group-hover:scale-110 transition-transform duration-300"
-            >
-              <i class="fas fa-home text-2xl"></i>
-            </div>
-
-            <h3 class="text-xl font-bold mb-1 text-slate-900">
-              Domicile Certificate
-            </h3>
-            <h4 class="text-sm font-bold text-slate-600 mb-3">
-              मूल निवास प्रमाण पत्र
-            </h4>
-            <p class="text-slate-500 text-sm italic mb-4">
-              Proof of permanent residence. <br />
-              स्थायी निवास का प्रमाण।
-            </p>
-
-            <ul class="space-y-2 text-slate-600 font-medium text-xs mb-6">
-              <li>
-                <i class="fas fa-check-circle text-teal-500 mr-2"></i> Address
-                Proof
-              </li>
-              <li>
-                <i class="fas fa-check-circle text-teal-500 mr-2"></i> State
-                Benefits
-              </li>
-            </ul>
-
-            <div class="mt-auto pt-4 border-t border-slate-100">
-              <span
-                class="block w-full text-center bg-teal-600 group-hover:bg-teal-700 text-white font-bold py-2.5 rounded-xl transition shadow-lg shadow-teal-100 text-sm"
+            <div>
+              <div
+                class="w-16 h-16 bg-white rounded-2xl flex items-center justify-center text-indigo-600 text-3xl shadow-sm mb-6"
               >
-                Apply Now / आवेदन करें
-              </span>
+                <i class="fas fa-home"></i>
+              </div>
+              <h3 class="text-2xl font-black mb-1">Domicile Certificate</h3>
+              <p class="text-indigo-600 font-bold mb-4">निवास प्रमाण पत्र</p>
+              <p class="text-slate-500 text-sm leading-relaxed mb-8">
+                स्थायी निवास का सबूत, जो सरकारी योजनाओं और स्कूल/कॉलेज एडमिशन के
+                लिए अनिवार्य है।
+              </p>
             </div>
-          </a>
+            <a
+              href="https://www.r2ps.in/apply.html?type=domicile"
+              class="bg-indigo-600 text-white text-center py-4 rounded-xl font-bold hover:bg-indigo-700 transition-colors"
+              >Select / चुनें</a
+            >
+          </div>
 
-          <a
-            href="apply.html?type=caste"
-            class="glass-card p-6 rounded-3xl border border-slate-200 bg-white shadow-sm hover:shadow-xl transition-all duration-300 flex flex-col h-full group cursor-pointer block text-left"
+          <div
+            class="md:col-span-3 bento-item bg-slate-900 rounded-[2.5rem] p-10 text-white flex flex-col justify-between"
             data-aos="fade-up"
             data-aos-delay="100"
           >
-            <div
-              class="w-14 h-14 bg-indigo-50 rounded-2xl flex items-center justify-center mb-6 text-indigo-600 group-hover:scale-110 transition-transform duration-300"
-            >
-              <i class="fas fa-users text-2xl"></i>
-            </div>
-
-            <h3 class="text-xl font-bold mb-1 text-slate-900">
-              Caste Certificate
-            </h3>
-            <h4 class="text-sm font-bold text-slate-600 mb-3">
-              जाति प्रमाण पत्र
-            </h4>
-            <p class="text-slate-500 text-sm italic mb-4">
-              Proof of social category. <br />
-              सामाजिक श्रेणी का प्रमाण।
-            </p>
-
-            <ul class="space-y-2 text-slate-600 font-medium text-xs mb-6">
-              <li>
-                <i class="fas fa-check-circle text-indigo-500 mr-2"></i>
-                SC/ST/OBC
-              </li>
-              <li>
-                <i class="fas fa-check-circle text-indigo-500 mr-2"></i> Gov.
-                Schemes
-              </li>
-            </ul>
-
-            <div class="mt-auto pt-4 border-t border-slate-100">
-              <span
-                class="block w-full text-center bg-indigo-600 group-hover:bg-indigo-700 text-white font-bold py-2.5 rounded-xl transition shadow-lg shadow-indigo-100 text-sm"
+            <div>
+              <div
+                class="w-16 h-16 bg-white/10 rounded-2xl flex items-center justify-center text-indigo-400 text-3xl mb-6"
               >
-                Apply Now / आवेदन करें
-              </span>
+                <i class="fas fa-users"></i>
+              </div>
+              <h3 class="text-2xl font-black mb-1">Caste Certificate</h3>
+              <p class="text-indigo-400 font-bold mb-4">जाति प्रमाण पत्र</p>
+              <p class="text-slate-400 text-sm leading-relaxed mb-8">
+                आरक्षण का लाभ उठाने के लिए आवश्यक। SC/ST/OBC/EWS श्रेणियों के
+                लिए उपलब्ध।
+              </p>
             </div>
-          </a>
+            <a
+              href="https://www.r2ps.in/apply.html?type=caste"
+              class="bg-white text-slate-900 text-center py-4 rounded-xl font-bold hover:bg-slate-100 transition-colors"
+              >Select / चुनें</a
+            >
+          </div>
 
-          <a
-            href="apply.html?type=income"
-            class="glass-card p-6 rounded-3xl border border-slate-200 bg-white shadow-sm hover:shadow-xl transition-all duration-300 flex flex-col h-full group cursor-pointer block text-left"
+          <div
+            class="md:col-span-3 lg:col-span-2 bento-item bg-emerald-50 rounded-[2.5rem] p-10 flex flex-col justify-between"
+            data-aos="fade-up"
+          >
+            <div>
+              <div
+                class="w-12 h-12 bg-white rounded-xl flex items-center justify-center text-emerald-600 text-2xl shadow-sm mb-6"
+              >
+                <i class="fas fa-wallet"></i>
+              </div>
+              <h3 class="text-xl font-black">Income Proof</h3>
+              <p class="text-emerald-600 font-bold mb-3 text-sm">
+                आय प्रमाण पत्र
+              </p>
+              <p class="text-slate-500 text-xs">
+                छात्रवृत्ति (Scholarship) और पेंशन योजनाओं के लिए जरूरी।
+              </p>
+            </div>
+            <a
+              href="https://www.r2ps.in/apply.html?type=income"
+              class="mt-6 text-emerald-700 font-black flex items-center gap-2"
+              >Apply Now <i class="fas fa-arrow-right"></i
+            ></a>
+          </div>
+
+          <div
+            class="md:col-span-3 lg:col-span-2 bento-item bg-indigo-50 rounded-[2.5rem] p-10 flex flex-col justify-between"
+            data-aos="fade-up"
+            data-aos-delay="100"
+          >
+            <div>
+              <div
+                class="w-12 h-12 bg-white rounded-xl flex items-center justify-center text-indigo-600 text-2xl shadow-sm mb-6"
+              >
+                <i class="fas fa-stamp"></i>
+              </div>
+
+              <h3 class="text-xl font-black text-slate-900 tracking-tight">
+                NCL Certificate
+              </h3>
+              <p class="text-indigo-600 font-bold mb-3 text-sm">
+                नॉन-क्रीमी लेयर प्रमाण पत्र
+              </p>
+
+              <p class="text-slate-500 text-xs leading-relaxed">
+                ओबीसी (OBC) आरक्षण और सरकारी नौकरियों में लाभ पाने के लिए
+                आवश्यक। यह आपकी वार्षिक आय और सामाजिक श्रेणी को सत्यापित करता
+                है।
+              </p>
+
+              <ul
+                class="mt-4 space-y-1 text-[10px] text-slate-400 font-bold uppercase tracking-wider"
+              >
+                <li class="flex items-center gap-2">
+                  <i class="fas fa-check text-indigo-500"></i> Gov Jobs / सरकारी
+                  नौकरी
+                </li>
+                <li class="flex items-center gap-2">
+                  <i class="fas fa-check text-indigo-500"></i> Admission / कॉलेज
+                  एडमिशन
+                </li>
+              </ul>
+            </div>
+
+            <a
+              href="https://www.r2ps.in/apply.html?type=ncl"
+              class="mt-8 text-indigo-700 font-black flex items-center gap-2 hover:gap-4 transition-all"
+            >
+              Apply Now / अभी आवेदन करें <i class="fas fa-arrow-right"></i>
+            </a>
+          </div>
+
+          <div
+            class="md:col-span-3 lg:col-span-2 bento-item bg-rose-50 rounded-[2.5rem] p-10 flex flex-col justify-between"
             data-aos="fade-up"
             data-aos-delay="200"
           >
-            <div
-              class="w-14 h-14 bg-green-50 rounded-2xl flex items-center justify-center mb-6 text-green-600 group-hover:scale-110 transition-transform duration-300"
-            >
-              <i class="fas fa-file-invoice-dollar text-2xl"></i>
-            </div>
-
-            <h3 class="text-xl font-bold mb-1 text-slate-900">
-              Income Certificate
-            </h3>
-            <h4 class="text-sm font-bold text-slate-600 mb-3">
-              आय प्रमाण पत्र
-            </h4>
-            <p class="text-slate-500 text-sm italic mb-4">
-              Annual family income proof. <br />
-              वार्षिक पारिवारिक आय।
-            </p>
-
-            <ul class="space-y-2 text-slate-600 font-medium text-xs mb-6">
-              <li>
-                <i class="fas fa-check-circle text-green-500 mr-2"></i>
-                Scholarship
-              </li>
-              <li>
-                <i class="fas fa-check-circle text-green-500 mr-2"></i> EWS
-                Support
-              </li>
-            </ul>
-
-            <div class="mt-auto pt-4 border-t border-slate-100">
-              <span
-                class="block w-full text-center bg-green-600 group-hover:bg-green-700 text-white font-bold py-2.5 rounded-xl transition shadow-lg shadow-green-100 text-sm"
+            <div>
+              <div
+                class="w-12 h-12 bg-white rounded-xl flex items-center justify-center text-rose-600 text-2xl shadow-sm mb-6"
               >
-                Apply Now / आवेदन करें
-              </span>
+                <i class="fas fa-bowl-food"></i>
+              </div>
+              <h3 class="text-xl font-black">Ration Card</h3>
+              <p class="text-rose-600 font-bold mb-3 text-sm">
+                राशन कार्ड सहायता
+              </p>
+              <p class="text-slate-500 text-xs">
+                नया राशन कार्ड बनवाने या नाम जुड़वाने के लिए दस्तावेज़ परामर्श।
+              </p>
             </div>
-          </a>
+            <a
+              href="#"
+              class="mt-6 text-rose-700 font-black flex items-center gap-2"
+              >Apply Now <i class="fas fa-arrow-right"></i
+            ></a>
+          </div>
+        </div>
+      </div>
+    </section>
 
-          <a
-            href="apply.html?type=ncl"
-            class="glass-card p-6 rounded-3xl border border-slate-200 bg-white shadow-sm hover:shadow-xl transition-all duration-300 flex flex-col h-full group cursor-pointer block text-left"
-            data-aos="fade-up"
+    <section id="process" class="py-24 bg-slate-50">
+      <div class="max-w-7xl mx-auto px-6 text-center">
+        <h2 class="text-4xl md:text-5xl font-black mb-16 tracking-tight">
+          How it works? <span class="text-indigo-600">/ आवेदन कैसे करें?</span>
+        </h2>
+
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-8">
+          <div
+            class="relative p-8 bg-white rounded-3xl border border-slate-100 shadow-sm"
+            data-aos="zoom-in"
+          >
+            <span
+              class="absolute -top-4 -left-4 w-10 h-10 bg-indigo-600 text-white rounded-full flex items-center justify-center font-black"
+              >1</span
+            >
+            <i class="fas fa-edit text-4xl text-indigo-200 mb-6"></i>
+            <h4 class="font-bold text-lg mb-2">Fill Details</h4>
+            <p class="text-slate-500 text-sm">अपनी जानकारी भरें।</p>
+          </div>
+          <div
+            class="relative p-8 bg-white rounded-3xl border border-slate-100 shadow-sm"
+            data-aos="zoom-in"
+            data-aos-delay="100"
+          >
+            <span
+              class="absolute -top-4 -left-4 w-10 h-10 bg-indigo-600 text-white rounded-full flex items-center justify-center font-black"
+              >2</span
+            >
+            <i
+              class="fas fa-cloud-upload-alt text-4xl text-indigo-200 mb-6"
+            ></i>
+            <h4 class="font-bold text-lg mb-2">Upload Photos</h4>
+            <p class="text-slate-500 text-sm">दस्तावेज़ फोटो भेजें।</p>
+          </div>
+          <div
+            class="relative p-8 bg-white rounded-3xl border border-slate-100 shadow-sm"
+            data-aos="zoom-in"
+            data-aos-delay="200"
+          >
+            <span
+              class="absolute -top-4 -left-4 w-10 h-10 bg-indigo-600 text-white rounded-full flex items-center justify-center font-black"
+              >3</span
+            >
+            <i class="fas fa-credit-card text-4xl text-indigo-200 mb-6"></i>
+            <h4 class="font-bold text-lg mb-2">Small Fee</h4>
+            <p class="text-slate-500 text-sm">परामर्श शुल्क जमा करें।</p>
+          </div>
+          <div
+            class="relative p-8 bg-white rounded-3xl border border-slate-100 shadow-sm"
+            data-aos="zoom-in"
             data-aos-delay="300"
           >
-            <div
-              class="w-14 h-14 bg-rose-50 rounded-2xl flex items-center justify-center mb-6 text-rose-600 group-hover:scale-110 transition-transform duration-300"
+            <span
+              class="absolute -top-4 -left-4 w-10 h-10 bg-indigo-600 text-white rounded-full flex items-center justify-center font-black"
+              >4</span
             >
-              <i class="fas fa-stamp text-2xl"></i>
-            </div>
-
-            <h3 class="text-xl font-bold mb-1 text-slate-900">
-              NCL Certificate
-            </h3>
-            <h4 class="text-sm font-bold text-slate-600 mb-3">
-              नॉन-क्रीमी लेयर
-            </h4>
-            <p class="text-slate-500 text-sm italic mb-4">
-              OBC reservation benefits. <br />
-              ओबीसी आरक्षण लाभ।
-            </p>
-
-            <ul class="space-y-2 text-slate-600 font-medium text-xs mb-6">
-              <li>
-                <i class="fas fa-check-circle text-rose-500 mr-2"></i>
-                Central/State
-              </li>
-              <li>
-                <i class="fas fa-check-circle text-rose-500 mr-2"></i> Valid 1
-                Year
-              </li>
-            </ul>
-
-            <div class="mt-auto pt-4 border-t border-slate-100">
-              <span
-                class="block w-full text-center bg-rose-600 group-hover:bg-rose-700 text-white font-bold py-2.5 rounded-xl transition shadow-lg shadow-rose-100 text-sm"
-              >
-                Apply Now / आवेदन करें
-              </span>
-            </div>
-          </a>
-        </div>
-
-        <div class="mt-16 text-center" data-aos="fade-up" data-aos-delay="100">
-          <a
-            href="services.html"
-            class="group relative inline-flex items-center justify-center px-8 py-4 text-lg font-bold text-white transition-all duration-200 bg-slate-900 rounded-full hover:bg-indigo-600 hover:shadow-2xl hover:-translate-y-1 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-600"
-          >
-            <span>View All Services / सभी सेवाएं देखें</span>
-            <i
-              class="fas fa-arrow-right ml-3 group-hover:translate-x-1 transition-transform"
-            ></i>
-          </a>
-        </div>
-      </div>
-    </section>
-    <section id="process" class="py-24 bg-slate-50 relative overflow-hidden">
-      <div
-        class="absolute top-0 left-0 w-full h-full overflow-hidden pointer-events-none"
-      >
-        <div
-          class="absolute -top-24 -right-24 w-96 h-96 bg-indigo-500/5 rounded-full blur-3xl"
-        ></div>
-        <div
-          class="absolute bottom-0 left-0 w-72 h-72 bg-blue-500/5 rounded-full blur-3xl"
-        ></div>
-      </div>
-
-      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
-        <div class="text-center mb-20">
-          <span
-            class="text-indigo-600 font-bold tracking-wider uppercase text-xs mb-2 block"
-            >Workflow / कार्य प्रक्रिया</span
-          >
-          <h2 class="text-3xl md:text-5xl font-black text-slate-900 mb-4">
-            Simple 4-Step Process
-          </h2>
-          <p class="text-xl md:text-2xl text-slate-500 font-medium brand-font">
-            4 आसान चरणों में काम पूरा
-          </p>
-        </div>
-
-        <div class="relative grid grid-cols-1 md:grid-cols-4 gap-8">
-          <div
-            class="hidden md:block absolute top-12 left-0 w-full h-0.5 border-t-2 border-dashed border-indigo-200 -z-10 transform translate-y-1/2"
-          ></div>
-
-          <div
-            class="group bg-white p-8 rounded-2xl shadow-lg border border-slate-100 text-center hover:-translate-y-2 transition-all duration-300 relative"
-          >
-            <div
-              class="w-16 h-16 mx-auto bg-indigo-600 text-white rounded-2xl flex items-center justify-center text-2xl mb-6 shadow-indigo-200 shadow-xl group-hover:scale-110 transition-transform"
-            >
-              <i class="fa-solid fa-user-plus"></i>
-            </div>
-            <div
-              class="absolute -top-4 -right-4 w-10 h-10 bg-slate-900 text-white rounded-full flex items-center justify-center font-bold text-sm border-4 border-slate-50"
-            >
-              01
-            </div>
-
-            <h3 class="text-lg font-bold text-slate-900">Apply Online</h3>
-            <p class="text-indigo-600 font-medium text-sm mb-3">आवेदन करें</p>
-            <p class="text-slate-500 text-xs leading-relaxed">
-              Fill the form with basic details & upload docs.<br />
-              <span class="opacity-70">फॉर्म भरें और दस्तावेज अपलोड करें।</span>
-            </p>
-          </div>
-
-          <div
-            class="group bg-white p-8 rounded-2xl shadow-lg border border-slate-100 text-center hover:-translate-y-2 transition-all duration-300 relative"
-          >
-            <div
-              class="w-16 h-16 mx-auto bg-blue-500 text-white rounded-2xl flex items-center justify-center text-2xl mb-6 shadow-blue-200 shadow-xl group-hover:scale-110 transition-transform"
-            >
-              <i class="fa-solid fa-magnifying-glass-chart"></i>
-            </div>
-            <div
-              class="absolute -top-4 -right-4 w-10 h-10 bg-slate-900 text-white rounded-full flex items-center justify-center font-bold text-sm border-4 border-slate-50"
-            >
-              02
-            </div>
-
-            <h3 class="text-lg font-bold text-slate-900">Expert Audit</h3>
-            <p class="text-blue-600 font-medium text-sm mb-3">दस्तावेज़ जाँच</p>
-            <p class="text-slate-500 text-xs leading-relaxed">
-              We verify your documents for errors.<br />
-              <span class="opacity-70"
-                >हम आपके दस्तावेजों की त्रुटि जाँच करते हैं।</span
-              >
-            </p>
-          </div>
-
-          <div
-            class="group bg-white p-8 rounded-2xl shadow-lg border border-slate-100 text-center hover:-translate-y-2 transition-all duration-300 relative"
-          >
-            <div
-              class="w-16 h-16 mx-auto bg-amber-500 text-white rounded-2xl flex items-center justify-center text-2xl mb-6 shadow-amber-200 shadow-xl group-hover:scale-110 transition-transform"
-            >
-              <i class="fa-solid fa-gears"></i>
-            </div>
-            <div
-              class="absolute -top-4 -right-4 w-10 h-10 bg-slate-900 text-white rounded-full flex items-center justify-center font-bold text-sm border-4 border-slate-50"
-            >
-              03
-            </div>
-
-            <h3 class="text-lg font-bold text-slate-900">Processing</h3>
-            <p class="text-amber-600 font-medium text-sm mb-3">
-              प्रक्रिया शुरू
-            </p>
-            <p class="text-slate-500 text-xs leading-relaxed">
-              Application submission to concerned dept.<br />
-              <span class="opacity-70"
-                >संबंधित विभाग में आवेदन जमा किया जाता है।</span
-              >
-            </p>
-          </div>
-
-          <div
-            class="group bg-white p-8 rounded-2xl shadow-lg border border-slate-100 text-center hover:-translate-y-2 transition-all duration-300 relative"
-          >
-            <div
-              class="w-16 h-16 mx-auto bg-emerald-500 text-white rounded-2xl flex items-center justify-center text-2xl mb-6 shadow-emerald-200 shadow-xl group-hover:scale-110 transition-transform"
-            >
-              <i class="fa-solid fa-file-circle-check"></i>
-            </div>
-            <div
-              class="absolute -top-4 -right-4 w-10 h-10 bg-slate-900 text-white rounded-full flex items-center justify-center font-bold text-sm border-4 border-slate-50"
-            >
-              04
-            </div>
-
-            <h3 class="text-lg font-bold text-slate-900">Delivery</h3>
-            <p class="text-emerald-600 font-medium text-sm mb-3">
-              प्रमाण पत्र प्राप्ति
-            </p>
-            <p class="text-slate-500 text-xs leading-relaxed">
-              Download verified certificate instantly.<br />
-              <span class="opacity-70">सत्यापित प्रमाण पत्र डाउनलोड करें।</span>
-            </p>
+            <i class="fas fa-check-circle text-4xl text-indigo-200 mb-6"></i>
+            <h4 class="font-bold text-lg mb-2">Get Certificate</h4>
+            <p class="text-slate-500 text-sm">प्रमाण पत्र प्राप्त करें।</p>
           </div>
         </div>
       </div>
     </section>
 
-    <section class="py-20 md:py-32 bg-white w-full overflow-hidden">
+    <section id="faq" class="py-24 bg-white">
       <div class="max-w-4xl mx-auto px-6">
-        <h2 class="text-3xl md:text-4xl font-black mb-16 text-center italic">
-          Frequently Asked <span class="text-indigo-600">Questions</span>
-        </h2>
-        <div class="space-y-8">
-          <div class="border-b border-slate-100 pb-6" data-aos="fade-right">
-            <h5 class="text-lg md:text-xl font-bold mb-3">
-              क्या आप सरकारी संस्था हैं?
-            </h5>
-            <p class="text-slate-600 text-sm md:text-base text-justify">
-              नहीं, हम एक निजी परामर्श फर्म हैं जो आपकी दस्तावेज़ीकरण प्रक्रिया
-              को आसान बनाने में सहायता करती है।
-            </p>
-          </div>
-          <div class="border-b border-slate-100 pb-6" data-aos="fade-left">
-            <h5 class="text-lg md:text-xl font-bold mb-3">
-              दस्तावेज़ कितने समय में तैयार होते हैं?
-            </h5>
-            <p class="text-slate-600 text-sm md:text-base text-justify">
-              यह दस्तावेज़ के प्रकार और पोर्टल की गति पर निर्भर करता है, हालांकि
-              हम न्यूनतम समय सुनिश्चित करते हैं।
-            </p>
-          </div>
-          <div class="border-b border-slate-100 pb-6" data-aos="fade-right">
-            <h5 class="text-lg md:text-xl font-bold mb-3">
-              क्या मेरा डेटा R2PS के साथ सुरक्षित है?
-            </h5>
-            <p
-              class="text-slate-600 text-sm md:text-base text-justify leading-relaxed"
+        <div class="text-center mb-16">
+          <h2 class="text-3xl md:text-5xl font-black text-slate-900 mb-4">
+            Common Questions
+            <span class="text-indigo-600">/ अक्सर पूछे जाने वाले सवाल</span>
+          </h2>
+          <p class="text-slate-500 font-medium italic">
+            Everything you need to know about our consultancy services. / हमारी
+            सेवाओं के बारे में पूरी जानकारी।
+          </p>
+        </div>
+
+        <div class="space-y-6">
+          <details
+            class="group border border-slate-100 rounded-2xl p-6 bg-slate-50 transition-all duration-300"
+          >
+            <summary
+              class="font-bold text-lg list-none cursor-pointer flex justify-between items-center text-slate-800"
             >
-              हाँ, हम सभी डेटा हैंडलिंग और संस्थागत सत्यापन (institutional
-              verification) के लिए उद्योग-मानक एन्क्रिप्शन (industry-standard
-              encryption) का पालन करते हैं। आपकी गोपनीयता और डेटा सुरक्षा हमारी
-              सर्वोच्च प्राथमिकता है।
+              Is this a government website? / क्या यह सरकारी वेबसाइट है?
+              <i
+                class="fas fa-plus transition-transform group-open:rotate-45 text-indigo-600"
+              ></i>
+            </summary>
+            <p
+              class="mt-4 text-slate-600 text-sm md:text-base leading-relaxed border-t border-slate-200 pt-4"
+            >
+              No, <strong>R2PS is a private consultancy</strong>. We charge a
+              service fee to help you prepare your documents, fill forms
+              correctly, and navigate the process to avoid common rejections at
+              the block level. / नहीं,
+              <strong>R2PS एक निजी परामर्श संस्था है</strong>। हम आपसे एक छोटा
+              शुल्क लेते हैं ताकि आपके फॉर्म में कोई गलती न हो और आपको ब्लॉक के
+              चक्कर न काटने पड़ें।
+            </p>
+          </details>
+
+          <details
+            class="group border border-slate-100 rounded-2xl p-6 bg-slate-50 transition-all duration-300"
+          >
+            <summary
+              class="font-bold text-lg list-none cursor-pointer flex justify-between items-center text-slate-800"
+            >
+              Which documents are needed? / आवेदन के लिए कौन से दस्तावेज चाहिए?
+              <i
+                class="fas fa-plus transition-transform group-open:rotate-45 text-indigo-600"
+              ></i>
+            </summary>
+            <div
+              class="mt-4 text-slate-600 text-sm md:text-base leading-relaxed border-t border-slate-200 pt-4"
+            >
+              Generally, you need an Aadhaar Card, a Mobile Number linked to
+              Aadhaar, and a Passport-sized photo. Specific services may need
+              Land Records (Rashid) or old certificates. / आमतौर पर आधार कार्ड,
+              आधार से जुड़ा मोबाइल नंबर और फोटो की जरूरत होती है। जमीन के कागजात
+              या पुराने प्रमाण पत्रों की जरूरत सेवा के अनुसार पड़ सकती है।
+            </div>
+          </details>
+
+          <details
+            class="group border border-slate-100 rounded-2xl p-6 bg-slate-50 transition-all duration-300"
+          >
+            <summary
+              class="font-bold text-lg list-none cursor-pointer flex justify-between items-center text-slate-800"
+            >
+              How long does it take? / प्रमाण पत्र बनने में कितना समय लगता है?
+              <i
+                class="fas fa-plus transition-transform group-open:rotate-45 text-indigo-600"
+              ></i>
+            </summary>
+            <p
+              class="mt-4 text-slate-600 text-sm md:text-base leading-relaxed border-t border-slate-200 pt-4"
+            >
+              While we process applications within 24-48 hours, the final
+              approval depends on government portal speeds and block officers
+              (usually 10-15 working days). / हम 24-48 घंटों में आवेदन कर देते
+              हैं, लेकिन सरकारी विभाग से प्रमाण पत्र जारी होने में आमतौर पर 10
+              से 15 कार्यदिवस लगते हैं।
+            </p>
+          </details>
+
+          <details
+            class="group border border-slate-100 rounded-2xl p-6 bg-slate-50 transition-all duration-300"
+          >
+            <summary
+              class="font-bold text-lg list-none cursor-pointer flex justify-between items-center text-slate-800"
+            >
+              What if my application is rejected? / अगर आवेदन खारिज हो जाए?
+              <i
+                class="fas fa-plus transition-transform group-open:rotate-45 text-indigo-600"
+              ></i>
+            </summary>
+            <p
+              class="mt-4 text-slate-600 text-sm md:text-base leading-relaxed border-t border-slate-200 pt-4"
+            >
+              If rejected due to a documentation error on our part, we will
+              re-apply for you at no extra cost. / अगर हमारी किसी गलती की वजह से
+              आवेदन रद्द होता है, तो हम बिना किसी अतिरिक्त शुल्क के आपका फॉर्म
+              दोबारा भरेंगे।
+            </p>
+          </details>
+
+          <details
+            class="group border border-slate-100 rounded-2xl p-6 bg-slate-50 transition-all duration-300"
+          >
+            <summary
+              class="font-bold text-lg list-none cursor-pointer flex justify-between items-center text-slate-800"
+            >
+              Is my data safe with R2PS? / क्या मेरा डेटा R2PS के साथ सुरक्षित
+              है?
+              <i
+                class="fas fa-plus transition-transform group-open:rotate-45 text-indigo-600"
+              ></i>
+            </summary>
+            <p
+              class="mt-4 text-slate-600 text-sm md:text-base leading-relaxed border-t border-slate-200 pt-4"
+            >
+              Yes, we use secure Supabase encryption. Your personal documents
+              are deleted from our temporary storage after the application is
+              approved. / हाँ, हम सुरक्षित एन्क्रिप्शन का उपयोग करते हैं। आपका
+              काम पूरा होने के बाद आपके दस्तावेज हमारे सिस्टम से हटा दिए जाते
+              हैं।
+            </p>
+          </details>
+
+          <details
+            class="group border border-slate-100 rounded-2xl p-6 bg-slate-50 transition-all duration-300"
+          >
+            <summary
+              class="font-bold text-lg list-none cursor-pointer flex justify-between items-center text-slate-800"
+            >
+              How can I track my status? / मैं अपने आवेदन की स्थिति कैसे देख
+              सकता हूँ?
+              <i
+                class="fas fa-plus transition-transform group-open:rotate-45 text-indigo-600"
+              ></i>
+            </summary>
+            <p
+              class="mt-4 text-slate-600 text-sm md:text-base leading-relaxed border-t border-slate-200 pt-4"
+            >
+              You can use our 'Track Application' feature using your mobile
+              number or check the WhatsApp updates we send regularly. / आप अपने
+              मोबाइल नंबर से हमारी वेबसाइट पर स्थिति देख सकते हैं या हमारे
+              द्वारा भेजे गए WhatsApp मैसेज को चेक कर सकते हैं।
+            </p>
+          </details>
+        </div>
+
+        <div
+          class="mt-12 p-8 bg-indigo-600 rounded-[2rem] text-white flex flex-col md:flex-row items-center justify-between gap-6 shadow-xl"
+        >
+          <div>
+            <h4 class="text-xl font-bold mb-1">
+              Need help in your local language?
+            </h4>
+            <p class="opacity-80">
+              क्या आपको अपनी भाषा में सहायता चाहिए? हमारे एक्सपर्ट से बात करें।
             </p>
           </div>
+          <a
+            href="https://wa.me/91XXXXXXXXXX"
+            class="bg-white text-indigo-600 px-8 py-3 rounded-full font-black flex items-center gap-2 hover:scale-105 transition-transform"
+          >
+            <i class="fab fa-whatsapp text-xl"></i> Contact Village Support
+          </a>
         </div>
       </div>
     </section>
 
-    <section
-      id="contact"
-      class="py-20 md:py-32 bg-indigo-950 text-white relative w-full overflow-hidden"
-    >
-      <div class="max-w-7xl mx-auto px-6 grid lg:grid-cols-2 gap-16 md:gap-20">
-        <div data-aos="fade-right" class="text-center lg:text-left">
-          <h2 class="text-5xl lg:text-7xl font-black mb-8 leading-tight">
-            Let's talk <br />Strategy.
-          </h2>
-          <p class="text-indigo-200 text-lg md:text-xl mb-12">
-            Connect for personalized advisory.
-          </p>
-          <div class="space-y-8 md:space-y-10">
-            <div class="flex flex-col lg:flex-row items-center gap-6">
-              <div
-                class="w-16 h-16 bg-white/10 rounded-full flex items-center justify-center text-2xl"
-              >
-                <i class="fas fa-headset"></i>
-              </div>
-              <div>
-                <p
-                  class="text-xs uppercase tracking-widest opacity-60 font-bold"
+    <section id="track" class="py-20 bg-slate-50 relative overflow-hidden">
+      <div
+        class="absolute top-0 right-0 w-64 h-64 bg-indigo-500/5 rounded-full blur-3xl"
+      ></div>
+
+      <div class="max-w-4xl mx-auto px-6 relative z-10">
+        <div
+          class="glass-nav rounded-[2.5rem] border border-white shadow-2xl p-8 md:p-12"
+          data-aos="fade-up"
+        >
+          <div class="text-center mb-10">
+            <span
+              class="inline-block px-4 py-1.5 mb-4 rounded-full bg-indigo-100 text-indigo-700 text-xs font-bold uppercase tracking-widest"
+            >
+              Live Tracking / लाइव ट्रैकिंग
+            </span>
+            <h2 class="text-3xl md:text-5xl font-black text-slate-900 mb-4">
+              Check Application Status
+            </h2>
+            <p class="text-slate-500 text-lg md:text-xl font-medium">
+              अपना मोबाइल नंबर दर्ज करें और स्थिति जानें।
+            </p>
+          </div>
+
+          <div class="max-w-md mx-auto">
+            <div class="space-y-4">
+              <div class="relative">
+                <label
+                  class="block text-xs font-black uppercase text-slate-400 mb-2 ml-2"
+                  >Mobile Number / मोबाइल नंबर</label
                 >
-                  Hotline
-                </p>
-                <p class="text-xl md:text-2xl font-bold">+91 XXXXX XXXXX</p>
-              </div>
-            </div>
-            <div class="flex flex-col lg:flex-row items-center gap-6">
-              <div
-                class="w-16 h-16 bg-white/10 rounded-full flex items-center justify-center text-2xl"
-              >
-                <i class="fas fa-paper-plane"></i>
-              </div>
-              <div>
+                <div class="relative">
+                  <i
+                    class="fas fa-phone absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"
+                  ></i>
+                  <input
+                    type="tel"
+                    id="trackMobile"
+                    maxlength="10"
+                    placeholder="Enter 10 digit number"
+                    class="w-full pl-12 pr-4 py-4 bg-white border border-slate-200 rounded-2xl focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 outline-none transition-all text-lg font-bold"
+                  />
+                </div>
                 <p
-                  class="text-xs uppercase tracking-widest opacity-60 font-bold"
+                  class="hidden text-xs text-red-500 mt-2 font-bold flex items-center gap-1"
+                  id="err-trackMobile"
                 >
-                  Mailbox
+                  <i class="fas fa-exclamation-circle"></i> Please enter a valid
+                  10-digit number.
                 </p>
-                <p class="text-xl md:text-2xl font-bold">info@r2ps.in</p>
               </div>
+
+              <button
+                onclick="performTracking()"
+                class="w-full bg-indigo-600 text-white font-black py-5 rounded-2xl shadow-xl shadow-indigo-200 hover:bg-indigo-700 hover:-translate-y-1 transition-all flex justify-center items-center gap-3 text-lg"
+                id="btn-track"
+              >
+                <span>Track My Application</span>
+                <i class="fas fa-arrow-right"></i>
+              </button>
             </div>
           </div>
-        </div>
 
-        <div
-          class="bg-white rounded-[2rem] p-8 md:p-10 text-slate-900 shadow-2xl"
-          data-aos="fade-left"
-        >
-          <form class="space-y-6">
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div class="space-y-2">
-                <label class="text-[10px] font-black uppercase text-slate-400"
-                  >Full Name</label
-                ><input
-                  class="w-full bg-slate-50 border-none p-4 rounded-xl focus:ring-2 focus:ring-indigo-600 outline-none"
-                  required
-                />
-              </div>
-              <div class="space-y-2">
-                <label class="text-[10px] font-black uppercase text-slate-400"
-                  >WhatsApp</label
-                ><input
-                  class="w-full bg-slate-50 border-none p-4 rounded-xl focus:ring-2 focus:ring-indigo-600 outline-none"
-                  required
-                />
-              </div>
-            </div>
-            <div class="space-y-2">
-              <label class="text-[10px] font-black uppercase text-slate-400"
-                >Purpose</label
-              >
-              <select
-                class="w-full bg-slate-50 border-none p-4 rounded-xl focus:ring-2 focus:ring-indigo-600 outline-none appearance-none"
-              >
-                <option>RTPS Services</option>
-                <option>Institutional Support</option>
-                <option>Data Correction</option>
-                <option>Other</option>
-              </select>
-            </div>
-            <div class="space-y-2">
-              <label class="text-[10px] font-black uppercase text-slate-400"
-                >Message</label
-              ><textarea
-                class="w-full bg-slate-50 border-none p-4 rounded-xl focus:ring-2 focus:ring-indigo-600 outline-none"
-                rows="3"
-              ></textarea>
-            </div>
-            <button
-              class="w-full bg-indigo-600 text-white font-black py-5 rounded-2xl shadow-xl hover:bg-indigo-700 transition-all uppercase tracking-widest text-sm"
-            >
-              Launch Inquiry
-            </button>
-          </form>
+          <div
+            id="trackResult"
+            class="hidden mt-12 grid grid-cols-1 md:grid-cols-2 gap-6 border-t border-slate-100 pt-10"
+          ></div>
         </div>
       </div>
     </section>
@@ -796,7 +769,7 @@
             <h4
               class="text-white font-bold mb-6 uppercase tracking-wider text-sm"
             >
-              Quick Links
+              Quick Links / लिंक
             </h4>
             <ul class="space-y-3 text-sm">
               <li>
@@ -880,14 +853,16 @@
             class="bg-slate-900/50 p-6 rounded-2xl mb-8 border border-slate-800"
           >
             <p class="text-xs leading-relaxed text-center italic">
-              <strong class="text-indigo-400 uppercase"
+              <strong
+                class="text-indigo-400 uppercase tracking-widest block mb-2 font-black"
                 >Important Disclaimer / महत्वपूर्ण अस्वीकरण:</strong
-              ><br />
+              >
               R2PS एक निजी परामर्श फर्म है। हम RTPS बिहार, सेवा प्लस, या किसी भी
               राज्य/केंद्र सरकार के पोर्टल के आधिकारिक प्रतिनिधि नहीं हैं। हम
               केवल डेटा प्रोसेसिंग और दस्तावेज़ीकरण में व्यावसायिक सहायता प्रदान
-              करते हैं। (R2PS is a private firm and not affiliated with RTPS
-              Bihar or any government body.)
+              करते हैं। <br class="hidden md:block" />
+              (R2PS is a private firm and not affiliated with RTPS Bihar or any
+              government body.)
             </p>
           </div>
 
@@ -896,50 +871,263 @@
           >
             <p>&copy; 2024 R2PS — Private Documentation Consultancy</p>
             <div class="flex gap-6">
-              <a href="#" class="hover:text-white">Privacy Policy</a>
-              <a href="#" class="hover:text-white">Terms of Service</a>
+              <a href="#" class="hover:text-white transition-colors"
+                >Privacy Policy</a
+              >
+              <a href="#" class="hover:text-white transition-colors"
+                >Terms of Service</a
+              >
             </div>
           </div>
         </div>
       </div>
     </footer>
 
-    <a
-      href="https://wa.me/91XXXXXXXXXX"
-      class="fixed bottom-6 right-6 md:bottom-10 md:right-10 bg-green-500 text-white w-14 h-14 md:w-16 md:h-16 rounded-full flex items-center justify-center text-2xl md:text-3xl shadow-[0_20px_50px_rgba(34,197,94,0.3)] z-[100] hover:scale-110 transition-transform"
-    >
-      <i class="fab fa-whatsapp"></i>
-    </a>
-
     <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
     <script>
-      AOS.init({ duration: 800, once: true });
+      (function () {
+        // 1. Disable Right Click (Context Menu)
+        document.addEventListener("contextmenu", (e) => e.preventDefault());
 
-      const menuBtn = document.getElementById("menu-btn");
-      const mobileMenu = document.getElementById("mobile-menu");
-      const menuIcon = menuBtn.querySelector("i");
+        // 2. Disable Common Shortcut Keys
+        document.addEventListener("keydown", function (e) {
+          if (
+            e.key === "F12" ||
+            (e.ctrlKey &&
+              e.shiftKey &&
+              ["I", "J", "C"].includes(e.key.toUpperCase())) ||
+            (e.ctrlKey && e.key.toLowerCase() === "u") // View Source
+          ) {
+            e.preventDefault();
+            return false;
+          }
+        });
 
-      // Mobile Menu Logic
-      menuBtn.addEventListener("click", (e) => {
-        e.stopPropagation();
-        mobileMenu.classList.toggle("hidden");
-        menuIcon.classList.toggle("fa-bars");
-        menuIcon.classList.toggle("fa-times");
-      });
+        // 3. The "Heavy Debugger" Trap
+        // This detects if the console is open by checking execution speed
+        const detectDevTools = () => {
+          const start = new Date();
+          debugger; // This only pauses if DevTools is open
+          const end = new Date();
 
-      // Close menu on link click
-      document.querySelectorAll(".mobile-link").forEach((link) => {
-        link.addEventListener("click", () => {
+          // If the difference is > 100ms, it means the debugger paused execution
+          if (end - start > 100) {
+            document.body.innerHTML = `
+        <div style="display:flex;flex-direction:column;justify-content:center;align-items:center;height:100vh;background:#0f172a;color:white;text-align:center;font-family:sans-serif;padding:20px;">
+          <h1 style="font-size:4rem;margin-bottom:10px;">🛑</h1>
+          <h1 style="font-size:24px;font-weight:900;">SECURITY ALERT</h1>
+          <p style="color:#94a3b8;margin-top:10px;">Developer Tools are restricted on this premium panel.</p>
+          <button onclick="location.reload()" style="margin-top:20px;padding:10px 20px;background:#4f46e5;border:none;color:white;border-radius:8px;font-weight:bold;cursor:pointer;">Reload Page</button>
+        </div>`;
+          }
+        };
+
+        // Run the check every 1.5 seconds
+        setInterval(detectDevTools, 1500);
+
+        // 4. Clear Console frequently
+        setInterval(() => {
+          console.clear();
+        }, 2000);
+      })();
+      AOS.init({ duration: 1000, once: true });
+
+      // Mobile Menu Controller
+      document.addEventListener("DOMContentLoaded", () => {
+        const menuBtn = document.getElementById("menu-btn");
+        const mobileMenu = document.getElementById("mobile-menu");
+        const menuIcon = menuBtn.querySelector("i");
+
+        // Toggle Function
+        const toggleMenu = (event) => {
+          event.stopPropagation(); // Prevent immediate closing from the document listener
+          const isHidden = mobileMenu.classList.contains("hidden");
+
+          if (isHidden) {
+            mobileMenu.classList.remove("hidden");
+            // Use a slight timeout to trigger CSS transitions if you add them
+            mobileMenu.classList.add("opacity-100", "translate-y-0");
+            menuIcon.className = "fas fa-times text-xl"; // Switch to close icon
+          } else {
+            closeMenu();
+          }
+        };
+
+        // Close Function
+        const closeMenu = () => {
           mobileMenu.classList.add("hidden");
-          menuIcon.className = "fas fa-bars text-xl";
+          menuIcon.className = "fas fa-th-large text-xl"; // Switch back to hamburger/grid icon
+        };
+
+        // 1. Click Listener for the Toggle Button
+        menuBtn.addEventListener("click", toggleMenu);
+
+        // 2. Close when any link inside the mobile menu is clicked
+        document.querySelectorAll(".mobile-link").forEach((link) => {
+          link.addEventListener("click", closeMenu);
+        });
+
+        // 3. Close when clicking anywhere outside the menu or button
+        document.addEventListener("click", (event) => {
+          const isClickInsideMenu = mobileMenu.contains(event.target);
+          const isClickOnButton = menuBtn.contains(event.target);
+
+          if (!isClickInsideMenu && !isClickOnButton) {
+            closeMenu();
+          }
+        });
+
+        // 4. Handle Window Resizing (Auto-close if switching to desktop view)
+        window.addEventListener("resize", () => {
+          if (window.innerWidth >= 1024) {
+            // Matches Tailwind 'lg' breakpoint
+            closeMenu();
+          }
         });
       });
 
-      // Close menu on click outside
-      document.addEventListener("click", () => {
-        mobileMenu.classList.add("hidden");
-        menuIcon.className = "fas fa-bars text-xl";
-      });
+      // 1. Initial configuration (KEEP THIS OUTSIDE THE FUNCTION)
+      const SUPABASE_URL = "https://douciplboqmayceruthu.supabase.co";
+      const SUPABASE_KEY = "sb_publishable_1CKpfNGUpUFQqOeIENMe_A_7Yk84j_z";
+
+      // Use the standard createClient method (case-sensitive)
+      const supabaseClient = window.supabase.createClient(
+        SUPABASE_URL,
+        SUPABASE_KEY,
+      );
+
+      async function performTracking() {
+        const mobileInput = document.getElementById("trackMobile");
+        const mobile = mobileInput.value.trim();
+        const btn = document.getElementById("btn-track");
+        const resDiv = document.getElementById("trackResult");
+        const errMobile = document.getElementById("err-trackMobile");
+
+        // 1. Validation
+        if (!/^[0-9]{10}$/.test(mobile)) {
+          errMobile.classList.remove("hidden");
+          mobileInput.classList.add("border-red-500");
+          return;
+        } else {
+          errMobile.classList.add("hidden");
+          mobileInput.classList.remove("border-red-500");
+        }
+
+        // 2. Show Loading State
+        btn.disabled = true;
+        const originalBtnText = btn.innerHTML;
+        btn.innerHTML = `<i class="fas fa-circle-notch fa-spin mr-2"></i> Searching...`;
+
+        resDiv.classList.remove("hidden");
+        resDiv.innerHTML = `
+    <div class="col-span-full text-center py-12">
+        <div class="inline-block w-12 h-12 border-4 border-indigo-600 border-t-transparent rounded-full animate-spin mb-4"></div>
+        <p class="text-slate-500 font-bold animate-pulse">Searching your records / खोज जारी है...</p>
+    </div>`;
+
+        try {
+          // 3. Fetch from Supabase
+          // (Note: No need to re-initialize here, using the global supabaseClient)
+          const { data, error } = await supabaseClient
+            .from("application_entries")
+            .select("*")
+            .eq("mobile", mobile)
+            .order("created_at", { ascending: false });
+
+          if (error) throw error;
+
+          // 4. Handle No Data
+          if (!data || data.length === 0) {
+            resDiv.innerHTML = `
+            <div class="col-span-full bg-red-50 border border-red-100 rounded-[2rem] p-10 text-center shadow-inner">
+                <div class="w-20 h-20 bg-white rounded-3xl flex items-center justify-center mx-auto mb-6 shadow-sm">
+                    <i class="fas fa-search-minus text-3xl text-red-400"></i>
+                </div>
+                <p class="text-slate-800 text-2xl font-black italic">Record Not Found</p>
+                <p class="text-slate-500 mt-2 font-medium">कोई रिकॉर्ड नहीं मिला। कृपया अपना पंजीकृत नंबर जांचें।</p>
+            </div>`;
+            return;
+          }
+
+          // 5. Build Result Cards (Bento Style)
+          let html = "";
+
+          data.forEach((app) => {
+            const docStatus = app.documents_status || "PENDING";
+            const isCompleted =
+              docStatus === "COMPLETED" || docStatus === "APPROVED";
+
+            let statusColor = "bg-amber-100 text-amber-700 border-amber-200";
+            let statusIcon = "fa-clock";
+            let statusLabel = "Processing / प्रक्रिया में";
+
+            if (isCompleted) {
+              statusColor =
+                "bg-emerald-100 text-emerald-700 border-emerald-200";
+              statusIcon = "fa-check-double";
+              statusLabel = "Approved / स्वीकृत";
+            } else if (docStatus === "REJECTED") {
+              statusColor = "bg-rose-100 text-rose-700 border-rose-200";
+              statusIcon = "fa-ban";
+              statusLabel = "Rejected / अस्वीकृत";
+            }
+
+            let actionButtons = "";
+            if (isCompleted) {
+              actionButtons = `
+                <div class="grid grid-cols-2 gap-3 mt-6">
+                    <button onclick="triggerDownload('${app.receiving_document}', 'Receipt_${app.id}.pdf', event)" 
+                            class="bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold py-3 rounded-xl text-xs transition border border-slate-200">
+                        <i class="fas fa-file-invoice mr-1"></i> Receipt
+                    </button>
+                    <button onclick="triggerDownload('${app.certificate_document}', 'Certificate_${app.id}.pdf', event)" 
+                            class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 rounded-xl text-xs shadow-lg transition">
+                        <i class="fas fa-download mr-1"></i> Download
+                    </button>
+                </div>`;
+            } else if (docStatus === "PENDING" && app.receiving_document) {
+              actionButtons = `
+                <button onclick="triggerDownload('${app.receiving_document}', 'Receipt_${app.id}.pdf', event)" 
+                        class="w-full mt-6 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 font-bold py-3 rounded-xl text-xs transition border border-indigo-100">
+                    <i class="fas fa-file-invoice mr-1"></i> Get Receipt / रसीद प्राप्त करें
+                </button>`;
+            }
+
+            html += `
+            <div class="bg-white rounded-3xl p-6 border border-slate-100 shadow-xl hover:border-indigo-500 transition-all flex flex-col justify-between group">
+                <div>
+                    <div class="flex justify-between items-start mb-6">
+                        <span class="text-[10px] font-black bg-slate-900 text-white px-3 py-1 rounded-full uppercase tracking-tighter">REF: #${app.id}</span>
+                        <span class="px-3 py-1 rounded-full text-[10px] font-black border uppercase ${statusColor}">
+                            <i class="fas ${statusIcon} mr-1"></i> ${statusLabel}
+                        </span>
+                    </div>
+                    <h3 class="text-xl font-black text-slate-900 uppercase tracking-tight group-hover:text-indigo-600 transition-colors">${app.document_type || "Service"}</h3>
+                    <p class="text-slate-400 text-[10px] font-bold mb-4 uppercase">Applied: ${new Date(app.created_at).toLocaleDateString()}</p>
+                    <div class="p-4 bg-slate-50 rounded-2xl mb-2 border border-slate-100">
+                        <p class="text-[9px] text-slate-400 font-black uppercase tracking-widest">Applicant Name / नाम</p>
+                        <p class="text-sm font-black text-slate-800">${app.applicant_name}</p>
+                    </div>
+                </div>
+                ${actionButtons}
+            </div>`;
+          });
+
+          resDiv.innerHTML = html;
+          // Smooth scroll to the results
+          resDiv.scrollIntoView({ behavior: "smooth", block: "nearest" });
+        } catch (err) {
+          console.error("Tracking Error:", err);
+          resDiv.innerHTML = `
+        <div class="col-span-full text-center p-8 bg-red-50 rounded-2xl border border-red-100">
+            <p class="text-red-600 font-bold">❌ Error: Network failure / नेटवर्क समस्या</p>
+            <p class="text-xs text-red-400 mt-1">Please check your internet or change your DNS to 1.1.1.1</p>
+        </div>`;
+        } finally {
+          btn.disabled = false;
+          btn.innerHTML = originalBtnText;
+        }
+      }
     </script>
   </body>
 </html>
