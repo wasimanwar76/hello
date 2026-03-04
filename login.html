@@ -3,148 +3,234 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Login | Admin Panel</title>
+    <title>Admin Login | R2PS Digital Documentation</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&family=Inter:wght@400;500;600&display=swap"
+      rel="stylesheet"
+    />
     <style>
+      :root {
+        --brand-navy: #0a2540;
+        --brand-blue: #635bff;
+        --bg-light: #f6f9fc;
+      }
+      body {
+        font-family: "Inter", sans-serif;
+        background-color: var(--bg-light);
+      }
+      h1,
+      h2,
+      h3 {
+        font-family: "Poppins", sans-serif;
+      }
+
+      .login-card {
+        background: #ffffff;
+        border: 1px solid #e0e6ee;
+        box-shadow:
+          0 50px 100px -20px rgba(50, 50, 93, 0.25),
+          0 30px 60px -30px rgba(0, 0, 0, 0.3);
+      }
+
+      .input-field {
+        transition: all 0.2s ease;
+        border: 1.5px solid #e0e6ee;
+      }
+      .input-field:focus {
+        border-color: var(--brand-blue);
+        box-shadow: 0 0 0 4px rgba(99, 91, 255, 0.1);
+        outline: none;
+      }
+
+      .btn-primary {
+        background-color: var(--brand-navy);
+        transition: all 0.3s ease;
+      }
+      .btn-primary:hover {
+        background-color: #1a3a5a;
+        transform: translateY(-1px);
+      }
+
+      /* Loading Animation */
+      .spinner {
+        display: none;
+        border: 3px solid rgba(255, 255, 255, 0.3);
+        border-radius: 50%;
+        border-top: 3px solid #fff;
+        width: 20px;
+        height: 20px;
+        animation: spin 1s linear infinite;
+      }
       .btn-loading .spinner {
-        display: inline-block;
+        display: block;
       }
       .btn-loading .btn-text {
         display: none;
       }
-      .spinner {
-        display: none;
-      }
-
       @keyframes spin {
-        to {
+        0% {
+          transform: rotate(0deg);
+        }
+        100% {
           transform: rotate(360deg);
         }
-      }
-      .animate-spin-custom {
-        animation: spin 1s linear infinite;
       }
     </style>
   </head>
 
-  <body
-    class="min-h-screen bg-gradient-to-br from-indigo-600 via-indigo-500 to-purple-600 flex items-center justify-center p-4"
-  >
+  <body class="min-h-screen flex items-center justify-center p-6">
     <div
-      class="w-full max-w-5xl bg-white rounded-3xl shadow-2xl overflow-hidden grid grid-cols-1 md:grid-cols-2"
+      id="devtools-restricted"
+      class="hidden fixed inset-0 z-[100] bg-[#0f172a] flex items-center justify-center text-center p-4"
     >
-      <div
-        class="hidden md:flex flex-col justify-center p-10 bg-gradient-to-br from-indigo-700 to-indigo-500 text-white"
-      >
-        <h1 class="text-4xl font-bold mb-4">RTPS Assist</h1>
-        <p class="text-indigo-100 text-lg">
-          Secure Admin Dashboard for managing government applications
-          efficiently.
+      <div>
+        <h1 class="text-white text-3xl font-bold mb-2">⚠ Access Restricted</h1>
+        <p class="text-slate-400">
+          Developer tools are not allowed on this panel.
         </p>
       </div>
+    </div>
 
-      <div class="p-8 md:p-12 flex flex-col justify-center">
-        <h2 class="text-3xl font-bold text-slate-800 mb-2">Welcome Back 👋</h2>
-        <p class="text-slate-500 mb-8">Login to your admin account</p>
+    <div
+      class="w-full max-w-4xl grid grid-cols-1 md:grid-cols-2 login-card rounded-3xl overflow-hidden"
+    >
+      <div
+        class="hidden md:flex flex-col justify-between p-12 bg-[#0A2540] text-white relative overflow-hidden"
+      >
+        <div class="relative z-10">
+          <div
+            class="w-12 h-12 bg-[#635BFF] rounded-xl flex items-center justify-center mb-8 shadow-lg"
+          >
+            <span class="font-black text-2xl">R</span>
+          </div>
+          <h1 class="text-4xl font-bold leading-tight mb-4">
+            R2PS<br /><span class="text-[#635BFF]">Control Center.</span>
+          </h1>
+          <p class="text-slate-400 text-lg">
+            Manage digital governance, partner stats, and application flows from
+            one secure environment.
+          </p>
+        </div>
 
-        <form id="loginForm" class="space-y-5">
+        <div
+          class="relative z-10 flex items-center gap-2 text-xs font-medium text-slate-500 uppercase tracking-widest"
+        >
+          <span
+            class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"
+          ></span>
+          System Secured with 256-bit Encryption
+        </div>
+
+        <div
+          class="absolute -bottom-20 -right-20 w-64 h-64 bg-[#635BFF] opacity-10 rounded-full blur-3xl"
+        ></div>
+      </div>
+
+      <div class="p-8 md:p-16 flex flex-col justify-center bg-white">
+        <div class="mb-10">
+          <h2 class="text-2xl font-bold text-slate-800 mb-2">
+            Administrator Login
+          </h2>
+          <p class="text-slate-500">
+            Enter your credentials to access the panel.
+          </p>
+        </div>
+
+        <form id="loginForm" class="space-y-6">
           <div>
-            <label class="text-sm font-semibold text-slate-600">Email</label>
+            <label
+              class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2"
+              >Internal Email Address</label
+            >
             <input
               type="email"
               id="email"
               required
-              placeholder="admin@example.com"
-              class="w-full mt-1 px-4 py-3 rounded-xl border border-slate-300 focus:ring-2 focus:ring-indigo-500 outline-none transition-all"
+              placeholder="name@r2ps.in"
+              class="w-full px-4 py-4 rounded-xl input-field bg-slate-50 text-slate-800"
             />
           </div>
 
           <div class="relative">
-            <label class="text-sm font-semibold text-slate-600">Password</label>
+            <div class="flex justify-between items-center mb-2">
+              <label
+                class="block text-xs font-bold text-slate-500 uppercase tracking-wider"
+                >Access Password</label
+              >
+            </div>
             <div class="relative">
               <input
                 type="password"
                 id="password"
                 required
                 placeholder="••••••••"
-                class="w-full mt-1 px-4 py-3 rounded-xl border border-slate-300 focus:ring-2 focus:ring-indigo-500 pr-12 outline-none transition-all"
+                class="w-full px-4 py-4 rounded-xl input-field bg-slate-50 text-slate-800 pr-12"
               />
               <button
                 type="button"
                 onclick="togglePassword()"
-                class="absolute right-3 top-1/2 -translate-y-1/2 mt-0.5 text-slate-400 hover:text-indigo-600 transition-colors"
+                class="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 hover:text-[#635BFF]"
               >
                 <svg
                   id="eye-icon"
-                  xmlns="http://www.w3.org/2000/svg"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke-width="2"
-                  stroke="currentColor"
                   class="w-5 h-5"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
                 >
                   <path
                     stroke-linecap="round"
                     stroke-linejoin="round"
-                    d="M2.036 12.322a1.012 1.012 0 010-.644C3.399 8.049 7.21 5 12 5c4.79 0 8.601 3.049 9.964 6.322a1.012 1.012 0 010 .644C20.601 15.951 16.79 19 12 19c-4.79 0-8.601-3.049-9.964-6.322z"
+                    stroke-width="2"
+                    d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
                   />
                   <path
                     stroke-linecap="round"
                     stroke-linejoin="round"
-                    d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
+                    stroke-width="2"
+                    d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"
                   />
                 </svg>
               </button>
             </div>
           </div>
 
-          <p
+          <div
             id="errorMsg"
-            class="text-red-500 text-sm hidden bg-red-50 p-3 rounded-lg border border-red-100"
-          ></p>
+            class="hidden animate-shake bg-red-50 border-l-4 border-red-500 p-4 rounded-lg"
+          >
+            <p class="text-red-700 text-sm font-medium" id="errorText"></p>
+          </div>
 
           <button
             type="submit"
             id="submitBtn"
-            class="w-full py-3 bg-indigo-600 text-white rounded-xl font-bold hover:bg-indigo-700 transition shadow-lg flex items-center justify-center gap-3 disabled:opacity-70 disabled:cursor-not-allowed"
+            class="w-full py-4 btn-primary text-white rounded-xl font-bold shadow-xl shadow-indigo-100 flex items-center justify-center gap-3 active:scale-[0.98] transition-transform"
           >
-            <svg
-              class="spinner animate-spin-custom h-5 w-5 text-white"
-              xmlns="http://www.w3.org/2000/svg"
-              fill="none"
-              viewBox="0 0 24 24"
-            >
-              <circle
-                class="opacity-25"
-                cx="12"
-                cy="12"
-                r="10"
-                stroke="currentColor"
-                stroke-width="4"
-              ></circle>
-              <path
-                class="opacity-75"
-                fill="currentColor"
-                d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-              ></path>
-            </svg>
-            <span class="btn-text">Login</span>
-            <span class="spinner">Verifying...</span>
+            <div class="spinner"></div>
+            <span class="btn-text">Authenticate User</span>
           </button>
         </form>
+
+        <div class="mt-8 text-center">
+          <a
+            href="https://www.r2ps.in/"
+            class="text-sm font-semibold text-[#635BFF] hover:underline"
+            >← Back to Public Website</a
+          >
+        </div>
       </div>
     </div>
 
     <script>
-      // Anti-DevTools Logic
+      // --- 1. Anti-DevTools Logic ---
       (function () {
         document.addEventListener("contextmenu", (e) => e.preventDefault());
-        document.addEventListener("keydown", function (e) {
+        document.addEventListener("keydown", (e) => {
           if (
             e.key === "F12" ||
-            (e.ctrlKey &&
-              e.shiftKey &&
-              (e.key === "I" || e.key === "J" || e.key === "C")) ||
+            (e.ctrlKey && e.shiftKey && ["I", "J", "C"].includes(e.key)) ||
             (e.ctrlKey && e.key === "U")
           ) {
             e.preventDefault();
@@ -156,73 +242,108 @@
           debugger;
           const end = new Date();
           if (end - start > 100) {
-            document.body.innerHTML = `<div style="display:flex;justify-content:center;align-items:center;height:100vh;font-family:sans-serif;background:#0f172a;color:white;text-align:center"><div><h1 style="font-size:32px">⚠ Access Restricted</h1><p>Developer tools are not allowed on this panel.</p></div></div>`;
+            const restricted = document.getElementById("devtools-restricted");
+            if (restricted) {
+              document.body.innerHTML = restricted.innerHTML;
+              document.body.className = "restricted-overlay";
+            }
           }
         };
         setInterval(detectDevTools, 1000);
       })();
 
+      // --- 0. Auto-Redirect if Session Exists ---
+      (function checkExistingSession() {
+        const token = localStorage.getItem("r2ps_token");
+        const email = localStorage.getItem("r2ps_email");
+
+        if (token && email) {
+          // Decide where they belong based on the stored email
+          const targetPage =
+            email === "wasimanwar9344@gmail.com" ||
+            email === "kunal2828babu@r2ps.in"
+              ? "/superadmin.html"
+              : "/admin.html";
+
+          console.log("Session found, redirecting to:", targetPage);
+          window.location.replace(targetPage);
+        }
+      })();
+
+      // --- 2. Password Toggle ---
       function togglePassword() {
         const passwordInput = document.getElementById("password");
         const eyeIcon = document.getElementById("eye-icon");
         if (passwordInput.type === "password") {
           passwordInput.type = "text";
-          eyeIcon.innerHTML = `<path stroke-linecap="round" stroke-linejoin="round" d="M3.98 8.223A10.477 10.477 0 001.934 12C3.226 16.338 7.244 19.5 12 19.5c.993 0 1.953-.138 2.863-.395M6.228 6.228A10.45 10.45 0 0112 4.5c4.756 0 8.773 3.162 10.065 7.498a10.523 10.523 0 01-4.293 5.774M6.228 6.228L3 3m3.228 3.228l3.65 3.65m7.822 7.822L21 21m-3.228-3.228l-3.65-3.65m0 0a3 3 0 10-4.243-4.243m4.242 4.242L9.88 9.88" />`;
+          eyeIcon.innerHTML = `<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l18 18" />`;
         } else {
           passwordInput.type = "password";
-          eyeIcon.innerHTML = `<path stroke-linecap="round" stroke-linejoin="round" d="M2.036 12.322a1.012 1.012 0 010-.644C3.399 8.049 7.21 5 12 5c4.79 0 8.601 3.049 9.964 6.322a1.012 1.012 0 010 .644C20.601 15.951 16.79 19 12 19c-4.79 0-8.601-3.049-9.964-6.322z" /><path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />`;
+          eyeIcon.innerHTML = `<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />`;
         }
       }
 
+      // --- 3. Authentication Logic ---
       const loginForm = document.getElementById("loginForm");
       const submitBtn = document.getElementById("submitBtn");
       const errorMsg = document.getElementById("errorMsg");
+      const errorText = document.getElementById("errorText");
+
+      // Backend URL
+      const API_URL = "https://rtps-backend.vercel.app/api/auth/login";
 
       loginForm.addEventListener("submit", async (e) => {
         e.preventDefault();
+        const emailInput = document.getElementById("email").value.trim();
+        const passwordInput = document.getElementById("password").value;
 
-        const email = document.getElementById("email").value;
-        const password = document.getElementById("password").value;
-
-        // UI Feedback: Start Loading
+        // Reset UI State
         errorMsg.classList.add("hidden");
         submitBtn.classList.add("btn-loading");
         submitBtn.disabled = true;
 
         try {
-          const res = await fetch(
-            "https://backend-5gc912wx6-wasimsonu76-gmailcoms-projects.vercel.app/api/auth/login",
-            {
-              method: "POST",
-              headers: { "Content-Type": "application/json" },
-              body: JSON.stringify({ email, password }),
-            },
-          );
+          const res = await fetch(API_URL, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              email: emailInput,
+              password: passwordInput,
+            }),
+          });
 
-          const data = await res.json();
+          const result = await res.json();
 
-          if (!res.ok) {
-            throw new Error(data.message || "Invalid credentials");
+          // Check if response is successful
+          if (!res.ok || !result.success) {
+            throw new Error(result.message || "Authentication Failed");
           }
 
-          // Save Auth Data
-          localStorage.setItem("token", data.token);
-          localStorage.setItem("email", email);
+          /** * FIX: Use 'result.data.token' instead of 'data.token'
+           * Because your API wraps the response in a 'data' object.
+           */
+          localStorage.setItem("r2ps_token", result.data.token);
+          localStorage.setItem("r2ps_email", result.data.user.email);
 
-          // Route based on email
+          // Route Logic
+          const userEmail = result.data.user.email;
           const targetPage =
-            email === "kunal2828babu@r2ps.in"
+            userEmail === "wasimanwar9344@gmail.com" ||
+            userEmail === "kunal2828babu@r2ps.in"
               ? "/superadmin.html"
               : "/admin.html";
 
+          // Small delay for smooth transition
           setTimeout(() => {
-            window.location.href = targetPage;
+            window.location.replace(targetPage);
           }, 600);
         } catch (err) {
-          // UI Feedback: Stop Loading
+          console.error("Login Error:", err);
           submitBtn.classList.remove("btn-loading");
           submitBtn.disabled = false;
-          errorMsg.innerText = err.message;
+
+          // Professional error message handling
+          errorText.innerText = err.message;
           errorMsg.classList.remove("hidden");
         }
       });

@@ -381,14 +381,49 @@
     </div>
 
     <script>
-      document.addEventListener("DOMContentLoaded", () => {
-        const token = localStorage.getItem("token");
+      (function secureAuthGuard() {
+        const token = localStorage.getItem("r2ps_token");
+        const email = localStorage.getItem("r2ps_email");
+        const path = window.location.pathname;
 
-        if (!token) {
-          // Option A: Hard Redirect (Your current way)
-          window.location.href = "/login.html";
-        } 
-      });
+        // Define page categories
+        const isLoginPage = path.includes("login.html");
+        const isSuperAdminPage = path.includes("superadmin.html");
+        const isAdminPage = path.includes("admin.html");
+
+        // 1. If NOT logged in, restrict access
+        if (!token || !email) {
+          if (isAdminPage || isSuperAdminPage) {
+            console.warn("Unauthorized: Redirecting to login.");
+            window.location.href = "/login.html";
+          }
+          return; // Stop execution
+        }
+
+        // 2. If logged in, check role-based access
+        const isSuperUser =
+          email === "wasimanwar9344@gmail.com" ||
+          email === "kunal2828babu@r2ps.in";
+
+        if (isSuperUser) {
+          // SuperAdmin should be on superadmin.html
+          if (!isSuperAdminPage) {
+            window.location.href = "/superadmin.html";
+          }
+        } else {
+          // Regular Admin should be on admin.html
+          if (!isAdminPage) {
+            window.location.href = "/admin.html";
+          }
+        }
+
+        // 3. Prevent logged-in users from seeing the login page
+        if (isLoginPage) {
+          window.location.href = isSuperUser
+            ? "/superadmin.html"
+            : "/admin.html";
+        }
+      })();
       // 1. PROTECTION
       (function () {
         document.addEventListener("contextmenu", (e) => e.preventDefault());

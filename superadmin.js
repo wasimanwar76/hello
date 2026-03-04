@@ -33,42 +33,84 @@
   setInterval(detectDevTools, 1000);
 })();
 
-// 1. AUTH & ROLE REDIRECT LOGIC
-const token = localStorage.getItem("token");
-const email = localStorage.getItem("email");
+/**
+ * R2PS Enterprise Auth Guard
+ * Logic for secure routing and session management
+ */
 
-// Check if a session exists
-if (token) {
-  // If logged in, determine the correct dashboard based on email
-  if (email === "wasimanwar9344@gmail.com") {
-    // Prevent redundant redirection if already on the superadmin page
-    if (!window.location.pathname.includes("superadmin.html")) {
+(function secureAuthGuard() {
+  const token = localStorage.getItem("r2ps_token");
+  const email = localStorage.getItem("r2ps_email");
+  const path = window.location.pathname;
+
+  // Define page categories
+  const isLoginPage = path.includes("login.html");
+  const isSuperAdminPage = path.includes("superadmin.html");
+  const isAdminPage = path.includes("admin.html");
+
+  // 1. If NOT logged in, restrict access
+  if (!token || !email) {
+    if (isAdminPage || isSuperAdminPage) {
+      console.warn("Unauthorized: Redirecting to login.");
+      window.location.href = "/login.html";
+    }
+    return; // Stop execution
+  }
+
+  // 2. If logged in, check role-based access
+  const isSuperUser =
+    email === "wasimanwar9344@gmail.com" || email === "kunal2828babu@r2ps.in";
+
+  if (isSuperUser) {
+    // SuperAdmin should be on superadmin.html
+    if (!isSuperAdminPage) {
       window.location.href = "/superadmin.html";
     }
   } else {
-    // Redirect regular admins if they try to access non-admin pages
-    if (!window.location.pathname.includes("admin.html")) {
+    // Regular Admin should be on admin.html
+    if (!isAdminPage) {
       window.location.href = "/admin.html";
     }
   }
-} else {
-  // If no token exists, force login (except if already on login page)
-  if (!window.location.pathname.includes("login.html")) {
+
+  // 3. Prevent logged-in users from seeing the login page
+  if (isLoginPage) {
+    window.location.href = isSuperUser ? "/superadmin.html" : "/admin.html";
+  }
+})();
+
+/**
+ * 2. SECURE LOGOUT
+ * Fully purges the session and browser cache
+ */
+async function logout() {
+  try {
+    // Optional: Call Supabase signout if you want to invalidate on server too
+    // await supabaseClient.auth.signOut();
+
+    // Clear all session markers
+    const keysToRemove = [
+      "r2ps_token",
+      "r2ps_email",
+      "r2ps_user",
+      "CACHED_APPLICATIONS",
+      "PARTNER_DATA_CACHE",
+    ];
+
+    keysToRemove.forEach((key) => localStorage.removeItem(key));
+    sessionStorage.clear();
+
+    // Hard redirect to prevent "Back Button" access to cached views
+    window.location.replace("/login.html?status=logged_out");
+  } catch (err) {
+    console.error("Logout failed", err);
     window.location.href = "/login.html";
   }
 }
 
-// 2. LOGOUT FUNCTION
-function logout() {
-  localStorage.removeItem("token");
-  localStorage.removeItem("email");
-  // Clear any cached application data to ensure privacy
-  localStorage.removeItem("CACHED_APPLICATIONS");
-  window.location.href = "/login.html";
-}
-
 // 3. CORE VARIABLES & UTILS
-const API_BASE = "https://backend-5gc912wx6-wasimsonu76-gmailcoms-projects.vercel.app/api";
+const API_BASE =
+  "https://backend-5gc912wx6-wasimsonu76-gmailcoms-projects.vercel.app/api";
 let applications = [];
 
 function showToast(message, type = "success") {
