@@ -269,49 +269,47 @@
     </div>
 
     <script>
-      (function secureAuthGuard() {
+      (function strictSecurityGuard() {
         const token = localStorage.getItem("r2ps_token");
         const email = localStorage.getItem("r2ps_email");
         const path = window.location.pathname;
 
-        // Define page categories
+        // 1. Core Identification
         const isLoginPage = path.includes("login.html");
-        const isSuperAdminPage = path.includes("superadmin.html");
-        const isAdminPage = path.includes("admin.html");
-
-        // 1. If NOT logged in, restrict access
-        if (!token || !email) {
-          if (isAdminPage || isSuperAdminPage) {
-            console.warn("Unauthorized: Redirecting to login.");
-            window.location.href = "/login.html";
-          }
-          return; // Stop execution
-        }
-
-        // 2. If logged in, check role-based access
         const isSuperUser =
           email === "wasimanwar9344@gmail.com" ||
           email === "kunal2828babu@r2ps.in";
 
-        if (isSuperUser) {
-          // SuperAdmin should be on superadmin.html
-          if (!isSuperAdminPage) {
-            window.location.href = "/superadmin.html";
+        // --- CASE 1: NOT LOGGED IN ---
+        if (!token || !email) {
+          // If they are NOT on the login page, force them there immediately
+          if (!isLoginPage) {
+            window.location.replace("/login.html");
           }
-        } else {
-          // Regular Admin should be on admin.html
-          if (!isAdminPage) {
-            window.location.href = "/admin.html";
-          }
+          return; // Halt logic for public pages
         }
 
-        // 3. Prevent logged-in users from seeing the login page
+        // --- CASE 2: LOGGED IN ---
+
+        // Kick them out of the login page if they already have a session
         if (isLoginPage) {
-          window.location.href = isSuperUser
-            ? "/superadmin.html"
-            : "/admin.html";
+          window.location.replace(
+            isSuperUser ? "/superadmin.html" : "/admin.html",
+          );
+          return;
+        }
+
+        // Role Enforcement (Prevent regular admins from peaking at SuperAdmin)
+        if (path.includes("superadmin.html") && !isSuperUser) {
+          window.location.replace("/admin.html");
+        }
+
+        // Ensure SuperUsers are always in the Master Terminal
+        if (path.includes("admin.html") && isSuperUser) {
+          window.location.replace("/superadmin.html");
         }
       })();
+
       // 1. INITIALIZE SUPABASE
       // Using the keys provided in your previous prompt
       const SUPABASE_URL = "https://douciplboqmayceruthu.supabase.co";

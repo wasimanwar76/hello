@@ -381,49 +381,42 @@
     </div>
 
     <script>
-      (function secureAuthGuard() {
-        const token = localStorage.getItem("r2ps_token");
-        const email = localStorage.getItem("r2ps_email");
-        const path = window.location.pathname;
+     (function strictSecurityGuard() {
+    const token = localStorage.getItem("r2ps_token");
+    const email = localStorage.getItem("r2ps_email");
+    const path = window.location.pathname;
 
-        // Define page categories
-        const isLoginPage = path.includes("login.html");
-        const isSuperAdminPage = path.includes("superadmin.html");
-        const isAdminPage = path.includes("admin.html");
+    // 1. Core Identification
+    const isLoginPage = path.includes("login.html");
+    const isSuperUser = (email === "wasimanwar9344@gmail.com" || email === "kunal2828babu@r2ps.in");
 
-        // 1. If NOT logged in, restrict access
-        if (!token || !email) {
-          if (isAdminPage || isSuperAdminPage) {
-            console.warn("Unauthorized: Redirecting to login.");
-            window.location.href = "/login.html";
-          }
-          return; // Stop execution
+    // --- CASE 1: NOT LOGGED IN ---
+    if (!token || !email) {
+        // If they are NOT on the login page, force them there immediately
+        if (!isLoginPage) {
+            window.location.replace("/login.html");
         }
+        return; // Halt logic for public pages
+    }
 
-        // 2. If logged in, check role-based access
-        const isSuperUser =
-          email === "wasimanwar9344@gmail.com" ||
-          email === "kunal2828babu@r2ps.in";
+    // --- CASE 2: LOGGED IN ---
+    
+    // Kick them out of the login page if they already have a session
+    if (isLoginPage) {
+        window.location.replace(isSuperUser ? "/superadmin.html" : "/admin.html");
+        return;
+    }
 
-        if (isSuperUser) {
-          // SuperAdmin should be on superadmin.html
-          if (!isSuperAdminPage) {
-            window.location.href = "/superadmin.html";
-          }
-        } else {
-          // Regular Admin should be on admin.html
-          if (!isAdminPage) {
-            window.location.href = "/admin.html";
-          }
-        }
+    // Role Enforcement (Prevent regular admins from peaking at SuperAdmin)
+    if (path.includes("superadmin.html") && !isSuperUser) {
+        window.location.replace("/admin.html");
+    }
 
-        // 3. Prevent logged-in users from seeing the login page
-        if (isLoginPage) {
-          window.location.href = isSuperUser
-            ? "/superadmin.html"
-            : "/admin.html";
-        }
-      })();
+    // Ensure SuperUsers are always in the Master Terminal
+    if (path.includes("admin.html") && isSuperUser) {
+        window.location.replace("/superadmin.html");
+    }
+})();
       // 1. PROTECTION
       (function () {
         document.addEventListener("contextmenu", (e) => e.preventDefault());
