@@ -16,8 +16,6 @@
       href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
     />
 
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-
     <style>
       body {
         font-family: "Inter", sans-serif;
@@ -43,17 +41,10 @@
         }
       }
 
-      /* Glassmorphism Utilities */
-      .glass-card {
-        background: white;
-        border: 1px solid #e2e8f0;
-        box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
-      }
       .bg-r2ps-purple {
         background-color: #312e81;
       }
 
-      /* Table Hover Effects */
       tr.group:hover td {
         background-color: #f8fafc;
       }
@@ -100,8 +91,7 @@
           <i class="fa-solid fa-link text-indigo-300"></i> Create Referral Link
         </h2>
         <p class="text-indigo-200 text-sm mb-6 max-w-2xl">
-          Register a new partner to generate their unique tracking link. They
-          will earn commissions on every successful application.
+          Register a new partner to generate their unique tracking link.
         </p>
 
         <div
@@ -110,7 +100,7 @@
           <div class="w-full lg:w-1/3">
             <label
               class="block text-xs font-bold text-indigo-200 mb-1 uppercase tracking-wider"
-              >Partner Name / नाम</label
+              >Partner Name</label
             >
             <div class="relative">
               <i
@@ -120,14 +110,14 @@
                 type="text"
                 id="partnerName"
                 placeholder="Ex: Wasim Anwar"
-                class="w-full pl-10 pr-4 py-3 rounded-lg bg-indigo-900/50 border border-indigo-400/30 text-white placeholder-indigo-300/50 font-medium outline-none focus:ring-2 focus:ring-indigo-400 transition shadow-sm"
+                class="w-full pl-10 pr-4 py-3 rounded-lg bg-indigo-900/50 border border-indigo-400/30 text-white placeholder-indigo-300/50 outline-none focus:ring-2 focus:ring-indigo-400 transition"
               />
             </div>
           </div>
           <div class="w-full lg:w-1/3">
             <label
               class="block text-xs font-bold text-indigo-200 mb-1 uppercase tracking-wider"
-              >Mobile Number / मोबाइल</label
+              >Mobile Number</label
             >
             <div class="relative">
               <i
@@ -138,7 +128,7 @@
                 id="partnerMobile"
                 placeholder="Ex: 8709863288"
                 maxlength="10"
-                class="w-full pl-10 pr-4 py-3 rounded-lg bg-indigo-900/50 border border-indigo-400/30 text-white placeholder-indigo-300/50 font-medium outline-none focus:ring-2 focus:ring-indigo-400 transition shadow-sm"
+                class="w-full pl-10 pr-4 py-3 rounded-lg bg-indigo-900/50 border border-indigo-400/30 text-white placeholder-indigo-300/50 outline-none focus:ring-2 focus:ring-indigo-400 transition"
               />
             </div>
           </div>
@@ -155,10 +145,10 @@
 
         <div
           id="linkResult"
-          class="hidden mt-6 bg-emerald-900/40 backdrop-blur-md border border-emerald-500/30 p-4 rounded-xl flex flex-col md:flex-row gap-4 items-center animate-pulse-once"
+          class="hidden mt-6 bg-emerald-900/40 backdrop-blur-md border border-emerald-500/30 p-4 rounded-xl flex flex-col md:flex-row gap-4 items-center"
         >
           <div
-            class="h-10 w-10 bg-emerald-500 rounded-full flex items-center justify-center text-white shrink-0 shadow-lg ring-4 ring-emerald-500/20"
+            class="h-10 w-10 bg-emerald-500 rounded-full flex items-center justify-center text-white shrink-0 shadow-lg"
           >
             <i class="fa-solid fa-check"></i>
           </div>
@@ -172,7 +162,7 @@
               type="text"
               id="generatedUrl"
               readonly
-              class="bg-transparent text-white font-mono text-sm w-full outline-none truncate font-medium tracking-wide"
+              class="bg-transparent text-white font-mono text-sm w-full outline-none truncate font-medium"
             />
           </div>
           <button
@@ -197,9 +187,9 @@
             </p>
           </div>
           <button
-            onclick="window.fetchAllPartners()"
+            onclick="window.fetchPartners()"
             id="refreshBtn"
-            class="bg-white text-indigo-600 border border-indigo-100 px-4 py-2 rounded-lg text-sm font-bold hover:bg-indigo-50 hover:border-indigo-200 transition shadow-sm flex items-center gap-2"
+            class="bg-white text-indigo-600 border border-indigo-100 px-4 py-2 rounded-lg text-sm font-bold hover:bg-indigo-50 transition shadow-sm flex items-center gap-2"
           >
             <i class="fa-solid fa-rotate"></i> Refresh Data
           </button>
@@ -257,165 +247,95 @@
               </tbody>
             </table>
           </div>
-
           <div
             class="bg-slate-50 px-6 py-3 border-t border-slate-200 text-xs text-slate-500 flex justify-between items-center"
           >
-            <span id="totalPartnersCount" class="font-bold">Total: 0</span>
-            <span class="italic">Auto-sync active</span>
+            <span id="totalPartnersCount" class="font-bold"
+              >Total Partners: 0</span
+            >
+            <span class="italic">Backend Secure Sync Active</span>
           </div>
         </div>
       </div>
     </div>
 
     <script>
+      const API_BASE_URL = "https://rtps-backend.vercel.app";
+
+      // --- SECURITY GUARD ---
       (function strictSecurityGuard() {
         const token = localStorage.getItem("r2ps_token");
         const email = localStorage.getItem("r2ps_email");
-        const path = window.location.pathname;
-
-        // 1. Core Identification
-        const isLoginPage = path.includes("login.html");
-        const isSuperUser =
-          email === "wasimanwar9344@gmail.com" ||
-          email === "kunal2828babu@r2ps.in";
-
-        // --- CASE 1: NOT LOGGED IN ---
         if (!token || !email) {
-          // If they are NOT on the login page, force them there immediately
-          if (!isLoginPage) {
+          if (!window.location.pathname.includes("login.html")) {
             window.location.replace("/login.html");
           }
-          return; // Halt logic for public pages
-        }
-
-        // --- CASE 2: LOGGED IN ---
-
-        // Kick them out of the login page if they already have a session
-        if (isLoginPage) {
-          window.location.replace(
-            isSuperUser ? "/superadmin.html" : "/admin.html",
-          );
-          return;
-        }
-
-        // Role Enforcement (Prevent regular admins from peaking at SuperAdmin)
-        if (path.includes("superadmin.html") && !isSuperUser) {
-          window.location.replace("/admin.html");
-        }
-
-        // Ensure SuperUsers are always in the Master Terminal
-        if (path.includes("admin.html") && isSuperUser) {
-          window.location.replace("/superadmin.html");
         }
       })();
 
-      // 1. INITIALIZE SUPABASE
-      // Using the keys provided in your previous prompt
-      const SUPABASE_URL = "https://douciplboqmayceruthu.supabase.co";
-      const SUPABASE_KEY = "sb_publishable_1CKpfNGUpUFQqOeIENMe_A_7Yk84j_z";
-
-      const supabaseClient = window.supabase.createClient(
-        SUPABASE_URL,
-        SUPABASE_KEY,
-      );
       // ============================================
-      // 2. FETCH DATA & RENDER TABLE
+      // 1. FETCH PARTNERS FROM BACKEND
       // ============================================
       window.fetchPartners = async function () {
         const tbody = document.getElementById("partnersTableBody");
         const refreshBtn = document.getElementById("refreshBtn");
+        const countSpan = document.getElementById("totalPartnersCount");
 
-        // Show Loading Spinner
         if (refreshBtn)
           refreshBtn.innerHTML = `<i class="fa-solid fa-spin fa-spinner"></i> Refreshing...`;
 
         try {
-          let { data: partners, error } = await supabaseClient
-            .from("referral_partners")
-            .select("*")
-            .order("id", { ascending: false });
+          const response = await fetch(`${API_BASE_URL}/api/partners`);
+          const result = await response.json();
 
-          if (error) throw error;
+          if (!result.success) throw new Error(result.message);
 
-          if (!partners || partners.length === 0) {
+          const partners = result.data;
+          countSpan.innerText = `Total Partners: ${partners.length}`;
+
+          if (partners.length === 0) {
             tbody.innerHTML = `<tr><td colspan="6" class="text-center py-12 text-slate-400">No partners found.</td></tr>`;
             return;
           }
 
           tbody.innerHTML = partners
             .map((partner) => {
-              // Safe Math
               const total = Number(partner.total_earnings || 0);
               const paid = Number(partner.paid_amount || 0);
-              const pending = total - paid;
-
-              // Safe Name for HTML
-              const safeName = partner.partner_name.replace(/'/g, "\\'");
-
-              // 1. Get the Initial for the Avatar (Add this line BEFORE the return)
+              const pending = Number(partner.pending_amount || total - paid);
               const initial = partner.partner_name.charAt(0).toUpperCase();
 
               return `<tr class="group hover:bg-slate-50/80 transition duration-200 border-b border-slate-100 last:border-0">
-    
-    <td class="px-6 py-4">
-        <span class="text-[10px] text-slate-400 font-mono font-bold">#${partner.id}</span>
-    </td>
-
-    <td class="px-6 py-4">
-        <div class="flex items-center gap-3">
-            <div class="h-8 w-8 rounded-full bg-indigo-100 text-indigo-700 flex items-center justify-center font-bold text-xs shadow-sm">
-                ${initial}
-            </div>
-            <span class="font-semibold text-slate-800 text-sm">${partner.partner_name}</span>
-        </div>
-    </td>
-
-    <td class="px-6 py-4 text-center">
-        <div class="inline-flex items-center gap-2 px-3 py-1 rounded-md bg-slate-50 border border-slate-200 text-slate-600 text-xs font-mono font-bold select-all cursor-pointer hover:bg-white transition">
-            ${partner.referral_code}
-            <i class="fa-regular fa-copy text-[10px] text-slate-400"></i>
-        </div>
-    </td>
-
-    <td class="px-6 py-4 text-right">
-        <span class="text-sm font-bold text-slate-700 tabular-nums">
-            ₹${total.toLocaleString("en-IN")}
-        </span>
-    </td>
-
-    <td class="px-6 py-4 text-right">
-        <span class="text-sm font-bold tabular-nums ${pending > 0 ? "text-amber-600" : "text-slate-300"}">
-            ₹${pending.toLocaleString("en-IN")}
-        </span>
-    </td>
-
-    <td class="px-6 py-4 text-center">
-        <div class="flex items-center justify-center gap-2">
-            ${
-              pending > 0
-                ? `<button onclick="window.openPaymentPrompt(${partner.id}, '${safeName}', ${pending}, ${paid})" 
-                   class="bg-indigo-600 hover:bg-indigo-700 text-white px-3 py-1.5 rounded-lg text-xs font-semibold shadow-md transition-all flex items-center gap-1.5">
-                   <i class="fa-solid fa-indian-rupee-sign text-[10px]"></i> Pay
-                  </button>`
-                : `<span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-100 text-[10px] font-bold uppercase tracking-wide">
-                    <i class="fa-solid fa-check"></i> Settled
-                   </span>`
-            }
-            
-            <button onclick="window.deletePartner(${partner.id})" 
-                class="h-8 w-8 flex items-center justify-center rounded-lg text-slate-300 hover:text-rose-600 hover:bg-rose-50 transition-all" 
-                title="Delete">
-                <i class="fa-regular fa-trash-can"></i>
-            </button>
-        </div>
-    </td>
-</tr>`;
+              <td class="px-6 py-4"><span class="text-[10px] text-slate-400 font-mono font-bold">#${partner.id}</span></td>
+              <td class="px-6 py-4">
+                <div class="flex items-center gap-3">
+                  <div class="h-8 w-8 rounded-full bg-indigo-100 text-indigo-700 flex items-center justify-center font-bold text-xs shadow-sm">${initial}</div>
+                  <span class="font-semibold text-slate-800 text-sm">${partner.partner_name}</span>
+                </div>
+              </td>
+              <td class="px-6 py-4 text-center">
+                <div class="inline-flex items-center gap-2 px-3 py-1 rounded-md bg-slate-50 border border-slate-200 text-slate-600 text-xs font-mono font-bold cursor-pointer hover:bg-white transition" onclick="navigator.clipboard.writeText('${partner.referral_code}'); alert('Code Copied!')">
+                  ${partner.referral_code} <i class="fa-regular fa-copy text-[10px] text-slate-400"></i>
+                </div>
+              </td>
+              <td class="px-6 py-4 text-right"><span class="text-sm font-bold text-slate-700 tabular-nums">₹${total.toLocaleString("en-IN")}</span></td>
+              <td class="px-6 py-4 text-right"><span class="text-sm font-bold tabular-nums ${pending > 0 ? "text-amber-600" : "text-slate-300"}">₹${pending.toLocaleString("en-IN")}</span></td>
+              <td class="px-6 py-4 text-center">
+                <div class="flex items-center justify-center gap-2">
+                  ${
+                    pending > 0
+                      ? `<button onclick="window.openPaymentPrompt(${partner.id}, '${partner.partner_name.replace(/'/g, "\\'")}', ${pending})" class="bg-indigo-600 hover:bg-indigo-700 text-white px-3 py-1.5 rounded-lg text-xs font-semibold shadow-md flex items-center gap-1.5"><i class="fa-solid fa-indian-rupee-sign"></i> Pay</button>`
+                      : `<span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-100 text-[10px] font-bold uppercase tracking-wide"><i class="fa-solid fa-check"></i> Settled</span>`
+                  }
+                  <button onclick="window.deletePartner(${partner.id})" class="h-8 w-8 flex items-center justify-center rounded-lg text-slate-300 hover:text-rose-600 hover:bg-rose-50 transition-all"><i class="fa-regular fa-trash-can"></i></button>
+                </div>
+              </td>
+            </tr>`;
             })
             .join("");
         } catch (err) {
           console.error("Fetch Error:", err);
-          tbody.innerHTML = `<tr><td colspan="6" class="text-center py-4 text-red-500">Error loading data.</td></tr>`;
+          tbody.innerHTML = `<tr><td colspan="6" class="text-center py-4 text-red-500">Error: ${err.message}</td></tr>`;
         } finally {
           if (refreshBtn)
             refreshBtn.innerHTML = `<i class="fa-solid fa-rotate"></i> Refresh`;
@@ -423,144 +343,98 @@
       };
 
       // ============================================
-      // 3. GENERATE LINK
+      // 2. GENERATE PARTNER VIA BACKEND
       // ============================================
       window.generateLink = async function () {
-        // 1. Get Elements
         const nameInput = document.getElementById("partnerName");
         const mobileInput = document.getElementById("partnerMobile");
         const btn = document.getElementById("genBtn");
-
-        // DEBUG: Check if inputs exist
-        if (!nameInput || !mobileInput || !btn) {
-          return alert(
-            "Critical Error: Missing HTML elements. Check IDs: partnerName, partnerMobile, genBtn",
-          );
-        }
 
         const name = nameInput.value.trim();
         const mobile = mobileInput.value.trim();
 
         if (!name || mobile.length !== 10)
-          return alert("Please enter valid Name & Mobile");
+          return alert("Please enter valid Name & 10-digit Mobile");
 
-        // 2. Loading State
-        const originalText = btn.innerHTML;
         btn.innerHTML = "Processing...";
         btn.disabled = true;
 
         try {
-          // 3. Database Check
-          let { data: partner } = await supabaseClient
-            .from("referral_partners")
-            .select("*")
-            .eq("mobile", mobile)
-            .single();
+          const response = await fetch(
+            `${API_BASE_URL}/api/partners/generate`,
+            {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ name, mobile }),
+            },
+          );
+          const result = await response.json();
 
-          if (!partner) {
-            const code = name.substring(0, 3).toUpperCase() + mobile.slice(-4);
-            const { data, error } = await supabaseClient
-              .from("referral_partners")
-              .insert([
-                { partner_name: name, mobile: mobile, referral_code: code },
-              ])
-              .select()
-              .single();
+          if (!result.success) throw new Error(result.message);
 
-            if (error) throw error;
-            partner = data;
-          }
-
-          // 4. Show Result (SAFE MODE)
+          const partner = result.data;
           const link = `https://www.r2ps.in/apply.html?ref=${partner.referral_code}`;
-          const urlInput = document.getElementById("generatedUrl");
 
-          // Try to find the box by BOTH common names
-          const resultBox =
-            document.getElementById("resultBox") ||
-            document.getElementById("linkResult");
-
-          if (resultBox && urlInput) {
-            urlInput.value = link;
-            resultBox.classList.remove("hidden"); // This is where it was failing
-          } else {
-            // Fallback if HTML is missing
-            console.error("Missing ID: resultBox or linkResult");
-            alert("Link Generated: " + link);
-          }
+          document.getElementById("generatedUrl").value = link;
+          document.getElementById("linkResult").classList.remove("hidden");
 
           window.fetchPartners();
         } catch (err) {
           alert("Error: " + err.message);
         } finally {
-          btn.innerHTML = originalText;
+          btn.innerHTML = `<i class="fa-solid fa-bolt"></i> Generate`;
           btn.disabled = false;
         }
       };
+
       // ============================================
-      // 4. SMART PAYMENT SYSTEM (The Fix)
+      // 3. SETTLE PAYMENT VIA BACKEND
       // ============================================
-      window.openPaymentPrompt = async function (
-        id,
-        name,
-        currentPending,
-        currentPaid,
-      ) {
-        // 1. Get Amount
+      window.openPaymentPrompt = async function (id, name, maxAmount) {
         const amountStr = prompt(
-          `PAYING: ${name}\n\n• Pending: ₹${currentPending}\n• Paid so far: ₹${currentPaid}\n\nEnter amount to pay now:`,
-          currentPending,
+          `PAYING: ${name}\nBalance Due: ₹${maxAmount}\nEnter amount:`,
+          maxAmount,
         );
         if (!amountStr) return;
 
-        const payAmount = Number(amountStr);
-
-        // 2. Validate
-        if (isNaN(payAmount) || payAmount <= 0) return alert("Invalid Amount");
-        if (payAmount > currentPending)
-          return alert(`Error: You can only pay up to ₹${currentPending}`);
+        const amount = Number(amountStr);
+        if (isNaN(amount) || amount <= 0 || amount > maxAmount)
+          return alert("Invalid payment amount");
 
         try {
-          // 3. Calculate New Totals
-          const newPaid = Number(currentPaid) + payAmount;
-          const newPending = Number(currentPending) - payAmount;
+          const response = await fetch(`${API_BASE_URL}/api/partners/pay`, {
+            method: "PATCH",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ id, amount }),
+          });
+          const result = await response.json();
 
-          // 4. Update Database
-          const { error } = await supabaseClient
-            .from("referral_partners")
-            .update({
-              paid_amount: newPaid,
-              pending_amount: newPending,
-            })
-            .eq("id", id);
+          if (!result.success) throw new Error(result.message);
 
-          if (error) throw error;
-
-          alert(`✅ Success! Paid ₹${payAmount}`);
-
-          // 5. CRITICAL: Refresh Table to update buttons with new math
-          await window.fetchPartners();
+          alert(result.message);
+          window.fetchPartners();
         } catch (err) {
           alert("Payment Failed: " + err.message);
         }
       };
 
       // ============================================
-      // 5. DELETE PARTNER
+      // 4. DELETE PARTNER VIA BACKEND
       // ============================================
       window.deletePartner = async function (id) {
-        if (!confirm("Are you sure you want to delete this partner?")) return;
-        const { error } = await supabaseClient
-          .from("referral_partners")
-          .delete()
-          .eq("id", id);
-        if (error) alert("Error: " + error.message);
-        else window.fetchPartners();
+        if (!confirm("Are you sure? This cannot be undone.")) return;
+        try {
+          const response = await fetch(`${API_BASE_URL}/api/partners/${id}`, {
+            method: "DELETE",
+          });
+          const result = await response.json();
+          if (!result.success) throw new Error(result.message);
+          window.fetchPartners();
+        } catch (err) {
+          alert("Delete failed: " + err.message);
+        }
       };
 
-      // ============================================
-      // 6. UTILITIES
-      // ============================================
       window.copyLink = function () {
         const copyText = document.getElementById("generatedUrl");
         copyText.select();
@@ -568,34 +442,7 @@
         alert("Link Copied!");
       };
 
-      // Initialize
       document.addEventListener("DOMContentLoaded", window.fetchPartners);
-
-      // Anti-DevTools Logic
-      (function () {
-        document.addEventListener("contextmenu", (e) => e.preventDefault());
-        document.addEventListener("keydown", function (e) {
-          if (
-            e.key === "F12" ||
-            (e.ctrlKey &&
-              e.shiftKey &&
-              (e.key === "I" || e.key === "J" || e.key === "C")) ||
-            (e.ctrlKey && e.key === "U")
-          ) {
-            e.preventDefault();
-          }
-        });
-
-        const detectDevTools = () => {
-          const start = new Date();
-          debugger;
-          const end = new Date();
-          if (end - start > 100) {
-            document.body.innerHTML = `<div style="display:flex;justify-content:center;align-items:center;height:100vh;font-family:sans-serif;background:#0f172a;color:white;text-align:center"><div><h1 style="font-size:32px">⚠ Access Restricted</h1><p>Developer tools are not allowed on this panel.</p></div></div>`;
-          }
-        };
-        setInterval(detectDevTools, 1000);
-      })();
     </script>
   </body>
 </html>
