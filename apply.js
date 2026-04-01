@@ -323,28 +323,35 @@ function checkFile(id) {
 // --- 6. FILE UPLOAD HELPER ---
 async function uploadToSupabase(fileInputId, folder) {
   const fileInput = document.getElementById(fileInputId);
-  // If element doesn't exist or no file selected, return empty string (valid for optional files)
-  if (!fileInput || fileInput.files.length === 0) return "";
+
+  // Better: return null for optional files
+  if (!fileInput || fileInput.files.length === 0) return null;
 
   const file = fileInput.files[0];
+
   // Clean filename
   const cleanName = file.name.replace(/[^a-zA-Z0-9.]/g, "_");
-  const fileName = `${folder}/${Date.now()}_${Math.floor(Math.random() * 1000)}_${cleanName}`;
+
+  // Strong unique filename
+  const fileName = `${folder}/${Date.now()}_${Math.floor(Math.random() * 10000)}_${cleanName}`;
 
   try {
     if (!supabaseClient) throw new Error("Supabase client not initialized");
 
-    const { data, error } = await supabaseClient.storage
-      .from("documents") // MUST MATCH BUCKET NAME IN SUPABASE
-      .upload(fileName, file);
+    const { error } = await supabaseClient.storage
+      .from("documents")
+      .upload(fileName, file, {
+        cacheControl: "3600",
+        upsert: false,
+      });
 
     if (error) throw error;
 
-    const { data: urlData } = supabaseClient.storage
+    const { data } = supabaseClient.storage
       .from("documents")
       .getPublicUrl(fileName);
 
-    return urlData.publicUrl;
+    return data.publicUrl;
   } catch (err) {
     console.error(`Upload failed for ${fileInputId}:`, err);
     throw new Error(`Failed to upload ${file.name}`);
@@ -423,6 +430,8 @@ async function validateAndSubmit() {
       urlOldDom,
       urlOldCaste,
       urlOldInc,
+      urlSignature,
+      urlLandRecord,
     ] = await Promise.all([
       uploadToSupabase("fileAadhaarFront", "aadhaar"),
       uploadToSupabase("fileAadhaarBack", "aadhaar"),
@@ -431,6 +440,8 @@ async function validateAndSubmit() {
       uploadToSupabase("fileOldDomicile", "old_docs"),
       uploadToSupabase("fileOldCaste", "old_docs"),
       uploadToSupabase("fileOldIncome", "old_docs"),
+      uploadToSupabase("fileSignature", "signatures"),
+      uploadToSupabase("fileLandRecord", "land_records"),
     ]);
 
     // 2. डेटा और रेफरल कोड तैयार करें
@@ -452,6 +463,8 @@ async function validateAndSubmit() {
       file_old_domicile: urlOldDom,
       file_old_caste: urlOldCaste,
       file_old_income: urlOldInc,
+      signature: urlSignature,
+      land_record_document: urlLandRecord,
 
       caste_profession:
         docType === "caste"
