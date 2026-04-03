@@ -1,3 +1,6 @@
+window.addEventListener("DOMContentLoaded", () => {
+  handleLogic();
+});
 async function triggerDownload(url, filename) {
   try {
     // 1. Show loading state on the button
@@ -267,6 +270,22 @@ function handleLogic() {
   const showNcl = docType === "ncl";
   const showCaste = docType === "caste";
   const showIncome = docType === "income";
+
+  // 🔥 Land Record Logic (FINAL FIX)
+  const landDiv = document.getElementById("landRecordDiv");
+  const landInput = document.getElementById("fileLandRecord");
+
+  if (!landDiv) {
+    console.log("❌ landRecordDiv not found");
+  } else {
+    if (docType === "pan") {
+      landDiv.classList.add("hidden");
+      if (landInput) landInput.required = false;
+    } else {
+      landDiv.classList.remove("hidden");
+      if (landInput) landInput.required = true;
+    }
+  }
 
   // Logic A: Parent Aadhaar
   if (showParent) divParentAadhaar.classList.remove("hidden");
